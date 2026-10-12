@@ -60,7 +60,7 @@ export function callsRouter(db, cfg) {
 
   router.get('/:id', (req, res) => {
     const call = calls.getCall(db, parseId(req.params.id));
-    if (!call) throw new HttpError(404, 'call_not_found');
+    if (!call || call.userId !== req.auth.userId) throw new HttpError(404, 'call_not_found');
     res.json({ data: call });
   });
 

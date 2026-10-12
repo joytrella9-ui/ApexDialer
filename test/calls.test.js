@@ -204,6 +204,24 @@ test('aborting ends the active attempt without a disposition', async () => {
   });
 });
 
+test('preview order is stable and matches what an attempt would fetch: oldest eligible allowed lead first', async () => {
+  await withServer(async (base) => {
+    const first = await createLead(base);
+    const second = await createLead(base);
+    assert.ok(first.id < second.id, 'leads must be created in order');
+
+    const next = await api(base, 'GET', '/api/calls/next');
+    assert.equal(next.body.data.lead.id, first.id, 'server preview must pick the oldest eligible allowed lead');
+
+    const skip = await api(base, 'POST', '/api/calls/skip', { leadId: first.id });
+    assert.equal(skip.status, 200);
+    assert.equal(skip.body.data.lead.id, second.id, 'after a skip the next lead in the same order is returned');
+
+    const attempt = await api(base, 'POST', '/api/calls/attempt', { leadId: first.id });
+    assert.equal(attempt.status, 201, 'the previewed lead must still be dialable on the next attempt');
+  });
+});
+
 test('GET /api/calls/next returns the first eligible allowed lead and honors exclude', async () => {
   await withServer(async (base) => {
     const a = await createLead(base);

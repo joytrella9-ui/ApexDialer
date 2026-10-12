@@ -104,7 +104,7 @@ button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 </section>
 <section class="page" id="page-leads">
  <div class="sectionhead"><div><h2>Lead queue</h2><div class="sub">Import, search, update, and suppress contacts from your local workspace.</div></div><div class="formrow"><button class="btn" id="importBtn">⇧ Import CSV</button><button class="btn primary" id="addLeadBtn">＋ Add lead</button><input class="hidden" id="csvFile" type="file" accept=".csv,text/csv"></div></div>
- <div class="card"><div class="filters"><input class="search" id="leadSearch" placeholder="Search name, phone, company or ID…" aria-label="Search leads"><select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option>Pending</option><option>Completed</option><option>DNC</option></select><button class="btn" id="exportLeads">⇩ Export CSV</button></div><div class="tablewrap" id="leadTable"></div><div class="tablefoot"><span id="leadCount">0 leads</span><span>Tip: DNC contacts stay suppressed when resetting the queue.</span></div></div>
+ <div class="card"><div class="filters"><input class="search" id="leadSearch" placeholder="Search name, phone or company…" aria-label="Search leads"><select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="pending">Pending</option><option value="completed">Completed</option><option value="dnc">DNC</option><option value="blocked">Blocked</option></select><button class="btn" id="exportLeads">⇩ Export CSV</button></div><div class="tablewrap" id="leadTable"></div><div class="tablefoot"><span id="leadCount">0 leads</span><span>Tip: DNC contacts stay suppressed when resetting the queue.</span></div></div>
 </section>
 <section class="page" id="page-dialer">
  <div class="sectionhead"><div><h2>Dialer</h2><div class="sub">A safe local simulation of a single-contact calling workflow.</div></div><span class="pill warn">NOT CONNECTED TO TELEPHONY</span></div>
@@ -113,12 +113,13 @@ button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
  <div class="grid workspace"><div class="card"><div class="cardhead"><h3>Current contact</h3><span class="pill" id="dialStatus">IDLE</span></div><div class="callbox"><div class="callring">☎</div><h3 id="dialName">No active contact</h3><p id="dialPhone">Select a lead from the queue</p><div class="calltime" id="dialTimer">00:00</div><div class="callcontrols"><button class="btn primary" id="dialStartNext">▶ Start next lead</button><button class="btn danger" id="dialEnd" disabled>■ End call</button></div></div><div class="grid two" style="margin-top:15px"><button class="btn" data-disposition="No answer">No answer</button><button class="btn" data-disposition="Voicemail">Voicemail</button><button class="btn success" data-disposition="Interested">Interested</button><button class="btn danger" data-disposition="Add to DNC">Add to DNC</button></div></div><div class="card"><div class="cardhead"><h3>Compliance check</h3><span class="pill" id="compStatus">IDLE</span></div><div id="compBody" class="sub">Compliance is evaluated on the server before any call can start. Review and blocked leads are not dialable.</div><div id="compReasons" class="compReasons"></div><p class="sub" id="compDisclaimer" style="margin:10px 0 0"></p></div></div><div class="card"><div class="cardhead"><h3>Call notes</h3><span class="muted">Saved with the lead</span></div><div class="field"><label for="callNotes">Notes for active contact</label><textarea id="callNotes" placeholder="Record outcome, follow-up date, or context…"></textarea></div><button class="btn primary" id="saveNotes">Save notes</button><hr style="border-color:var(--line);margin:20px 0"><div class="field"><label for="dialManual">Manual number</label><input id="dialManual" placeholder="+1 555 010 1234" inputmode="tel"></div><button class="btn" id="dialManualBtn">Start demo call</button></div></div>
 </section>
 <section class="page" id="page-activity">
- <div class="sectionhead"><div><h2>Activity log</h2><div class="sub">Actions performed in this session (not stored server-side).</div></div><button class="btn" id="clearLogs">Clear log</button></div>
+ <div class="sectionhead"><div><h2>Activity log</h2><div class="sub">Actions performed in this session (this view clears on reload; the server keeps a full audit trail).</div></div><button class="btn" id="clearLogs">Clear log</button></div>
  <div class="card"><div id="allLogs" class="log"></div></div>
 </section>
 <section class="page" id="page-settings">
- <div class="sectionhead"><div><h2>Settings & data</h2><div class="sub">Manage this browser's workspace data.</div></div></div>
- <div class="grid two"><div class="card"><div class="cardhead"><h3>Workspace data</h3></div><p class="muted">Lead records and their consent/compliance fields are stored on this server by the authenticated ApexDialer API. Nothing sensitive is kept in browser storage.</p><div class="callcontrols" style="justify-content:flex-start"><button class="btn" id="exportSettings">Export backup CSV</button><button class="btn" id="resetQueue">Reset eligible lead statuses</button></div><p class="sub">Reset leaves Do Not Call and suppressed records untouched.</p></div><div class="card"><div class="cardhead"><h3>Production checklist</h3></div><ul class="muted" style="padding-left:18px;display:grid;gap:9px"><li>Secure sign-in and role permissions</li><li>Server-side database and audit trail</li><li>Telephony provider integration and verified call events</li><li>Consent, suppression lists, and allowed calling hours</li><li>Secure AI service integration with API keys held server-side</li><li>Backups, monitoring, and browser/device testing</li></ul></div></div>
+ <div class="sectionhead"><div><h2>Settings & data</h2><div class="sub">Manage your workspace data and operator account, and review the server's read-only configuration.</div></div></div>
+ <div class="grid two"><div class="card"><div class="cardhead"><h3>Workspace data</h3></div><p class="muted">Lead records and their consent/compliance fields are stored on this server by the authenticated ApexDialer API. Nothing sensitive is kept in browser storage.</p><div class="callcontrols" style="justify-content:flex-start"><button class="btn" id="exportSettings">Export leads CSV</button><button class="btn" id="resetQueue">Reset completed leads to Pending</button></div><p class="sub">Resets completed contacts so they can be dialed again. Do Not Call and suppressed contacts stay blocked and are never made dialable again.</p></div><div class="card"><div class="cardhead"><h3>Production checklist</h3></div><ul class="muted" style="padding-left:18px;display:grid;gap:9px"><li>Secure sign-in and role permissions</li><li>Server-side database and audit trail</li><li>Telephony provider integration and verified call events</li><li>Consent, suppression lists, and allowed calling hours</li><li>Secure AI service integration with API keys held server-side</li><li>Backups, monitoring, and browser/device testing</li></ul></div></div>
+  <div class="card" style="margin-top:15px"><div class="cardhead"><h3>Server configuration</h3><span class="pill">READ-ONLY</span></div><p class="sub" style="margin:0 0 12px">These values come from the running server's configuration (environment variables). To change one, edit <code>.env</code> and restart the server — they cannot be changed from this page.</p><div id="sysConfig" class="sub">Loading…</div></div>
   <div class="card" style="margin-top:15px"><div class="cardhead"><h3>Operator account</h3><span class="pill" id="acctName">—</span></div><p class="sub" style="margin:0 0 12px">Change your sign-in password. This signs out every other active session.</p><form id="changePassForm" class="formrow" style="gap:10px"><input id="changeCurrent" type="password" autocomplete="current-password" placeholder="Current password" required><input id="changeNew" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="New password" required><input id="changeNew2" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="Confirm new password" required><button class="btn primary" type="submit">Change password</button></form></div>
 </section>
 </main><nav class="mobile-nav" aria-label="Mobile navigation">
@@ -140,6 +141,8 @@ const STATUS_OPTION = {pending:'Pending',completed:'Completed',dnc:'DNC',blocked
 const STATUS_FROM_OPTION = {Pending:'pending',Completed:'completed',DNC:'dnc',Blocked:'blocked'};
 const titles = {overview:'Call center overview',leads:'Lead queue',dialer:'Dialer workspace',activity:'Activity log','settings':'Settings & data'};
 const state = {leads:[],logs:[],operator:null,signedIn:false,setupRequired:false,activeLeadId:null,callStart:null,callTicker:null,callSeconds:0,compliance:null,watchdog:null,startupDone:false,startupErr:false,pd:{session:false,call:null,preview:null,excluded:[]}};
+const inflight=new Set();
+async function guard(key,fn){if(inflight.has(key))return;inflight.add(key);try{return await fn();}finally{inflight.delete(key);}}
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function toast(msg,type='ok'){const el=document.createElement('div');el.className='toast '+type;el.textContent=msg;$('toastArea').append(el);setTimeout(()=>el.remove(),3600);}
@@ -183,14 +186,14 @@ function showLogin(msg){clearAuthError();state.signedIn=false;$('setupForm').hid
 function showStartupError(msg){state.startupErr=true;clearTimeout(state.watchdog);clearAuthError();state.signedIn=false;$('startupErrorMsg').textContent=msg;$('loginView').hidden=true;$('loadingView').hidden=true;document.querySelector('.app').hidden=true;$('startupError').hidden=false;}
 function showApp(){$('loginView').hidden=true;$('loadingView').hidden=true;document.querySelector('.app').hidden=false;}
 function activeLead(){return state.leads.find(x=>x.id===state.activeLeadId)||null;}
-function nextEligible(){return state.leads.find(l=>l.status==='pending'&&!l.suppressed)||null;}
+function nextEligible(){return state.leads.slice().reverse().find(l=>l.status==='pending'&&!l.suppressed)||null;}
 function replaceLead(l){const i=state.leads.findIndex(x=>x.id===l.id);if(i>=0)state.leads[i]=l;}
 
 function badge(status,suppressed){const label=STATUS_LABEL[status]||String(status);const cls=status==='dnc'||status==='blocked'?'dnc':status==='completed'?'completed':'pending';return `<span class="badge ${cls}">${esc(label)}${suppressed?' ⊘':''}</span>`;}
 function leadRows(list,compact=false){if(!list.length)return '<div class="empty">No leads match. Add a contact or change your filters.</div>';return `<table><thead><tr><th>Contact</th><th>Company</th><th>Status</th>${compact?'':'<th>Last outcome</th><th>Actions</th>'}</tr></thead><tbody>${list.map(l=>{const callable=(l.status==='pending')&&!l.suppressed;return `<tr><td><div class="name">${esc(l.name)}</div><div class="muted">${esc(l.phone)}</div></td><td>${esc(l.company||'—')}</td><td>${badge(l.status,l.suppressed)}</td>${compact?'':`<td>${esc(l.disposition||'—')}</td><td><div class="formrow"><button class="btn small" data-action="call" data-id="${l.id}" ${callable&&!state.activeLeadId?'':'disabled'}>Call</button><button class="btn small" data-action="compliance" data-id="${l.id}" title="Compliance check">◎</button><button class="btn small" data-action="edit" data-id="${l.id}">Edit</button><button class="btn small danger" data-action="delete" data-id="${l.id}" ${l.id===state.activeLeadId?'disabled':''}>×</button></div></td>`}</tr>`;}).join('')}</tbody></table>`;}
 
 function renderWorkspace(){
-  const pending=state.leads.filter(l=>l.status==='pending'),done=state.leads.filter(l=>l.status==='completed'),dnc=state.leads.filter(l=>l.status==='dnc');
+  const pending=state.leads.filter(l=>l.status==='pending'&&!l.suppressed),done=state.leads.filter(l=>l.status==='completed'),dnc=state.leads.filter(l=>l.status==='dnc'||l.suppressed);
   $('statTotal').textContent=state.leads.length;$('statPending').textContent=pending.length;$('statCompleted').textContent=done.length;$('statDnc').textContent=dnc.length;
   $('overviewLeads').innerHTML=leadRows(state.leads.filter(l=>l.status==='pending'&&!l.suppressed).slice(0,5),true);
   const eligible=state.leads.filter(l=>l.status!=='dnc'&&l.status!=='blocked'&&!l.suppressed);
@@ -203,7 +206,7 @@ async function loadTable(){
   const t=++tableToken;const params=new URLSearchParams();
   const q=$('leadSearch').value.trim().toLowerCase()||'',st=$('statusFilter').value;
   if(q)params.set('q',$('leadSearch').value.trim());
-  if(st!=='all')params.set('status',st);
+  if(st!=='all')params.set('status',String(st).toLowerCase());
   let list=[];
   try{const res=await api('GET','/api/leads?'+params.toString());if(t===tableToken){list=res.data||[];$('leadTable').innerHTML=leadRows(list);$('leadCount').textContent=`${list.length} of ${state.leads.length} leads`;}}
   catch(err){handleErr(err,'Could not load leads.');}
@@ -220,7 +223,7 @@ async function refreshAll(){
 }
 function renderLogs(){const make=()=>state.logs.length?state.logs.map(x=>`<div class="logitem"><span class="logtime">${esc(x.time)}</span><span class="logmsg">${esc(x.msg)}</span></div>`).join(''):'<div class="empty">No activity this session.</div>';$('allLogs').innerHTML=make();}
 function renderRecent(){$('recentLogs').innerHTML=state.logs.slice(0,4).map(x=>`<div class="logitem"><span class="logtime">${esc(x.time)}</span><span class="logmsg">${esc(x.msg)}</span></div>`).join('')||'<div class="empty">Your activity will appear here.</div>';}
-function showPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+name));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$('pageTitle').textContent=titles[name]||titles.overview;$('crumb').textContent=name.toUpperCase();if(name==='leads')loadTable();}
+function showPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+name));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$('pageTitle').textContent=titles[name]||titles.overview;$('crumb').textContent=name.toUpperCase();if(name==='leads')loadTable();if(name==='settings')renderSettings();}
 
 function openModal(lead=null){
   $('leadForm').reset();$('editId').value=lead?lead.id:'';
@@ -474,14 +477,40 @@ async function manualCall(inputId){
 }
 
 async function resetQueue(){
-  if(!confirm('Reset all non-DNC lead statuses to Pending?'))return;
+  if(!confirm('Reset completed leads back to Pending so they can be dialed again? Do Not Call and suppressed contacts stay blocked and are never made dialable again.'))return;
+  const btn=$('resetQueue'),label=btn.textContent;btn.disabled=true;btn.textContent='Resetting…';
   try{
-    const res=await api('GET','/api/leads?eligible=true');
-    const list=res.data||[];let n=0;
-    for(const l of list){await api('PUT',`/api/leads/${l.id}`,{status:'pending',disposition:''});n++;}
-    log(`Reset eligible leads; DNC records preserved. (${n} updated)`);
-    await refreshAll();toast('Eligible leads reset.');
+    const res=await api('POST','/api/leads/reset-queue');
+    const s=res.data||{};
+    const blockedPart=s.blocked?` · ${s.blocked} kept suppressed`:'';
+    if(s.total){
+      log(`Queue reset: ${s.reset||0} lead(s) returned to Pending${blockedPart}.`);
+      toast(`${s.reset||0} lead(s) reset to Pending${blockedPart}.`);
+    }else{
+      log('Queue reset: no completed leads to reset.');
+      toast('No completed leads to reset.');
+    }
+    await refreshAll();
   }catch(err){handleErr(err,'Reset failed.');}
+  finally{btn.disabled=false;btn.textContent=label;}
+}
+async function renderSettings(){
+  const box=$('sysConfig');if(!box)return;
+  box.innerHTML='Loading…';
+  let s;
+  try{s=(await api('GET','/api/settings')).data||{};}
+  catch(err){box.innerHTML='<span class="muted">Server configuration is unavailable.</span>';return;}
+  const tel=s.telephony||{},comp=s.compliance||{},auth=s.auth||{},calls=s.calls||{};
+  const provider=tel.provider&&tel.provider!=='none'?String(tel.provider):'none (not connected)';
+  const rows=[
+    ['Demo mode',s.demoMode?'ON':'OFF'],
+    ['Telephony provider',provider],
+    ['Live calling',tel.liveEnabled?'ENABLED':'disabled'],
+    ['Calling window',`${comp.callWindowStart||'—'}–${comp.callWindowEnd||'—'} recipient-local`],
+    ['Session length',`${auth.sessionTtlHours??'—'} h`],
+    ['Stale attempt limit',`${calls.maxAttemptMinutes??'—'} min`],
+  ];
+  box.innerHTML=rows.map(([k,v])=>`<div class="formrow" style="justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)"><span class="muted">${esc(k)}</span><b>${esc(String(v))}</b></div>`).join('');
 }
 async function exportCsv(){
   try{
@@ -546,6 +575,7 @@ async function logout(){
 async function submitChangePass(e){
   e.preventDefault();
   const currentPassword=$('changeCurrent').value,newPassword=$('changeNew').value,confirm=$('changeNew2').value;
+  if(newPassword.length<12||newPassword.length>72){toast('New password must be 12 to 72 characters.','error');return;}
   if(newPassword!==confirm){toast('New passwords do not match.','error');return;}
   try{
     await api('PUT','/api/auth/password',{currentPassword,newPassword});
@@ -580,7 +610,7 @@ document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',(
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.goto)));
 $('addTop').onclick=$('addLeadBtn').onclick=()=>openModal();
 $('closeModal').onclick=$('cancelModal').onclick=closeModal;
-$('leadForm').addEventListener('submit',saveLead);
+$('leadForm').addEventListener('submit',e=>guard('saveLead',()=>saveLead(e)));
 $('leadModal').addEventListener('click',e=>{if(e.target===$('leadModal'))closeModal();});
 $('leadSearch').addEventListener('input',scheduleTable);
 $('statusFilter').addEventListener('change',scheduleTable);
@@ -596,31 +626,33 @@ $('leadTable').addEventListener('click',async e=>{
   else if(b.dataset.action==='delete'){
     if(l.id===state.activeLeadId){toast('End the active call before deleting this contact.','error');return;}
     if(!confirm(`Delete ${l.name} from the workspace?`))return;
-    try{await api('DELETE',`/api/leads/${l.id}`);}catch(err){handleErr(err,'Could not delete lead.');return;}
-    state.leads=state.leads.filter(x=>x.id!==l.id);log(`Deleted lead: ${l.name}`);
-    await refreshAll();
+    await guard('deleteLead',async()=>{
+      try{await api('DELETE',`/api/leads/${l.id}`);}catch(err){handleErr(err,'Could not delete lead.');return;}
+      state.leads=state.leads.filter(x=>x.id!==l.id);log(`Deleted lead: ${l.name}`);
+      await refreshAll();
+    });
   }
 });
-$('startNext').onclick=$('dialStartNext').onclick=startNextLead;
-$('endCall').onclick=$('dialEnd').onclick=()=>endCall('Completed');
-$('manualCall').onclick=()=>manualCall('manualPhone');
-$('dialManualBtn').onclick=()=>manualCall('dialManual');
-$('saveNotes').onclick=saveNotes;
-document.querySelectorAll('[data-disposition]').forEach(b=>b.addEventListener('click',()=>{if(!state.activeLeadId)return;const d=b.dataset.disposition;const l=activeLead();if(l&&$('callNotes').value.trim())l.notes=$('callNotes').value.trim();endCall(d);}));
-$('pdStart').onclick=pdStartSession;
-$('pdDial').onclick=pdDial;
-$('pdPause').onclick=pdPause;
-$('pdResume').onclick=pdResume;
-$('pdSkip').onclick=pdSkip;
-$('pdNext').onclick=pdNext;
-$('pdStop').onclick=pdStop;
-$('pdSaveNext').onclick=pdSaveNext;
-$('resetQueue').onclick=resetQueue;
+$('startNext').onclick=$('dialStartNext').onclick=()=>guard('startNext',startNextLead);
+$('endCall').onclick=$('dialEnd').onclick=()=>guard('endCall',()=>endCall('Completed'));
+$('manualCall').onclick=()=>guard('manualCall',()=>manualCall('manualPhone'));
+$('dialManualBtn').onclick=()=>guard('manualCall',()=>manualCall('dialManual'));
+$('saveNotes').onclick=()=>guard('saveNotes',saveNotes);
+document.querySelectorAll('[data-disposition]').forEach(b=>b.addEventListener('click',()=>guard('endCall',async()=>{if(!state.activeLeadId)return;const d=b.dataset.disposition;const l=activeLead();if(l&&$('callNotes').value.trim())l.notes=$('callNotes').value.trim();await endCall(d);})));
+$('pdStart').onclick=()=>guard('pdStart',pdStartSession);
+$('pdDial').onclick=()=>guard('pdDial',pdDial);
+$('pdPause').onclick=()=>guard('pdPause',pdPause);
+$('pdResume').onclick=()=>guard('pdResume',pdResume);
+$('pdSkip').onclick=()=>guard('pdSkip',pdSkip);
+$('pdNext').onclick=()=>guard('pdNext',pdNext);
+$('pdStop').onclick=()=>guard('pdStop',pdStop);
+$('pdSaveNext').onclick=()=>guard('pdSaveNext',pdSaveNext);
+$('resetQueue').onclick=()=>guard('resetQueue',resetQueue);
 $('clearLogs').onclick=()=>{if(confirm('Clear activity history for this session?')){state.logs=[];renderLogs();renderRecent();toast('Activity log cleared (this session).');}};
 $('logoutBtn').onclick=$('logoutTop').onclick=logout;
-$('loginForm').addEventListener('submit',submitLogin);
-$('setupForm').addEventListener('submit',submitSetup);
-$('changePassForm').addEventListener('submit',submitChangePass);
+$('loginForm').addEventListener('submit',e=>guard('login',()=>submitLogin(e)));
+$('setupForm').addEventListener('submit',e=>guard('setup',()=>submitSetup(e)));
+$('changePassForm').addEventListener('submit',e=>guard('changePass',()=>submitChangePass(e)));
 $('closeComp').onclick=$('compCloseBtn').onclick=closeCompModal;
 $('compModal').addEventListener('click',e=>{if(e.target===$('compModal'))closeCompModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeCompModal();}});

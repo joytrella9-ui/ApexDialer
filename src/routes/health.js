@@ -1,11 +1,7 @@
 import { Router } from 'express';
+import { config } from '../config.js';
 
-function setting(db, key) {
-  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
-  return row ? row.value : null;
-}
-
-export function healthRouter(db) {
+export function healthRouter(db, cfg = config) {
   const router = Router();
 
   router.get('/', (req, res) => {
@@ -18,11 +14,11 @@ export function healthRouter(db) {
 
   router.get('/config', (req, res) => {
     res.json({
-      demoMode: setting(db, 'demo_mode') !== 'false',
+      demoMode: cfg.demoMode,
       telephony: {
-        provider: setting(db, 'telephony_provider'),
-        enabled: false,
-        liveEnabled: setting(db, 'live_enabled') === 'true',
+        provider: cfg.telephony.provider,
+        enabled: cfg.telephony.enabled,
+        liveEnabled: cfg.telephony.liveEnabled,
       },
       database: 'connected',
     });

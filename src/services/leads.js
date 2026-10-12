@@ -1,4 +1,5 @@
 import { parseLead, mapLeadUpdate } from '../validate/lead.js';
+import { audit } from './auth.js';
 
 export function phoneKey(phone) {
   const digits = String(phone ?? '').replace(/\D/g, '');
@@ -133,4 +134,32 @@ export function updateLead(db, id, input) {
 export function deleteLead(db, id) {
   const info = db.prepare('DELETE FROM leads WHERE id = ?').run(id);
   return info.changes > 0;
+}
+
+// Returns completed leads to `pending` so they can be dialed again, while
+// leaving Do Not Call and suppressed contacts suppressed. Atomic + audited.
+export function resetQueue(db, { username = 'system' } = {}) {
+  const dncKeys = activeDncKeys(db);
+  const rows = db
+    .prepare("SELECT id, phone, suppression_blocked FROM leads WHERE status = 'completed'")
+    .all();
+  const run = db.transaction(() => {
+    const update = db.prepare(
+      "UPDATE leads SET status = ?, disposition = '', updated_at = datetime('now') WHERE id = ?"
+    );
+    let reset = 0;
+    let blocked = 0;
+    for (const row of rows) {
+      if (row.suppression_blocked === 1 || dncKeys.has(phoneKey(row.phone))) {
+        update.run('blocked', row.id);
+        blocked += 1;
+      } else {
+        update.run('pending', row.id);
+        reset += 1;
+      }
+    }
+    audit(db, username, 'queue_reset', 'lead', '', JSON.stringify({ reset, blocked }));
+    return { total: rows.length, reset, blocked };
+  });
+  return run();
 }

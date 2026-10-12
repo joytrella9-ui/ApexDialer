@@ -6,6 +6,7 @@ import { healthRouter } from './routes/health.js';
 import { authRouter } from './routes/auth.js';
 import { leadsRouter } from './routes/leads.js';
 import { callsRouter } from './routes/calls.js';
+import { settingsRouter } from './routes/settings.js';
 import { requireAuth } from './middleware/auth.js';
 import { parseCookies, originGuard } from './middleware/security.js';
 import { errorHandler } from './lib/errors.js';
@@ -35,12 +36,13 @@ export function createApp(db, overrides = {}) {
   app.get('/', (req, res) => res.sendFile(FRONTEND_HTML));
 
   app.use('/api', originGuard);
-  app.use('/api/health', healthRouter(db));
+  app.use('/api/health', healthRouter(db, cfg));
   app.use('/api/auth', authRouter(db, cfg));
 
   app.use('/api', requireAuth(db));
   app.use('/api/leads', leadsRouter(db));
   app.use('/api/calls', callsRouter(db, cfg));
+  app.use('/api/settings', settingsRouter(db, cfg));
 
   app.use('/api', (req, res) => {
     res.status(404).json({ error: 'not_found', path: req.path });

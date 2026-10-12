@@ -353,6 +353,117 @@ test('startup behavior: reachable server reveals setup; failed request reveals e
   assert.equal(broken.reloads(), 1, 'Retry must reload the page');
 });
 
+test('the settings UI exposes the server reset and read-only config contract', () => {
+  const html = readFileSync(INTEGRATED, 'utf8');
+  for (const needle of [
+    'id="sysConfig"',
+    'api/settings',
+    'api/leads/reset-queue',
+    'Reset completed leads to Pending',
+  ]) {
+    assert.ok(html.includes(needle), `frontend must reference "${needle}"`);
+  }
+});
+
+test('the leads status filter uses lowercase server-side status values', () => {
+  const html = readFileSync(INTEGRATED, 'utf8');
+  const segment = html.slice(html.indexOf('id="statusFilter"'), html.indexOf('</select>', html.indexOf('id="statusFilter"')) + 9);
+  for (const value of ['pending', 'completed', 'dnc', 'blocked']) {
+    assert.ok(segment.includes(`value="${value}"`), `status filter must offer "${value}"`);
+  }
+});
+
+test('the frontend preview order matches the server: nextEligible picks the oldest pending lead', () => {
+  const html = readFileSync(INTEGRATED, 'utf8');
+  const i = html.indexOf('function nextEligible(){');
+  assert.ok(i >= 0, 'nextEligible must exist');
+  assert.match(
+    html.slice(i, i + 120),
+    /state\.leads\.slice\(\)\.reverse\(\)\.find/,
+    'nextEligible must pick the oldest pending lead to match GET /api/calls/next',
+  );
+});
+
+test('settings queue reset reports the real outcome and re-enables the button', async () => {
+  const html = readFileSync(INTEGRATED, 'utf8');
+  const hits = { reset: 0 };
+  const json = (obj) => ({ ok: true, status: 200, statusText: 'OK', text: async () => JSON.stringify(obj) });
+  const fetch = async (path, init = {}) => {
+    if (path === '/api/auth/config') return json({ setupRequired: false });
+    if (path === '/api/auth/me') {
+      return json({ data: { operator: { id: 1, username: 'op', displayName: 'Op', role: 'admin' }, expiresAt: 'x' } });
+    }
+    if (path.startsWith('/api/leads') && !path.includes('/reset-queue')) return json({ data: [] });
+    if (path === '/api/calls/active') return json({ data: null });
+    if (path === '/api/leads/reset-queue') {
+      hits.reset += 1;
+      return json({ data: { total: 3, reset: 2, blocked: 1 } });
+    }
+    return json({ data: null });
+  };
+
+  const app = loadFrontend(html, { fetch });
+  await app.flush();
+  assert.equal(app.get('startupErrorMsg').textContent, '', 'workspace must boot without a startup error');
+
+  const btn = app.get('resetQueue');
+  btn.click();
+  await app.flush();
+
+  assert.equal(hits.reset, 1, 'reset-queue must be called exactly once');
+  assert.equal(btn.disabled, false, 'button must be re-enabled after the request');
+  assert.match(app.get('allLogs').innerHTML, /2 lead\(s\) returned to Pending/);
+  const toastLog = app.get('toastArea').children.map((c) => c.textContent).join('|');
+  assert.match(toastLog, /2 lead\(s\) reset to Pending.*· 1 kept suppressed/);
+});
+
+test('the settings page renders the read-only server configuration from /api/settings', async () => {
+  const html = readFileSync(INTEGRATED, 'utf8');
+  assert.ok(html.includes('>READ-ONLY</span>'), 'the server configuration card must be labeled READ-ONLY');
+  assert.ok(html.includes('they cannot be changed from this page'), 'copy must make clear the config is not editable');
+
+  const json = (obj) => ({ ok: true, status: 200, statusText: 'OK', text: async () => JSON.stringify(obj) });
+  const fetch = async (path) => {
+    if (path === '/api/auth/config') return json({ setupRequired: false });
+    if (path === '/api/auth/me') {
+      return json({ data: { operator: { id: 1, username: 'op', displayName: 'Op', role: 'admin' }, expiresAt: 'x' } });
+    }
+    if (path === '/api/leads' || path.startsWith('/api/leads?')) return json({ data: [] });
+    if (path === '/api/calls/active') return json({ data: null });
+    if (path === '/api/settings') {
+      return json({
+        data: {
+          demoMode: true,
+          telephony: { provider: null, enabled: false, liveEnabled: false },
+          compliance: { callWindowStart: '08:00', callWindowEnd: '21:00' },
+          auth: { sessionTtlHours: 12 },
+          calls: { maxAttemptMinutes: 240 },
+          readOnly: true,
+          source: 'server',
+        },
+      });
+    }
+    return json({ data: null });
+  };
+
+  const app = loadFrontend(html, { fetch });
+  await app.flush();
+  assert.equal(app.get('startupErrorMsg').textContent, '', 'workspace must boot without a startup error');
+
+  app.settingsNav.click();
+  await app.flush();
+
+  const out = app.get('sysConfig').innerHTML;
+  assert.ok(!out.includes('Loading'), 'config must be rendered, not left loading');
+  assert.match(out, /<b>ON<\/b>/, 'demo mode renders ON');
+  assert.match(out, /Telephony provider/);
+  assert.match(out, /none \(not connected\)/, 'provider label when unset');
+  assert.match(out, /Live calling[\s\S]*<b>disabled<\/b>/, 'live calling renders disabled');
+  assert.match(out, /08:00–21:00 recipient-local/, 'calling window renders');
+  assert.match(out, /<b>12 h<\/b>/, 'session length renders');
+  assert.match(out, /<b>240 min<\/b>/, 'stale attempt limit renders');
+});
+
 test('frontend defines refreshAll and wires the power-dialer contract', () => {
   const html = readFileSync(INTEGRATED, 'utf8');
   assert.ok(html.includes('async function refreshAll('), 'refreshAll must be defined (regression)');

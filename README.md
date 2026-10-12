@@ -78,6 +78,7 @@ operator exists), `POST /api/auth/login`, `POST /api/auth/logout`. Everything el
 | GET    | `/api/leads`          | List leads. Query: `q`, `status`, `callType`, `eligible` |
 | GET    | `/api/leads/export`   | Download leads as CSV (same query filters as the list) |
 | POST   | `/api/leads/import`   | Import leads from CSV (`text/csv` body or JSON `{ "csv": "..." }`) |
+| POST   | `/api/leads/reset-queue` | Return completed leads to `pending` (atomic); DNC/suppressed stay `blocked` |
 | GET    | `/api/leads/:id`      | Get one lead                                        |
 | GET    | `/api/leads/:id/compliance` | Evaluate whether a lead may be dialed (optional `?at=<ISO>`) |
 | POST   | `/api/leads`          | Create a lead (validated)                           |
@@ -88,11 +89,12 @@ operator exists), `POST /api/auth/login`, `POST /api/auth/logout`. Everything el
 | GET    | `/api/calls/next`     | Next eligible + `allowed` lead to preview (`?exclude=1,2`) |
 | POST   | `/api/calls/attempt`  | Start an attempt for a lead (server re-checks compliance) |
 | POST   | `/api/calls/skip`     | Record a skip and return the next lead              |
-| GET    | `/api/calls/:id`      | One attempt with its event history                  |
+| GET    | `/api/calls/:id`      | One attempt with its event history (scoped to the operator who made it) |
 | POST   | `/api/calls/:id/pause`  | `in_progress` → `paused`                          |
 | POST   | `/api/calls/:id/resume` | `paused` → `in_progress`                          |
 | POST   | `/api/calls/:id/end`    | End with a disposition (required) and update the lead |
 | POST   | `/api/calls/:id/abort`  | Abandon the attempt without a disposition         |
+| GET    | `/api/settings`       | Effective server configuration, read-only (`readOnly: true`)
 
 A lead response looks like:
 
@@ -214,8 +216,8 @@ replacing browser storage with the authenticated API:
 **Existing UI features without full backend support (shown honestly, not faked):**
 
 - The **Activity log** is session-only: it lists actions performed in the current
-  session and is explicitly labeled "not stored server-side" (cleared on reload). The
-  schema has an `audit_log` table but no read endpoint for it yet.
+  session (cleared on reload). The server records the same actions in `audit_log`, but
+  there is no read endpoint to browse the full audit trail yet.
 - The **dialer** runs a server-backed **power-dialer session** (see below) but still
   simulates calls: no telephony provider is connected and no calls (real or simulated)
   start automatically.
@@ -254,6 +256,32 @@ and Stop.
 This is a **simulated** workflow: `calls` rows record intent and outcome, no carrier call
 is placed, and there is no dialer tone, recording, or provider ID (`provider_call_sid`
 stays empty).
+
+### Settings & data (repaired)
+
+The Settings page now matches reality:
+
+- **"Reset completed leads to Pending"** calls `POST /api/leads/reset-queue`. The server
+  returns every `completed` lead to `pending` with its disposition cleared, in one
+  audited transaction. Do Not Call (matching the internal `dnc_entries` list) and
+  suppressed/blocked contacts are left `blocked` and are never made dialable again. The
+  button reports how many were reset and how many were kept suppressed, and is disabled
+  while the request is in flight (prevents double-submit cascades).
+- **Server configuration card.** `GET /api/settings` exposes the *effective* running
+  configuration (demo mode, telephony provider/live status, calling window, session
+  TTL, stale-attempt limit) as read-only values from the server. The previous card
+  claimed the settings were "this browser's data", and the page showed no real
+  configuration at all.
+- **`GET /api/health/config` now reflects the live configuration** (env vars), not the
+  seeded `settings` table, so it can never disagree with the running process.
+- **Leads status filter** uses the lowercase values the API expects (`pending`,
+  `completed`, `dnc`, `blocked`), so filtering actually returns rows. The search
+  placeholder no longer claims IDs are searchable (they are not).
+- **Security hardening:** `GET /api/calls/:id` is scoped to the authenticated operator
+  (a foreign operator's call returns `404 call_not_found`). Password changes enforce the
+  12–72 character rule client-side too. Key destructive/state-changing actions
+  (save/edit lead, reset queue, password change, and every power-dialer control) are
+  guarded against double submission.
 
 ### Do Not Call (internal suppression)
 

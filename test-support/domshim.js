@@ -62,6 +62,9 @@ function makeElement(id) {
 export function makeDom() {
   const elements = new Map();
   const app = makeElement('.app');
+  const settingsNav = makeElement('settingsnav');
+  settingsNav.dataset.page = 'settings';
+  const navs = [settingsNav];
   const get = (id) => {
     if (!elements.has(id)) elements.set(id, makeElement(id));
     return elements.get(id);
@@ -69,17 +72,17 @@ export function makeDom() {
   const document = {
     getElementById: get,
     querySelector: (sel) => (sel === '.app' ? app : elements.values().next().value || makeElement('q')),
-    querySelectorAll: () => [],
+    querySelectorAll: (sel) => (sel === '[data-page]' || sel === '.page' ? navs : []),
     createElement: (tag) => makeElement(tag),
     addEventListener: () => {},
     body: { append: () => {}, appendChild: () => {} },
   };
-  return { document, get, app };
+  return { document, get, app, settingsNav };
 }
 
 export function loadFrontend(html, { fetch, location } = {}) {
   const code = extractScript(html);
-  const { document, get, app } = makeDom();
+  const { document, get, app, settingsNav } = makeDom();
   const windowObj = {
     _listeners: {},
     addEventListener(type, fn) {
@@ -113,6 +116,7 @@ export function loadFrontend(html, { fetch, location } = {}) {
     get,
     document,
     app,
+    settingsNav,
     windowObj,
     async flush() {
       for (let i = 0; i < 12; i += 1) {

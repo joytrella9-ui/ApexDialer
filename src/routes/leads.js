@@ -60,6 +60,11 @@ export function leadsRouter(db) {
     res.status(201).json({ data: summary });
   });
 
+  router.post('/reset-queue', (req, res) => {
+    const summary = leads.resetQueue(db, { username: req.auth?.user?.username });
+    res.json({ data: summary });
+  });
+
   router.get('/:id/compliance', (req, res) => {
     const decision = evaluateLeadById(db, parseId(req.params.id), { now: parseAt(req.query.at) });
     if (!decision) throw new HttpError(404, 'lead_not_found');

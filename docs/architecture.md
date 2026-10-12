@@ -54,6 +54,30 @@ Every transition is appended to `call_events` and recorded in `audit_log`. This 
 **simulated**: `calls` rows capture intent/outcome only — no carrier, no audio, no
 `provider_call_sid`. Live calling stays disabled until telephony is integrated and approved.
 
+## Settings & config (implemented — from the full bug audit)
+
+The Settings page and configuration surface were repaired so what the UI shows matches
+how the server actually behaves:
+
+- **Queue reset is server-side and safe.** `POST /api/leads/reset-queue` runs one audited
+  transaction on `src/services/leads.js`: completed leads go back to `pending` with
+  `disposition` cleared, and any contact whose phone is on `dnc_entries` or is flagged
+  `suppression_blocked` is forced to `blocked`. The previous frontend loop fetched
+  `?eligible=true` (already-pending leads only) so it was a no-op that still claimed success.
+- **One config source of truth.** `GET /api/settings` (`src/routes/settings.js`) returns the
+  *effective* `cfg` the running process uses — demo mode, telephony, calling window,
+  session TTL, stale-attempt limit — marked `readOnly: true, source: 'server'`. The UI
+  renders it (but can never edit it), and the misleading "this browser's data" copy is gone.
+- **`/api/health/config` reads live config**, not the seeded `settings` table, so status
+  reporting always matches the process (a bug when env vars differed from the seed).
+- **Leads filter values match the API today** (lowercase statuses, plus `blocked`), the
+  search placeholder no longer over-claims ID search, the DNC stat includes suppressed
+  rows, and password changes are length-checked client-side as well as server-side.
+- **IDOR closed:** `GET /api/calls/:id` returns 404 unless the attempt belongs to the
+  authenticated operator (every other attempt route was already user-scoped).
+- **Double-submit guards** wrap save/edit, reset queue, password change, and all
+  power-dialer controls via the `guard(key, fn)` in-flight helper.
+
 ## Desktop packaging: Electron evaluation
 
 Requirement: an installable Windows application, distributed to other users later,
