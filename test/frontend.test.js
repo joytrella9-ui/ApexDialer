@@ -352,3 +352,77 @@ test('startup behavior: reachable server reveals setup; failed request reveals e
   broken.get('startupRetry').click();
   assert.equal(broken.reloads(), 1, 'Retry must reload the page');
 });
+
+test('frontend defines refreshAll and wires the power-dialer contract', () => {
+  const html = readFileSync(INTEGRATED, 'utf8');
+  assert.ok(html.includes('async function refreshAll('), 'refreshAll must be defined (regression)');
+  for (const needle of [
+    'id="pdStart"',
+    'id="pdDial"',
+    'id="pdPause"',
+    'id="pdResume"',
+    'id="pdSkip"',
+    'id="pdNext"',
+    'id="pdStop"',
+    'id="pdDisposition"',
+    'id="pdSaveNext"',
+    'DEMO MODE',
+    '/api/calls/active',
+    '/api/calls/next',
+    '/api/calls/attempt',
+    '/api/calls/skip',
+    '/api/calls/${',
+  ]) {
+    assert.ok(html.includes(needle), `frontend must reference "${needle}"`);
+  }
+  assert.ok(/id="pdDial" disabled/.test(html), 'Dial must start disabled (no auto-dial)');
+  assert.ok(
+    !/localStorage|sessionStorage/.test(html),
+    'power-dialer state must come from the server, not browser storage',
+  );
+});
+
+test('power dialer behavior: session start loads a lead but never auto-dials', async () => {
+  const html = readFileSync(INTEGRATED, 'utf8');
+  const hits = { next: 0, attempt: 0 };
+  const json = (obj) => ({ ok: true, status: 200, statusText: 'OK', text: async () => JSON.stringify(obj) });
+  const fetch = async (path) => {
+    if (path === '/api/auth/config') return json({ setupRequired: false });
+    if (path === '/api/auth/me') {
+      return json({ data: { operator: { id: 1, username: 'op', displayName: 'Op', role: 'admin' }, expiresAt: 'x' } });
+    }
+    if (path === '/api/leads' || path.startsWith('/api/leads?')) return json({ data: [] });
+    if (path === '/api/calls/active') return json({ data: null });
+    if (path.startsWith('/api/calls/next')) {
+      hits.next += 1;
+      return json({
+        data: {
+          lead: { id: 7, name: 'Ready Contact', phone: '+1 555 010 1007' },
+          compliance: { decision: 'allowed', reasons: [] },
+        },
+      });
+    }
+    if (path === '/api/calls/attempt') {
+      hits.attempt += 1;
+      return json({ data: { call: { id: 9, leadId: 7, status: 'in_progress', durationSeconds: 0 } } });
+    }
+    return json({ data: null });
+  };
+
+  const app = loadFrontend(html, { fetch });
+  await app.flush();
+
+  assert.equal(app.get('startupErrorMsg').textContent, '', 'workspace must boot without a startup error');
+  assert.equal(app.get('loginView').hidden, true, 'workspace must be visible after boot');
+  assert.equal(app.get('loadingView').hidden, true, 'loading overlay must be dismissed');
+  assert.equal(app.get('pdState').textContent, 'idle');
+  assert.equal(app.get('pdDial').disabled, true, 'Dial requires an explicit session start');
+  assert.equal(hits.attempt, 0, 'nothing dials automatically on load');
+
+  app.get('pdStart').click();
+  await app.flush();
+  assert.equal(hits.next, 1, 'Start session loads the next eligible lead');
+  assert.equal(app.get('pdState').textContent, 'ready');
+  assert.equal(app.get('pdDial').disabled, false, 'Dial enables once a lead is loaded');
+  assert.equal(hits.attempt, 0, 'starting a session must not place an attempt');
+});

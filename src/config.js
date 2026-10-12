@@ -33,6 +33,9 @@ export function loadConfig(env = process.env) {
       callWindowStart: env.APEX_CALL_WINDOW_START || '08:00',
       callWindowEnd: env.APEX_CALL_WINDOW_END || '21:00',
     },
+    calls: {
+      maxAttemptMinutes: positiveNumber(env.APEX_MAX_ATTEMPT_MINUTES, 240),
+    },
     auth: {
       sessionTtlHours,
       bcryptRounds: positiveNumber(env.APEX_BCRYPT_ROUNDS, 10),

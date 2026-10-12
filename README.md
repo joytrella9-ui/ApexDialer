@@ -83,6 +83,16 @@ operator exists), `POST /api/auth/login`, `POST /api/auth/logout`. Everything el
 | POST   | `/api/leads`          | Create a lead (validated)                           |
 | PUT    | `/api/leads/:id`      | Update a lead (validated)                           |
 | DELETE | `/api/leads/:id`      | Delete a lead (204)                                 |
+| GET    | `/api/calls`          | List recent call attempts (`?limit=`)               |
+| GET    | `/api/calls/active`   | The operator's current attempt (or `null`); auto-abandons stale attempts |
+| GET    | `/api/calls/next`     | Next eligible + `allowed` lead to preview (`?exclude=1,2`) |
+| POST   | `/api/calls/attempt`  | Start an attempt for a lead (server re-checks compliance) |
+| POST   | `/api/calls/skip`     | Record a skip and return the next lead              |
+| GET    | `/api/calls/:id`      | One attempt with its event history                  |
+| POST   | `/api/calls/:id/pause`  | `in_progress` → `paused`                          |
+| POST   | `/api/calls/:id/resume` | `paused` → `in_progress`                          |
+| POST   | `/api/calls/:id/end`    | End with a disposition (required) and update the lead |
+| POST   | `/api/calls/:id/abort`  | Abandon the attempt without a disposition         |
 
 A lead response looks like:
 
@@ -206,11 +216,44 @@ replacing browser storage with the authenticated API:
 - The **Activity log** is session-only: it lists actions performed in the current
   session and is explicitly labeled "not stored server-side" (cleared on reload). The
   schema has an `audit_log` table but no read endpoint for it yet.
-- The **dialer** remains a local simulation (timer + outcome recording). No telephony
-  provider is connected and no calls (real or simulated) start automatically.
+- The **dialer** runs a server-backed **power-dialer session** (see below) but still
+  simulates calls: no telephony provider is connected and no calls (real or simulated)
+  start automatically.
 - The original auto-seeded sample-lead list is gone: leads come only from the server
   (add, or CSV-import, your own). There is no provider-secret material anywhere in the
   HTML.
+
+### Power dialer (simulated attempts, server-persisted)
+
+The Dialer page adds an explicit, click-driven **power-dialer session** for demo mode.
+Nothing is auto-dialed: starting a session only *previews* the next contact, and a call
+attempt begins only when the operator presses **Dial** (or the legacy "Start next"). The
+workflow is Start → Dial → (Pause/Resume) → disposition **Save & next**, with Skip, Next,
+and Stop.
+
+- **Server-owned state.** Attempts are stored in the existing `calls` table and every
+  transition is appended to `call_events`; start/end/pause/resume/abort/skip are written
+  to `audit_log`. Opening the workspace restores any in-progress attempt
+  (`GET /api/calls/active`) so a reload does not lose it.
+- **One live attempt at a time.** Enforced in the database by a partial unique index
+  (`idx_calls_one_active` on `calls(user_id)` where status is `in_progress`/`paused`); a
+  second attempt is refused with `409 attempt_in_progress`.
+- **Compliance is re-checked on the server** every time an attempt starts. A lead that
+  was previewed but has since become ineligible (completed, DNC, consent revoked, outside
+  the window) is refused with `409 not_eligible` and the full decision, even if the UI
+  thought it was dialable.
+- **Dispositions are required.** Ending an attempt without one returns
+  `400 disposition_required`. Ending records `status`, `disposition`, `notes`, and
+  `duration_seconds`; **"Add to DNC"** inserts the phone into `dnc_entries` and forces the
+  lead to `dnc`/suppressed.
+- **Stale attempts** older than `APEX_MAX_ATTEMPT_MINUTES` (default 240) are abandoned
+  automatically on the next check.
+- **Failed/unknown transitions** return `409 invalid_transition`; unknown attempts return
+  `404 call_not_found`.
+
+This is a **simulated** workflow: `calls` rows record intent and outcome, no carrier call
+is placed, and there is no dialer tone, recording, or provider ID (`provider_call_sid`
+stays empty).
 
 ### Do Not Call (internal suppression)
 
@@ -357,7 +400,10 @@ formula-injection escaping, limits, and transaction rollback), the compliance en
 (allowed/blocked/review decisions, DNC, consent, call types, timezones, calling window,
 DST transitions, and HTTP endpoint validation), authentication (setup, login/logout,
 wrong-credential behavior, session cookies, expiry, garbage/expired tokens, unauthorized
-API access, password change, rate limiting, and CSRF/origin checks), and the frontend
+API access, password change, rate limiting, and CSRF/origin checks), the power-dialer
+workflow (attempt lifecycle, one-active-attempt enforcement, server-side compliance
+re-checks, dispositions, skip/next, pause/resume, stale-attempt abandonment, and
+disposition-gated advancement), and the frontend
 integration (original HTML hash guards, integrated frontend contract, session-expiry
 handling, CSRF same-origin behavior, and the UI-equivalent auth/lead/CSV/compliance
 flows). Run this after every change.
@@ -395,8 +441,8 @@ src/
   lib/sessions.js    session tokens (random, hashed at rest) + expiry
   lib/rateLimit.js   in-memory sliding-window rate limiter
   middleware/        cookie parsing, origin guard, auth guards
-  routes/            API routers (health, auth, leads)
-  services/          business logic + SQL (leads, csv, compliance, auth)
+  routes/            API routers (health, auth, leads, calls)
+  services/          business logic + SQL (leads, csv, compliance, auth, calls)
   validate/          zod schemas for server-side validation
 scripts/             local operator-password reset helper
 test/                automated tests (node:test)
@@ -413,8 +459,9 @@ See `docs/architecture.md` for the desktop-packaging strategy and roadmap.
 4. Compliance engine (consent, internal DNC, 8am–9pm recipient-local calling hours) — done, tested (preliminary guardrail, not certification).
 5. Single-operator authentication (bcrypt, sessions, rate limiting, CSRF guards) — done, tested.
 6. Frontend integration (sign-in screen, server-backed leads, CSV and compliance display; original UI preserved) — done, tested.
-7. Twilio integration in test mode, then live calling — only with explicit approval.
-8. Desktop packaging (Electron evaluation in `docs/architecture.md`).
+7. Power dialer workflow (click-driven session, server-persisted attempts, re-checked compliance, disposition-gated advancement; simulated, no telephony) — done, tested.
+8. Twilio integration in test mode, then live calling — only with explicit approval.
+9. Desktop packaging (Electron evaluation in `docs/architecture.md`).
 
 Nothing above is claimed to be production-ready, legally compliant, or capable of real
 calls until implemented and verified.

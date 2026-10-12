@@ -33,6 +33,7 @@ function makeElement(id) {
   };
   el.removeEventListener = () => {};
   el.click = () => {
+    if (typeof el.onclick === 'function') el.onclick({ target: el });
     (el.listeners.click || []).forEach((fn) => fn({ target: el }));
   };
   el.setAttribute = () => {};
@@ -100,6 +101,8 @@ export function loadFrontend(html, { fetch, location } = {}) {
     confirm: () => true,
     navigator: {},
     console,
+    URL,
+    URLSearchParams,
     setTimeout,
     clearTimeout,
     setInterval,

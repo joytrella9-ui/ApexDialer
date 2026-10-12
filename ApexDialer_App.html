@@ -109,6 +109,7 @@ button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 <section class="page" id="page-dialer">
  <div class="sectionhead"><div><h2>Dialer</h2><div class="sub">A safe local simulation of a single-contact calling workflow.</div></div><span class="pill warn">NOT CONNECTED TO TELEPHONY</span></div>
  <div class="notice">To make real calls, this app needs a telephony provider, a secure backend, authentication, and jurisdiction-specific compliance checks. Never put provider secrets in this HTML file.</div>
+ <div class="card" style="margin-top:15px"><div class="cardhead"><h3>Power dialer</h3><span class="pill warn" id="pdMode">DEMO MODE</span></div><div class="notice" style="margin:0 0 14px">Simulated sequential calling only. No carrier is connected; each attempt is started by an explicit click and its compliance is re-checked on the server.</div><div class="callcontrols" style="justify-content:flex-start"><button class="btn primary" id="pdStart">▶ Start session</button><button class="btn primary" id="pdDial" disabled>☎ Dial</button><button class="btn" id="pdPause" disabled>⏸ Pause</button><button class="btn" id="pdResume" disabled>⏵ Resume</button><button class="btn" id="pdSkip" disabled>⏭ Skip</button><button class="btn" id="pdNext" disabled>↦ Next</button><button class="btn danger" id="pdStop" disabled>■ Stop</button></div><div class="grid two" style="margin-top:15px"><div class="field"><label for="pdDisposition">Disposition</label><select id="pdDisposition"><option>Connected</option><option>Interested</option><option>Not interested</option><option>Callback</option><option>No answer</option><option>Voicemail</option><option>Add to DNC</option></select></div><div class="field"><label>&nbsp;</label><button class="btn success" id="pdSaveNext" disabled>Save disposition &amp; next</button></div></div><div class="sub" style="margin-top:10px">State: <b id="pdState">idle</b> · Lead: <b id="pdLead">—</b> · Queue: <b id="pdQueue">0</b> eligible</div><div id="pdEmpty" class="sub" style="margin-top:4px"></div></div>
  <div class="grid workspace"><div class="card"><div class="cardhead"><h3>Current contact</h3><span class="pill" id="dialStatus">IDLE</span></div><div class="callbox"><div class="callring">☎</div><h3 id="dialName">No active contact</h3><p id="dialPhone">Select a lead from the queue</p><div class="calltime" id="dialTimer">00:00</div><div class="callcontrols"><button class="btn primary" id="dialStartNext">▶ Start next lead</button><button class="btn danger" id="dialEnd" disabled>■ End call</button></div></div><div class="grid two" style="margin-top:15px"><button class="btn" data-disposition="No answer">No answer</button><button class="btn" data-disposition="Voicemail">Voicemail</button><button class="btn success" data-disposition="Interested">Interested</button><button class="btn danger" data-disposition="Add to DNC">Add to DNC</button></div></div><div class="card"><div class="cardhead"><h3>Compliance check</h3><span class="pill" id="compStatus">IDLE</span></div><div id="compBody" class="sub">Compliance is evaluated on the server before any call can start. Review and blocked leads are not dialable.</div><div id="compReasons" class="compReasons"></div><p class="sub" id="compDisclaimer" style="margin:10px 0 0"></p></div></div><div class="card"><div class="cardhead"><h3>Call notes</h3><span class="muted">Saved with the lead</span></div><div class="field"><label for="callNotes">Notes for active contact</label><textarea id="callNotes" placeholder="Record outcome, follow-up date, or context…"></textarea></div><button class="btn primary" id="saveNotes">Save notes</button><hr style="border-color:var(--line);margin:20px 0"><div class="field"><label for="dialManual">Manual number</label><input id="dialManual" placeholder="+1 555 010 1234" inputmode="tel"></div><button class="btn" id="dialManualBtn">Start demo call</button></div></div>
 </section>
 <section class="page" id="page-activity">
@@ -138,7 +139,7 @@ const STATUS_LABEL = {pending:'Pending',completed:'Completed',dnc:'Do not call',
 const STATUS_OPTION = {pending:'Pending',completed:'Completed',dnc:'DNC',blocked:'Blocked'};
 const STATUS_FROM_OPTION = {Pending:'pending',Completed:'completed',DNC:'dnc',Blocked:'blocked'};
 const titles = {overview:'Call center overview',leads:'Lead queue',dialer:'Dialer workspace',activity:'Activity log','settings':'Settings & data'};
-const state = {leads:[],logs:[],operator:null,signedIn:false,setupRequired:false,activeLeadId:null,callStart:null,callTicker:null,callSeconds:0,compliance:null,watchdog:null,startupDone:false,startupErr:false};
+const state = {leads:[],logs:[],operator:null,signedIn:false,setupRequired:false,activeLeadId:null,callStart:null,callTicker:null,callSeconds:0,compliance:null,watchdog:null,startupDone:false,startupErr:false,pd:{session:false,call:null,preview:null,excluded:[]}};
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function toast(msg,type='ok'){const el=document.createElement('div');el.className='toast '+type;el.textContent=msg;$('toastArea').append(el);setTimeout(()=>el.remove(),3600);}
@@ -160,7 +161,7 @@ async function api(method, path, body, {csv=false}={}){
   if(!res.ok){const err=new Error(data?.error||'Request failed');err.status=res.status;err.error=data?.error;err.details=data?.details;err.path=path;throw err;}
   return data;
 }
-function handleSessionExpired(){if(state.signedIn){state.signedIn=false;clearInterval(state.callTicker);state.callTicker=null;state.activeLeadId=null;showLogin('Your session expired. Please sign in again.');}}
+function handleSessionExpired(){if(state.signedIn){state.signedIn=false;clearInterval(state.callTicker);state.callTicker=null;state.activeLeadId=null;if(state.pd){state.pd.call=null;state.pd.session=false;state.pd.preview=null;}showLogin('Your session expired. Please sign in again.');}}
 function handleErr(err,fallback='Request failed'){
   if(err.status===401)return;
   if(err.status===403){toast('Request blocked by the server (cross-origin guard).','error');return;}
@@ -210,6 +211,13 @@ async function loadTable(){
 let tableTimer=null;
 function scheduleTable(){clearTimeout(tableTimer);tableTimer=setTimeout(loadTable,180);}
 function render(){renderWorkspace();loadTable();}
+async function refreshAll(){
+  try{const res=await api('GET','/api/leads');state.leads=res.data||[];}
+  catch(err){handleErr(err,'Could not load leads.');return;}
+  render();
+  await refreshCompliance();
+  pdRender();
+}
 function renderLogs(){const make=()=>state.logs.length?state.logs.map(x=>`<div class="logitem"><span class="logtime">${esc(x.time)}</span><span class="logmsg">${esc(x.msg)}</span></div>`).join(''):'<div class="empty">No activity this session.</div>';$('allLogs').innerHTML=make();}
 function renderRecent(){$('recentLogs').innerHTML=state.logs.slice(0,4).map(x=>`<div class="logitem"><span class="logtime">${esc(x.time)}</span><span class="logmsg">${esc(x.msg)}</span></div>`).join('')||'<div class="empty">Your activity will appear here.</div>';}
 function showPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+name));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$('pageTitle').textContent=titles[name]||titles.overview;$('crumb').textContent=name.toUpperCase();if(name==='leads')loadTable();}
@@ -289,26 +297,6 @@ function openImportReport(s){
   $('compModal').classList.add('open');
 }
 
-async function gatedStart(lead){
-  if(state.activeLeadId){toast('End the active call first.','error');return;}
-  if(!lead){toast('No eligible leads are ready.','error');return;}
-  let dec;
-  try{dec=await checkCompliance(lead);}catch(err){handleErr(err,'Compliance check failed.');return;}
-  state.compliance=dec;renderComplianceCard(dec);
-  if(dec.decision!=='allowed'){openCompModal(dec,lead);toast(`Not dialable — ${dec.decision}. Review the reasons.`,'error');return;}
-  startDemoCall(lead,dec);
-}
-function startDemoCall(lead,dec){
-  if(state.activeLeadId){toast('End the active call first.','error');return;}
-  state.activeLeadId=lead.id;state.callStart=Date.now();state.callSeconds=0;
-  $('callNotes').value=lead.notes||'';
-  clearInterval(state.callTicker);state.callTicker=setInterval(()=>{state.callSeconds=Math.floor((Date.now()-state.callStart)/1000);syncCallUI();},1000);
-  state.compliance=dec||null;renderComplianceCard(state.compliance);
-  log(`Demo call started for ${lead.name}. No real call was placed.`);
-  render();showPage('dialer');
-}
-function startNextLead(){gatedStart(nextEligible());}
-function formatTime(sec){return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');}
 function syncCallUI(){
   const l=activeLead(),time=formatTime(state.callSeconds);
   ['callTimer','dialTimer'].forEach(id=>$(id).textContent=time);
@@ -316,22 +304,156 @@ function syncCallUI(){
   ['activePhone','dialPhone'].forEach(id=>$(id).textContent=l?l.phone:'Select a lead from the queue');
   ['endCall','dialEnd'].forEach(id=>$(id).disabled=!l);
   ['startNext','dialStartNext','manualCall','dialManualBtn'].forEach(id=>$(id).disabled=!!l);
-  $('dialStatus').textContent=l?'SIMULATED CALL':'IDLE';
+  $('dialStatus').textContent=l?(state.pd.call&&state.pd.call.status==='paused'?'PAUSED':'SIMULATED CALL'):'IDLE';
   document.querySelectorAll('[data-disposition]').forEach(b=>b.disabled=!l);
+  pdRender();
 }
-async function endCall(disposition='Completed'){
-  const lead=activeLead();if(!lead)return;
-  const duration=state.callSeconds,id=lead.id;
-  const body={notes:$('callNotes').value.trim()};
-  if(disposition==='Add to DNC'){body.status='dnc';body.disposition='Add to DNC';}
-  else{body.status='completed';body.disposition=disposition==='Completed'?'Completed':disposition;}
-  try{const res=await api('PUT',`/api/leads/${id}`,body);if(res.data)replaceLead(res.data);}
-  catch(err){handleErr(err,'Could not save the call outcome.');}
-  state.activeLeadId=null;state.callStart=null;state.callSeconds=0;state.compliance=null;
+function formatTime(sec){return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');}
+function pdStatus(){return state.pd.call?state.pd.call.status:null;}
+function pdActive(){return !!state.pd.call&&(state.pd.call.status==='in_progress'||state.pd.call.status==='paused');}
+function pdEligibleCount(){return state.leads.filter(l=>l.status==='pending'&&!l.suppressed).length;}
+function pdRender(){
+  const session=state.pd.session,preview=state.pd.preview,active=pdActive(),paused=pdStatus()==='paused';
+  $('pdState').textContent=!session?'idle':active?(paused?'paused':'in call'):(preview?'ready':'session');
+  $('pdLead').textContent=active?(activeLead()?activeLead().name:'—'):(preview&&preview.lead?preview.lead.name:'—');
+  $('pdQueue').textContent=String(pdEligibleCount());
+  $('pdStart').disabled=session;
+  $('pdDial').disabled=!(session&&preview&&!active);
+  $('pdPause').disabled=!(pdStatus()==='in_progress');
+  $('pdResume').disabled=!paused;
+  $('pdStop').disabled=!session;
+  $('pdSkip').disabled=!(session&&preview&&!active);
+  $('pdNext').disabled=!(session&&!active);
+  $('pdSaveNext').disabled=!active;
+  $('pdEmpty').textContent=!session?'Press “Start session” to load the first eligible contact.':(!active&&!preview?'No eligible, dialable contacts remain for this session.':'');
+}
+function pdStartTimer(){
+  clearInterval(state.callTicker);
+  state.callTicker=setInterval(()=>{
+    if(state.pd.call&&state.pd.call.status==='in_progress'){state.callSeconds=Math.floor((Date.now()-state.callStart)/1000);syncCallUI();}
+  },1000);
+  syncCallUI();
+}
+function pdAdopt(ctx){
+  state.pd.session=true;state.pd.call=ctx.call||null;
+  state.pd.preview=ctx.lead?{lead:ctx.lead,compliance:ctx.compliance||null}:null;
+  state.activeLeadId=ctx.lead?ctx.lead.id:null;
+  state.callSeconds=(ctx.call&&ctx.call.durationSeconds)||0;state.callStart=Date.now()-state.callSeconds*1000;
+  state.compliance=ctx.compliance||null;renderComplianceCard(state.compliance);
+  pdStartTimer();
+}
+function pdClearActive(){
   clearInterval(state.callTicker);state.callTicker=null;
-  log(`Demo call ended: ${lead.name} · ${disposition} · ${formatTime(duration)}. No carrier was connected.`);
+  state.pd.call=null;state.activeLeadId=null;state.callStart=null;state.callSeconds=0;state.compliance=null;
+  renderComplianceCard(null);
+}
+async function pdLoadNext(){
+  const ex=state.pd.excluded.join(',');
+  let res;
+  try{res=await api('GET','/api/calls/next'+(ex?'?exclude='+encodeURIComponent(ex):''));}
+  catch(err){handleErr(err,'Could not load the next contact.');return;}
+  state.pd.preview=res.data?{lead:res.data.lead,compliance:res.data.compliance}:null;
+  if(state.pd.preview){state.compliance=state.pd.preview.compliance;renderComplianceCard(state.compliance);}
+  pdRender();
+}
+async function pdRestore(){
+  let res;
+  try{res=await api('GET','/api/calls/active');}
+  catch(err){return;}
+  const ctx=res.data;
+  if(!ctx||!ctx.call){pdClearActive();state.pd.session=false;state.pd.preview=null;pdRender();return;}
+  pdAdopt(ctx);
+  log('Restored the active demo call from the server.');
+}
+async function pdStartSession(){
+  if(state.pd.session){toast('A power dial session is already active.','error');return;}
+  state.pd.session=true;state.pd.excluded=[];
+  log('Power dialer session started (demo mode). No carrier is connected.');
+  await pdLoadNext();
+}
+async function pdDialLead(lead){
+  if(state.pd.call){toast('End the active call first.','error');return;}
+  if(!lead){toast('No eligible leads are ready.','error');return;}
+  let dec;
+  try{dec=await checkCompliance(lead);}catch(err){handleErr(err,'Compliance check failed.');return;}
+  state.compliance=dec;renderComplianceCard(dec);
+  if(dec.decision!=='allowed'){openCompModal(dec,lead);toast(`Not dialable — ${dec.decision}. Review the reasons.`,'error');return;}
+  state.pd.preview={lead,compliance:dec};
+  let res;
+  try{res=await api('POST','/api/calls/attempt',{leadId:lead.id});}
+  catch(err){
+    if(err.status===409&&err.error==='not_eligible'&&err.details&&err.details.compliance){openCompModal(err.details.compliance,err.details.lead);toast('Not dialable — the server rechecked compliance.','error');return;}
+    if(err.status===409&&err.error==='attempt_in_progress'){await pdRestore();toast('Another call is already active.','error');return;}
+    handleErr(err,'Could not start the call.');return;
+  }
+  pdAdopt(res.data);
+  log(`Demo call started for ${lead.name}. No real call was placed.`);
+  render();showPage('dialer');
+}
+async function pdDial(){
+  const p=state.pd.preview;
+  if(!p){toast('No contact loaded. Press Skip or Next.','error');return;}
+  await pdDialLead(p.lead);
+}
+async function pdSkip(){
+  const p=state.pd.preview;
+  if(!p){toast('No contact to skip.','error');return;}
+  const id=p.lead.id;
+  if(!state.pd.excluded.includes(id))state.pd.excluded.push(id);
+  log(`Skipped ${p.lead.name} for this session.`);
+  try{await api('POST','/api/calls/skip',{leadId:id});}catch(err){if(err.status!==401)log('Skip audit could not be recorded; continuing.');}
+  state.pd.preview=null;
+  await pdLoadNext();render();
+}
+async function pdNext(){if(!state.pd.session)return;await pdLoadNext();render();}
+async function pdPause(){
+  const c=state.pd.call;if(!c)return;
+  try{const res=await api('POST',`/api/calls/${c.id}/pause`);state.pd.call=res.data.call;}
+  catch(err){handleErr(err,'Could not pause the call.');return;}
+  log('Demo call paused.');render();
+}
+async function pdResume(){
+  const c=state.pd.call;if(!c)return;
+  try{const res=await api('POST',`/api/calls/${c.id}/resume`);state.pd.call=res.data.call;}
+  catch(err){handleErr(err,'Could not resume the call.');return;}
+  log('Demo call resumed.');render();
+}
+async function pdStop(){
+  const c=state.pd.call;
+  if(c){try{await api('POST',`/api/calls/${c.id}/abort`,{reason:'Operator stopped'});}catch(err){if(err.status!==401)handleErr(err,'Could not stop the call.');}}
+  pdClearActive();state.pd.session=false;state.pd.preview=null;state.pd.excluded=[];
+  log('Power dialer session stopped; any active attempt was aborted.');
+  render();
+}
+async function startNextLead(){
+  if(state.pd.call){toast('End the active call first.','error');return;}
+  let res;
+  try{res=await api('GET','/api/calls/next');}
+  catch(err){handleErr(err,'Could not load the next contact.');return;}
+  if(!res.data){toast('No eligible leads are ready.','error');return;}
+  if(!state.pd.session){state.pd.session=true;state.pd.excluded=[];}
+  state.pd.preview={lead:res.data.lead,compliance:res.data.compliance};
+  await pdDialLead(res.data.lead);
+}
+async function gatedStart(lead){await pdDialLead(lead);}
+async function endCall(disposition='Completed'){await pdEnd(disposition);}
+async function pdEnd(disposition='Completed'){
+  const call=state.pd.call;if(!call){toast('No active call to save.','error');return;}
+  const lead=activeLead(),duration=state.callSeconds;
+  const addToDnc=disposition==='Add to DNC';
+  const body={disposition,notes:$('callNotes').value.trim(),durationSeconds:duration,addToDnc};
+  try{await api('POST',`/api/calls/${call.id}/end`,body);}
+  catch(err){handleErr(err,'Could not save the call outcome.');return;}
+  pdClearActive();
+  log(`Demo call ended${lead?': '+lead.name:''} · ${disposition} · ${formatTime(duration)}. No carrier was connected.`);
   await refreshAll();
-  toast(disposition==='Add to DNC'?'Contact added to Do Not Call suppression.':'Call outcome saved.');
+  toast(addToDnc?'Contact added to Do Not Call suppression.':'Call outcome saved.');
+}
+async function pdSaveNext(){
+  if(!state.pd.call){toast('No active call to save.','error');return;}
+  await pdEnd($('pdDisposition').value||'Connected');
+  if(state.pd.session)await pdLoadNext();
+  render();
 }
 async function saveNotes(){
   const lead=activeLead();if(!lead){toast('Start a demo call to attach notes.','error');return;}
@@ -391,6 +513,7 @@ async function enterWorkspace(){
   state.operator=me.data.operator;state.signedIn=true;state.setupRequired=false;
   renderOperator();showApp();
   await refreshAll();
+  await pdRestore();
 }
 async function submitLogin(e){
   e.preventDefault();
@@ -415,7 +538,7 @@ async function submitSetup(e){
     log('Operator account created and signed in.');
   }catch(err){$('setupPass').value='';$('setupPass2').value='';showAuthError(authErrText(err));}
 }
-function resetWorkspace(){state.leads=[];state.logs=[];state.operator=null;state.signedIn=false;state.compliance=null;state.activeLeadId=null;state.callStart=null;state.callSeconds=0;clearInterval(state.callTicker);state.callTicker=null;showPage('overview');}
+function resetWorkspace(){state.leads=[];state.logs=[];state.operator=null;state.signedIn=false;state.compliance=null;state.activeLeadId=null;state.callStart=null;state.callSeconds=0;clearInterval(state.callTicker);state.callTicker=null;if(state.pd){state.pd.call=null;state.pd.session=false;state.pd.preview=null;state.pd.excluded=[];}showPage('overview');}
 async function logout(){
   try{await api('POST','/api/auth/logout');}catch{}
   resetWorkspace();renderLogs();renderRecent();showLogin('Signed out. Sign in to continue.');
@@ -443,6 +566,7 @@ async function boot(){
     state.operator=me.data.operator;state.signedIn=true;
     renderOperator();showApp();
     await refreshAll();
+    await pdRestore();
     log('Workspace opened. Data is served by the ApexDialer backend.');
     clearTimeout(state.watchdog);state.startupDone=true;
   }catch(err){
@@ -483,6 +607,14 @@ $('manualCall').onclick=()=>manualCall('manualPhone');
 $('dialManualBtn').onclick=()=>manualCall('dialManual');
 $('saveNotes').onclick=saveNotes;
 document.querySelectorAll('[data-disposition]').forEach(b=>b.addEventListener('click',()=>{if(!state.activeLeadId)return;const d=b.dataset.disposition;const l=activeLead();if(l&&$('callNotes').value.trim())l.notes=$('callNotes').value.trim();endCall(d);}));
+$('pdStart').onclick=pdStartSession;
+$('pdDial').onclick=pdDial;
+$('pdPause').onclick=pdPause;
+$('pdResume').onclick=pdResume;
+$('pdSkip').onclick=pdSkip;
+$('pdNext').onclick=pdNext;
+$('pdStop').onclick=pdStop;
+$('pdSaveNext').onclick=pdSaveNext;
 $('resetQueue').onclick=resetQueue;
 $('clearLogs').onclick=()=>{if(confirm('Clear activity history for this session?')){state.logs=[];renderLogs();renderRecent();toast('Activity log cleared (this session).');}};
 $('logoutBtn').onclick=$('logoutTop').onclick=logout;

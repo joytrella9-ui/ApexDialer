@@ -5,6 +5,7 @@ import { config } from './config.js';
 import { healthRouter } from './routes/health.js';
 import { authRouter } from './routes/auth.js';
 import { leadsRouter } from './routes/leads.js';
+import { callsRouter } from './routes/calls.js';
 import { requireAuth } from './middleware/auth.js';
 import { parseCookies, originGuard } from './middleware/security.js';
 import { errorHandler } from './lib/errors.js';
@@ -18,6 +19,7 @@ function mergeConfig(overrides) {
     ...overrides,
     auth: { ...config.auth, ...(overrides.auth ?? {}) },
     compliance: { ...config.compliance, ...(overrides.compliance ?? {}) },
+    calls: { ...config.calls, ...(overrides.calls ?? {}) },
     telephony: { ...config.telephony, ...(overrides.telephony ?? {}) },
   };
 }
@@ -38,6 +40,7 @@ export function createApp(db, overrides = {}) {
 
   app.use('/api', requireAuth(db));
   app.use('/api/leads', leadsRouter(db));
+  app.use('/api/calls', callsRouter(db, cfg));
 
   app.use('/api', (req, res) => {
     res.status(404).json({ error: 'not_found', path: req.path });

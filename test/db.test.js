@@ -92,3 +92,29 @@ test('leads table accepts consent + timezone + call-type fields', () => {
     db.close();
   }
 });
+
+test('calls table enforces at most one active attempt per operator', () => {
+  const db = createDb(':memory:');
+  try {
+    db.prepare("INSERT INTO users (username, password_hash) VALUES ('op', 'x')").run();
+    const userId = db.prepare('SELECT id FROM users').get().id;
+    db.prepare("INSERT INTO leads (name, phone) VALUES ('A', '+1 555 010 5001')").run();
+    const leadId = db.prepare('SELECT id FROM leads').get().id;
+
+    const insertActive = db.prepare(
+      "INSERT INTO calls (lead_id, user_id, status, call_type, started_at) VALUES (?, ?, ?, 'sales', datetime('now'))"
+    );
+    insertActive.run(leadId, userId, 'in_progress');
+    assert.throws(
+      () => insertActive.run(leadId, userId, 'paused'),
+      /UNIQUE/i,
+      'a second active (in_progress/paused) call must be rejected'
+    );
+
+    db.prepare("UPDATE calls SET status = 'completed'").run();
+    insertActive.run(leadId, userId, 'in_progress');
+    assert.equal(db.prepare('SELECT COUNT(*) AS c FROM calls').get().c, 2);
+  } finally {
+    db.close();
+  }
+});

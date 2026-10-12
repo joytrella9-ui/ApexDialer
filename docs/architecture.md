@@ -27,9 +27,32 @@ shows the server compliance decision and **starts a call only when the decision 
 remains a local simulation and nothing dials automatically.
 
 Known UI features without full backend support yet (shown as such, not faked): the
-**activity log** is session-only (there is no audit-read endpoint yet), and the dialer
-has no telephony provider. The original auto-seeded sample leads were removed — leads
-come only from the server.
+**activity log** is session-only (there is no audit-read endpoint yet). The original
+auto-seeded sample leads were removed — leads come only from the server.
+
+## Power dialer (implemented — simulated attempts)
+
+The Dialer page hosts a click-driven power-dialer session over the existing `calls` and
+`call_events` tables. The server owns the state:
+
+- **Preview, not dial.** `GET /api/calls/next` returns the next eligible lead whose
+  compliance decision is `allowed`; the UI merely previews it. An attempt is created only
+  by an explicit `POST /api/calls/attempt` (Dial/Start next). Nothing dials on load.
+- **One active attempt per operator**, enforced by a DB partial unique index
+  (`idx_calls_one_active`); a second attempt is `409 attempt_in_progress`.
+- **Compliance is re-evaluated on the server** at attempt time, so a lead that became
+  ineligible after preview is refused (`409 not_eligible` with the full decision).
+- **Disposition-gated advancement.** `POST /api/calls/:id/end` requires a disposition
+  (`400 disposition_required`); "Add to DNC" writes `dnc_entries` and suppresses the lead.
+  Pause/Resume are validated transitions (`409 invalid_transition` otherwise). Skip
+  advances and excludes the lead for the session; Next advances without excluding; Stop is
+  `POST /api/calls/:id/abort` (no disposition).
+- **Reload-safe.** `GET /api/calls/active` restores an in-progress attempt (auto-abandoning
+  attempts older than `APEX_MAX_ATTEMPT_MINUTES`).
+
+Every transition is appended to `call_events` and recorded in `audit_log`. This remains
+**simulated**: `calls` rows capture intent/outcome only — no carrier, no audio, no
+`provider_call_sid`. Live calling stays disabled until telephony is integrated and approved.
 
 ## Desktop packaging: Electron evaluation
 
@@ -54,7 +77,7 @@ Why it is **not being packaged yet** (decision):
 
 - Packaging Electron before the API surface is stable means rebuilding installers for
   every milestone. Packaging is cheapest once leads, CSV, compliance, auth, frontend
-  integration, and the test-mode telephony path are done.
+  integration, the power-dialer workflow, and the test-mode telephony path are done.
 - `better-sqlite3` is a native module and must be rebuilt for Electron's Node ABI. This
   is a solved problem (`electron-rebuild` / electron-builder's `npmRebuild`) but it is
   exactly the class of issue to defer until packaging actually starts.
