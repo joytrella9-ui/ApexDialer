@@ -45,15 +45,62 @@ npm start
 ```
 
 Then open <http://localhost:3210> in Chrome/Edge/Firefox. The original ApexDialer UI
-loads from the backend. The API is:
+loads from the backend.
 
-| Method | Route                    | Purpose                                        |
-| ------ | ------------------------ | ---------------------------------------------- |
-| GET    | `/`                      | Serves the preserved ApexDialer frontend HTML  |
-| GET    | `/api/health`            | Liveness check                                 |
-| GET    | `/api/health/config`     | Demo mode, telephony status, database status   |
+### API endpoints
 
-More endpoints (leads, CSV, compliance, auth) arrive in later milestones.
+| Method | Route                 | Purpose                                             |
+| ------ | --------------------- | --------------------------------------------------- |
+| GET    | `/`                   | Serves the preserved ApexDialer frontend HTML       |
+| GET    | `/api/health`         | Liveness check                                      |
+| GET    | `/api/health/config`  | Demo mode, telephony status, database status        |
+| GET    | `/api/leads`          | List leads. Query: `q`, `status`, `callType`, `eligible` |
+| GET    | `/api/leads/:id`      | Get one lead                                        |
+| POST   | `/api/leads`          | Create a lead (validated)                           |
+| PUT    | `/api/leads/:id`      | Update a lead (validated)                           |
+| DELETE | `/api/leads/:id`      | Delete a lead (204)                                 |
+
+A lead response looks like:
+
+```json
+{
+  "data": {
+    "id": 1,
+    "name": "Jordan Mitchell",
+    "phone": "+1 555 010 1001",
+    "company": "Northstar Logistics",
+    "callType": "existing-customer",
+    "timezone": "America/New_York",
+    "consent": { "status": "recorded", "evidence": "signed", "source": "web-form", "date": "2026-09-01" },
+    "status": "pending",
+    "disposition": "",
+    "notes": "",
+    "suppressed": false,
+    "eligible": true,
+    "createdAt": "2026-10-12 03:00:00",
+    "updatedAt": "2026-10-12 03:00:00"
+  }
+}
+```
+
+Create/update body fields: `name`, `phone` (7-15 digits), `company`, `callType`
+(`sales` | `existing-customer`), `timezone`, `consent` object, `notes`; update also
+accepts `status` (`pending` | `completed` | `dnc` | `blocked`) and `disposition`.
+
+### Do Not Call (internal suppression)
+
+Suppression is enforced on the server, not just the UI. If a lead's phone matches an
+active entry in the internal `dnc_entries` list (compared by the last 10 digits, so
+formatting does not matter), the API forces its status to `blocked`, sets
+`suppressed: true`, and reports `eligible: false`. A suppressed lead cannot be made
+eligible by updating its status. The `?eligible=true` filter returns only leads that
+are `pending` and not suppressed — the safe candidate list for dialing.
+
+**This internal suppression is not, by itself, legal compliance.** Consent rules,
+national/state Do Not Call registries, calling-hour windows, and provider
+registrations are separate requirements handled in later milestones.
+
+More endpoints (CSV, compliance engine, auth) arrive in later milestones.
 
 ## Tests
 
@@ -61,7 +108,8 @@ More endpoints (leads, CSV, compliance, auth) arrive in later milestones.
 npm test
 ```
 
-Covers the database schema/migrations/seed, the API, and server-side validation.
+Covers the database schema/migrations/seed, the API, leads CRUD, input validation,
+and Do Not Call suppression behavior. Run this after every change.
 
 ## Data & security
 
@@ -86,18 +134,20 @@ src/
   db/migrate.js      applies ordered migrations
   db/migrations/     numbered SQL migrations
   db/seed.js         default settings (demo mode)
-  lib/errors.js      HTTP error + async handler
-  routes/            API routers
+  lib/errors.js      HTTP error, zod error mapping, async handler
+  routes/            API routers (health, leads)
+  services/          business logic + SQL (leads)
   validate/          zod schemas for server-side validation
 test/                automated tests (node:test)
+test-support/        shared test helpers (not treated as tests)
 ```
 
 See `docs/architecture.md` for the desktop-packaging strategy and roadmap.
 
 ## Roadmap
 
-1. Backend foundation (this milestone) — done, tested.
-2. Leads API (server-side CRUD/search/filter).
+1. Backend foundation — done, tested.
+2. Leads API (server-side CRUD/search/filter + internal DNC enforcement) — done, tested.
 3. CSV import/export with call type, consent, timezone, suppression.
 4. Compliance engine (consent, internal DNC, 8am–9pm recipient-local calling hours).
 5. Single-operator authentication (role-ready).

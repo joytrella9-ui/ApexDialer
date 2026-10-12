@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { healthRouter } from './routes/health.js';
+import { leadsRouter } from './routes/leads.js';
 import { errorHandler } from './lib/errors.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -15,6 +16,7 @@ export function createApp(db) {
   app.get('/', (req, res) => res.sendFile(FRONTEND_HTML));
 
   app.use('/api/health', healthRouter(db));
+  app.use('/api/leads', leadsRouter(db));
 
   app.use('/api', (req, res) => {
     res.status(404).json({ error: 'not_found', path: req.path });

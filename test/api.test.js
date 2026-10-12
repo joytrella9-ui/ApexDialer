@@ -1,25 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createDb } from '../src/db/db.js';
-import { createApp } from '../src/app.js';
-
-function start(db) {
-  const server = createApp(db).listen(0);
-  const base = `http://127.0.0.1:${server.address().port}`;
-  return { server, base };
-}
-
-async function withServer(fn) {
-  const db = createDb(':memory:');
-  const { server, base } = start(db);
-  try {
-    return await fn(base);
-  } finally {
-    server.closeAllConnections();
-    server.close();
-    db.close();
-  }
-}
+import { withServer } from '../test-support/helpers.js';
 
 test('GET /api/health reports ok', async () => {
   await withServer(async (base) => {

@@ -52,3 +52,35 @@ export function parseLead(input) {
     suppression_blocked: 0,
   };
 }
+
+export const updateLeadSchema = z.object({
+  name: z.string().trim().min(1, 'name is required').max(120, 'name is too long').optional(),
+  phone: phoneSchema.optional(),
+  company: z.string().trim().max(120).optional(),
+  callType: z.enum(CALL_TYPES).optional(),
+  timezone: z.string().trim().max(64).optional(),
+  consent: consentSchema.optional(),
+  notes: z.string().trim().max(4000).optional(),
+  status: z.enum(LEAD_STATUSES).optional(),
+  disposition: z.string().trim().max(80).optional(),
+});
+
+export function mapLeadUpdate(input) {
+  const parsed = updateLeadSchema.parse(input);
+  const out = {};
+  if (parsed.name !== undefined) out.name = parsed.name;
+  if (parsed.phone !== undefined) out.phone = parsed.phone;
+  if (parsed.company !== undefined) out.company = parsed.company;
+  if (parsed.callType !== undefined) out.call_type = parsed.callType;
+  if (parsed.timezone !== undefined) out.timezone = parsed.timezone;
+  if (parsed.notes !== undefined) out.notes = parsed.notes;
+  if (parsed.status !== undefined) out.status = parsed.status;
+  if (parsed.disposition !== undefined) out.disposition = parsed.disposition;
+  if (parsed.consent !== undefined) {
+    out.consent_status = parsed.consent.status ?? 'none';
+    out.consent_evidence = parsed.consent.evidence ?? '';
+    out.consent_source = parsed.consent.source ?? '';
+    out.consent_date = parsed.consent.date ?? '';
+  }
+  return out;
+}
