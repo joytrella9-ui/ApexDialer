@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { HttpError } from '../lib/errors.js';
 import * as leads from '../services/leads.js';
 import { importLeads, leadsToCsv } from '../services/csv.js';
+import { evaluateLeadById } from '../services/compliance.js';
 
 function parseId(value) {
   const id = Number(value);
@@ -9,6 +10,14 @@ function parseId(value) {
     throw new HttpError(400, 'invalid_id');
   }
   return id;
+}
+
+function parseAt(value) {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'string') throw new HttpError(400, 'invalid_at');
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) throw new HttpError(400, 'invalid_at');
+  return date;
 }
 
 function boolParam(value) {
@@ -49,6 +58,12 @@ export function leadsRouter(db) {
     }
     const summary = importLeads(db, csv);
     res.status(201).json({ data: summary });
+  });
+
+  router.get('/:id/compliance', (req, res) => {
+    const decision = evaluateLeadById(db, parseId(req.params.id), { now: parseAt(req.query.at) });
+    if (!decision) throw new HttpError(404, 'lead_not_found');
+    res.json({ data: decision });
   });
 
   router.get('/:id', (req, res) => {

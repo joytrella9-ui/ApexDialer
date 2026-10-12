@@ -58,6 +58,7 @@ loads from the backend.
 | GET    | `/api/leads/export`   | Download leads as CSV (same query filters as the list) |
 | POST   | `/api/leads/import`   | Import leads from CSV (`text/csv` body or JSON `{ "csv": "..." }`) |
 | GET    | `/api/leads/:id`      | Get one lead                                        |
+| GET    | `/api/leads/:id/compliance` | Evaluate whether a lead may be dialed (optional `?at=<ISO>`) |
 | POST   | `/api/leads`          | Create a lead (validated)                           |
 | PUT    | `/api/leads/:id`      | Update a lead (validated)                           |
 | DELETE | `/api/leads/:id`      | Delete a lead (204)                                 |
@@ -102,7 +103,91 @@ are `pending` and not suppressed — the safe candidate list for dialing.
 national/state Do Not Call registries, calling-hour windows, and provider
 registrations are separate requirements handled in later milestones.
 
-More endpoints (compliance engine, auth) arrive in later milestones.
+### Compliance engine (preliminary guardrail)
+
+`GET /api/leads/:id/compliance` runs a **server-side** evaluation of whether a lead may
+proceed to dialing. Exactly one answer comes back:
+
+```json
+{
+  "data": {
+    "decision": "allowed",
+    "allowed": true,
+    "mayDial": true,
+    "leadId": 1,
+    "callType": "sales",
+    "leadStatus": "pending",
+    "phoneKey": "5550101001",
+    "reasons": [
+      { "code": "within_calling_window", "severity": "info", "message": "..." }
+    ],
+    "details": {
+      "evaluatedAt": "2026-06-15T13:00:00.000Z",
+      "dnc": { "matched": false },
+      "suppression": { "flagged": false },
+      "consent": { "required": true, "status": "recorded", "proofLevel": "self-asserted", "evidence": true, "source": true, "date": true },
+      "schedule": {
+        "timeZone": "America/New_York",
+        "valid": true,
+        "localTime": "2026-06-15 09:00",
+        "localWeekday": "Mon",
+        "localHour": 9,
+        "localMinute": 0,
+        "utcOffsetMinutes": -240,
+        "window": { "start": "08:00", "end": "21:00", "startMinutes": 480, "endMinutes": 1260, "open": true }
+      }
+    },
+    "disclaimer": "Preliminary internal guardrail only. It is NOT a legal compliance certification. ..."
+  }
+}
+```
+
+- `decision` is `allowed`, `review`, or `blocked`; `mayDial` (alias `allowed`) is `true`
+  only for `allowed`. `blocked` — hard stop. `review` — no auto-dial; a human must
+  confirm first. The most severe reason wins (`block` > `review` > `info`).
+- `?at=<ISO timestamp>` evaluates at a specific instant (used by tests and "what if"
+  checks); without it the current server time is used.
+- Every call returns `reasons` with machine-readable `code` + `severity` + explanation.
+
+Checks performed, in order: internal DNC, suppression flag, lead status, call type,
+consent, timezone, and the calling window.
+
+| Code                          | Meaning                                                            |
+| ----------------------------- | ------------------------------------------------------------------ |
+| `internal_dnc`                | (block) phone matches the internal DNC list                        |
+| `suppression_flagged`         | (block) lead flagged as suppressed                                 |
+| `lead_status_completed` / `dnc` / `blocked` | (block) lead not dialable                       |
+| `unknown_call_type`           | (block) call type not recognized — fail closed                     |
+| `missing_consent`             | (block) sales call without recorded consent                        |
+| `consent_revoked`             | (block) contact revoked consent                                    |
+| `insufficient_consent_evidence` | (block) recorded consent with no evidence on file                |
+| `consent_metadata_incomplete` | (review) evidence exists but source/date missing; verify by human  |
+| `missing_timezone` / `invalid_timezone` | (block) cannot verify recipient-local hours            |
+| `outside_calling_window`      | (block) outside the configured recipient-local window              |
+| `invalid_calling_window_config` | (block) window settings malformed                                |
+| `within_calling_window`       | (info) inside the window                                           |
+| `consent_not_required`        | (info) existing-customer call needs no marketing consent           |
+
+Configuration — the preliminary calling window, recipient-local:
+
+```env
+# .env  (defaults shown)
+APEX_CALL_WINDOW_START=08:00
+APEX_CALL_WINDOW_END=21:00
+```
+
+Timezone handling uses each lead's IANA timezone (e.g. `America/New_York`) and Node's
+`Intl`/ICU data, so US and international DST transitions are computed per instant.
+
+**This is a preliminary guardrail — not a legal compliance certification.** It does not
+check national/state/number-area DNC registries, consent wireline/cell distinctions,
+state-specific rules, or business-day/holiday rules. Consent is **self-asserted**: the
+engine treats a `recorded` consent as *claimed*, reports `proofLevel: "self-asserted"`,
+and does not treat it as independent proof of legal permission. A lead can be
+`allowed` here and still be unlawful to call; a human operator and the operator's
+professional/legal review remain the decision-makers.
+
+More endpoints (auth) arrive in later milestones.
 
 ### CSV import & export
 
@@ -145,8 +230,10 @@ npm test
 ```
 
 Covers the database schema/migrations/seed, the API, leads CRUD, input validation,
-Do Not Call suppression, and CSV import/export (round-trip, quoting, row-level errors,
-formula-injection escaping, limits, and transaction rollback). Run this after every change.
+Do Not Call suppression, CSV import/export (round-trip, quoting, row-level errors,
+formula-injection escaping, limits, and transaction rollback), and the compliance
+engine (allowed/blocked/review decisions, DNC, consent, call types, timezones, calling
+window, DST transitions, and HTTP endpoint validation). Run this after every change.
 
 ## Data & security
 
@@ -173,7 +260,7 @@ src/
   db/seed.js         default settings (demo mode)
   lib/errors.js      HTTP error, zod error mapping, async handler
   routes/            API routers (health, leads)
-  services/          business logic + SQL (leads, csv import/export)
+  services/          business logic + SQL (leads, csv import/export, compliance)
   validate/          zod schemas for server-side validation
 test/                automated tests (node:test)
 test-support/        shared test helpers (not treated as tests)
@@ -186,7 +273,7 @@ See `docs/architecture.md` for the desktop-packaging strategy and roadmap.
 1. Backend foundation — done, tested.
 2. Leads API (server-side CRUD/search/filter + internal DNC enforcement) — done, tested.
 3. CSV import/export with call type, consent, timezone, suppression — done, tested.
-4. Compliance engine (consent, internal DNC, 8am–9pm recipient-local calling hours).
+4. Compliance engine (consent, internal DNC, 8am–9pm recipient-local calling hours) — done, tested (preliminary guardrail, not certification).
 5. Single-operator authentication (role-ready).
 6. Twilio integration in test mode, then live calling — only with explicit approval.
 7. Desktop packaging (Electron evaluation in `docs/architecture.md`).

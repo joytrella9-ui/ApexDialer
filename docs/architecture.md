@@ -60,10 +60,21 @@ The schema already carries `users.role`, `calls.user_id`, `calls.call_type`, and
 queue routing; inbound means TwiML `<Dial>` to a registered device. These are additive —
 no schema or UI rewrite.
 
-## Compliance gate (not yet implemented)
+## Compliance gate (implemented — preliminary guardrail)
 
-The compliance engine milestone (consent, internal DNC, 8am–9pm recipient-local
-calling hours, audit log) must be implemented and tested **before** any live calling is
-approved. US outbound calling also requires provider-side registration (e.g., a Twilio
-Primary Compliance Profile and SHAKEN/STIR registration) that is the user's account
-responsibility and outside this codebase's control.
+The compliance engine milestone landed as a server-side evaluation
+(`src/services/compliance.js`, endpoint `GET /api/leads/:id/compliance`). It evaluates
+consent, internal DNC, and the 8am–9pm recipient-local calling window using each lead's
+IANA timezone and Node's `Intl`/ICU data (DST transitions computed per instant). It
+returns one decision — `allowed`, `review`, or `blocked` — with machine-readable reason
+codes and details. It fails closed: a missing/invalid timezone or missing/insufficient
+consent for a sales call is a hard block, and unknown call types are blocked.
+
+**This is a preliminary guardrail, not a legal compliance certification.** It does not
+consult national/state/number-area DNC registries, and consent records are
+self-asserted (reported as `proofLevel: "self-asserted"`), so a `recorded` consent is a
+*claimed*, not verified, basis. It deliberately exposes this limitation in every
+evaluation response (`disclaimer`). US outbound calling additionally requires
+provider-side registration (e.g., a Twilio Primary Compliance Profile and SHAKEN/STIR
+registration) that is the user's account responsibility and outside this codebase's
+control. Live calling remains disabled until a supervised, approved live test.

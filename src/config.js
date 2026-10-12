@@ -22,6 +22,10 @@ export function loadConfig(env = process.env) {
       enabled: false,
       liveEnabled: false,
     },
+    compliance: {
+      callWindowStart: env.APEX_CALL_WINDOW_START || '08:00',
+      callWindowEnd: env.APEX_CALL_WINDOW_END || '21:00',
+    },
   };
 }
 
