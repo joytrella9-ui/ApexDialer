@@ -44,16 +44,27 @@ Defaults are fine for demo mode. `.env` is never committed.
 npm start
 ```
 
-Then open <http://localhost:3210> in Chrome/Edge/Firefox. The original ApexDialer UI
-loads from the backend.
+Then open <http://127.0.0.1:3210> in Chrome/Edge/Firefox (the server binds to
+`127.0.0.1` by default and loads the preserved ApexDialer UI).
 
 ### API endpoints
 
+Public (no login needed): `GET /` (frontend HTML), `GET /api/health`,
+`GET /api/health/config`, `GET /api/auth/config`, `POST /api/auth/setup` (only when no
+operator exists), `POST /api/auth/login`, `POST /api/auth/logout`. Everything else under
+`/api` requires a valid session cookie.
+
 | Method | Route                 | Purpose                                             |
 | ------ | --------------------- | --------------------------------------------------- |
-| GET    | `/`                   | Serves the preserved ApexDialer frontend HTML       |
-| GET    | `/api/health`         | Liveness check                                      |
-| GET    | `/api/health/config`  | Demo mode, telephony status, database status        |
+| GET    | `/`                   | Serves the preserved ApexDialer frontend HTML (public) |
+| GET    | `/api/health`         | Liveness check (public)                             |
+| GET    | `/api/health/config`  | Demo mode, telephony status, database status (public) |
+| GET    | `/api/auth/config`    | Setup status + session policy (public)              |
+| POST   | `/api/auth/setup`     | First-run operator creation (public, refused once an operator exists) |
+| POST   | `/api/auth/login`     | Log in and receive a session cookie (public, rate limited) |
+| POST   | `/api/auth/logout`    | End the current session (works with or without a session) |
+| GET    | `/api/auth/me`        | Current operator + session expiry                   |
+| PUT    | `/api/auth/password`  | Change the operator password (requires current password) |
 | GET    | `/api/leads`          | List leads. Query: `q`, `status`, `callType`, `eligible` |
 | GET    | `/api/leads/export`   | Download leads as CSV (same query filters as the list) |
 | POST   | `/api/leads/import`   | Import leads from CSV (`text/csv` body or JSON `{ "csv": "..." }`) |
@@ -89,6 +100,70 @@ A lead response looks like:
 Create/update body fields: `name`, `phone` (7-15 digits), `company`, `callType`
 (`sales` | `existing-customer`), `timezone`, `consent` object, `notes`; update also
 accepts `status` (`pending` | `completed` | `dnc` | `blocked`) and `disposition`.
+
+### Authentication & security (single operator)
+
+The app is a single-operator local application. The backend enforces authentication on
+every `/api` route except the small documented public set (health, auth config/setup/
+login/logout). Passwords are hashed with **bcrypt** (`bcryptjs`, cost factor 10 by
+default); login comparisons are **server-side** and fail **closed**. No password,
+plaintext or hashed, is ever returned to the client; sessions store **only a SHA-256
+hash** of the random session token (not the token itself).
+
+**First-run setup** — start the app, then create the operator account:
+
+```powershell
+$setup = Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3210/api/auth/setup `
+  -ContentType 'application/json' `
+  -Body '{"username":"operator","password":"a long random passphrase","displayName":"Demo Operator"}'
+$login = Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3210/api/auth/login `
+  -ContentType 'application/json' `
+  -Body '{"username":"operator","password":"a long random passphrase"}'
+```
+
+- `POST /api/auth/setup` returns `409 operator_exists` once an account exists — there is
+  exactly one operator and no way to add more through the API.
+- Login sets an **`HttpOnly` + `SameSite=Strict`** session cookie named
+  `apexdialer_session`. Sessions last **12 hours** (`APEX_SESSION_TTL_HOURS`), are
+  stored server-side, and are invalidated on logout or password change. `Secure` is only
+  set when `APEX_COOKIE_SECURE=true` (i.e. when served over HTTPS).
+- Wrong username and wrong password return the **same** `401 invalid_credentials`
+  response (no user enumeration); bcrypt verification is run against a dummy hash when
+  the username does not exist to avoid a timing side channel.
+- Login is **rate limited** in memory: 5 failed attempts per username/IP per window and
+  20 attempts per IP per window (see `.env.example`), returning `429 too_many_attempts`
+  with `Retry-After`. Setup is limited to 10 attempts/hour.
+- **CSRF protection:** state-changing requests with an `Origin`/`Referer` that does not
+  match the server host are rejected with `403 cross_origin_forbidden`; the cross-site
+  cookie flood is already blocked by `SameSite=Strict`.
+- The server binds to **`127.0.0.1`** so only this machine can reach the API.
+
+Auth-related events (setup, login, failed login, logout, password change) are written to
+the `audit_log` table.
+
+**Changing your password** (while logged in):
+
+```powershell
+Invoke-RestMethod -Method Put -Uri http://127.0.0.1:3210/api/auth/password `
+  -ContentType 'application/json' -WebSession $session `
+  -Body '{"currentPassword":"old passphrase","newPassword":"new strong passphrase"}'
+```
+
+**If you forget the password** — there is intentionally no password-recovery API (that
+would be an insecure shortcut). Use the local helper on the machine that owns the
+database; it prompts for a new password, hashes it, and invalidates all sessions:
+
+```powershell
+npm run reset-operator
+```
+
+This is local-only and does not bypass the running app's auth: anyone who can run it
+already has file-system access to the database. Changing a password also logs out other
+sessions automatically.
+
+**Notes / limitations:** rate-limit state is in-memory (resets on restart); sessions are
+not IP-bound (appropriate for a localhost desktop app); the login screen is a later
+frontend milestone — the preserved HTML UI is untouched by M5.
 
 ### Do Not Call (internal suppression)
 
@@ -231,16 +306,23 @@ npm test
 
 Covers the database schema/migrations/seed, the API, leads CRUD, input validation,
 Do Not Call suppression, CSV import/export (round-trip, quoting, row-level errors,
-formula-injection escaping, limits, and transaction rollback), and the compliance
-engine (allowed/blocked/review decisions, DNC, consent, call types, timezones, calling
-window, DST transitions, and HTTP endpoint validation). Run this after every change.
+formula-injection escaping, limits, and transaction rollback), the compliance engine
+(allowed/blocked/review decisions, DNC, consent, call types, timezones, calling window,
+DST transitions, and HTTP endpoint validation), and authentication (setup, login/logout,
+wrong-credential behavior, session cookies, expiry, garbage/expired tokens, unauthorized
+API access, password change, rate limiting, and CSRF/origin checks). Run this after
+every change.
 
 ## Data & security
 
 - SQLite database is stored at `data/apexdialer.db` (created on first run). It is
   git-ignored, as are `node_modules/` and `.env`.
-- No provider credentials exist in this codebase. When telephony is integrated,
-  credentials will live only in server-side configuration (`.env`), never in the browser.
+- Operator passwords are bcrypt-hashed; session tokens are random and only their
+  SHA-256 hash is stored. There are no hardcoded passwords, session secrets, or other
+  credentials in this codebase. No provider credentials exist; when telephony is
+  integrated, credentials will live only in server-side configuration (`.env`), never in
+  the browser.
+- The API binds to `127.0.0.1` and every sensitive route requires a valid session.
 - Demo mode is the hard default (`APEX_DEMO_MODE=true`); live calling is disabled.
 
 ## Backing up data
@@ -251,19 +333,23 @@ The database is a single file, `data/apexdialer.db`. Copy it while the app is st
 
 ```
 src/
-  server.js          entry point
-  app.js             Express app factory
+  server.js          entry point (binds to 127.0.0.1)
+  app.js             Express app factory (public routes then auth gate)
   config.js          environment configuration (no secrets)
   db/db.js           SQLite connection + migration runner
   db/migrate.js      applies ordered migrations
-  db/migrations/     numbered SQL migrations
+  db/migrations/     numbered SQL migrations (001 schema, 002 sessions)
   db/seed.js         default settings (demo mode)
   lib/errors.js      HTTP error, zod error mapping, async handler
-  routes/            API routers (health, leads)
-  services/          business logic + SQL (leads, csv import/export, compliance)
+  lib/sessions.js    session tokens (random, hashed at rest) + expiry
+  lib/rateLimit.js   in-memory sliding-window rate limiter
+  middleware/        cookie parsing, origin guard, auth guards
+  routes/            API routers (health, auth, leads)
+  services/          business logic + SQL (leads, csv, compliance, auth)
   validate/          zod schemas for server-side validation
+scripts/             local operator-password reset helper
 test/                automated tests (node:test)
-test-support/        shared test helpers (not treated as tests)
+test-support/        shared test helpers (auto-authenticate requests)
 ```
 
 See `docs/architecture.md` for the desktop-packaging strategy and roadmap.
@@ -274,7 +360,7 @@ See `docs/architecture.md` for the desktop-packaging strategy and roadmap.
 2. Leads API (server-side CRUD/search/filter + internal DNC enforcement) — done, tested.
 3. CSV import/export with call type, consent, timezone, suppression — done, tested.
 4. Compliance engine (consent, internal DNC, 8am–9pm recipient-local calling hours) — done, tested (preliminary guardrail, not certification).
-5. Single-operator authentication (role-ready).
+5. Single-operator authentication (bcrypt, sessions, rate limiting, CSRF guards) — done, tested.
 6. Twilio integration in test mode, then live calling — only with explicit approval.
 7. Desktop packaging (Electron evaluation in `docs/architecture.md`).
 

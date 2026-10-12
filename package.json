@@ -10,9 +10,11 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "reset-operator": "node scripts/reset-operator.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.2.0",
     "csv-parse": "^7.0.3",
     "csv-stringify": "^6.9.0",

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { withServer } from '../test-support/helpers.js';
+import { withServer, api } from '../test-support/helpers.js';
 
 test('GET /api/health reports ok', async () => {
   await withServer(async (base) => {
@@ -34,12 +34,16 @@ test('GET / serves the preserved original frontend HTML', async () => {
   });
 });
 
-test('unknown API route returns structured 404', async () => {
+test('unknown API route requires authentication (401 unauthenticated, 404 when logged in)', async () => {
   await withServer(async (base) => {
-    const res = await fetch(`${base}/api/nope`);
-    assert.equal(res.status, 404);
-    const body = await res.json();
-    assert.equal(body.error, 'not_found');
+    const unauth = await fetch(`${base}/api/nope`);
+    assert.equal(unauth.status, 401);
+    const unauthBody = await unauth.json();
+    assert.equal(unauthBody.error, 'authentication_required');
+
+    const authed = await api(base, 'GET', '/api/nope');
+    assert.equal(authed.status, 404);
+    assert.equal(authed.body.error, 'not_found');
   });
 });
 

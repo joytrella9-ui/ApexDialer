@@ -53,12 +53,22 @@ upgrade + data-backup steps.
 - Provider credentials: server-side `.env` / Electron `app.getPath('userData')` config
   only — never in browser code. Tokens handed to the browser are short-lived.
 
-## Multi-agent & inbound (design-time only, not built)
+## Authentication (implemented — single operator)
 
-The schema already carries `users.role`, `calls.user_id`, `calls.call_type`, and
-`calls.direction`. Adding agents means minting per-user tokens and adding presence and
-queue routing; inbound means TwiML `<Dial>` to a registered device. These are additive —
-no schema or UI rewrite.
+Single-operator auth landed as `src/routes/auth.js` + `src/services/auth.js` with a
+`sessions` table (migration 002). Passwords use bcrypt (`bcryptjs`, cost 10 default);
+sessions are random tokens whose SHA-256 hash is stored, expire after a configurable TTL
+(default 12h), and are revoked on logout/password change. Every `/api` route except a
+small documented public set (health, auth config/setup/login/logout) requires a valid
+`HttpOnly` + `SameSite=Strict` cookie. Login is rate limited in memory, wrong
+username/password return identical errors, and a same-origin check rejects state-changing
+requests with a foreign `Origin`/`Referer`. The server binds to `127.0.0.1`. Operator
+password recovery is intentionally offline: `npm run reset-operator`.
+
+**Multi-agent is still design-time only.** The schema already carries `users.role`,
+`calls.user_id`, `calls.call_type`, and `calls.direction`. Adding agents means per-user
+tokens, presence, and queue routing; inbound means TwiML `<Dial>` to a registered device.
+These are additive — no schema or UI rewrite.
 
 ## Compliance gate (implemented — preliminary guardrail)
 

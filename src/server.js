@@ -5,8 +5,8 @@ import { createApp } from './app.js';
 
 const db = createDb(config.dbPath);
 const app = createApp(db);
-const server = app.listen(config.port, () => {
-  console.log(`ApexDialer backend listening on http://localhost:${config.port}`);
+const server = app.listen(config.port, config.host, () => {
+  console.log(`ApexDialer backend listening on http://${config.host}:${config.port}`);
   console.log(
     `Demo mode: ${config.demoMode ? 'ON' : 'OFF'} · Telephony: ${config.telephony.provider ?? 'none'} · DB: ${config.dbPath}`
   );

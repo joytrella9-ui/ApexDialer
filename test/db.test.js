@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readdirSync } from 'node:fs';
 import { createDb } from '../src/db/db.js';
 import { runMigrations } from '../src/db/migrate.js';
 
@@ -12,8 +13,13 @@ const CORE_TABLES = [
   'call_events',
   'audit_log',
   'settings',
+  'sessions',
   'schema_migrations',
 ];
+
+const MIGRATION_FILES = readdirSync(
+  new URL('../src/db/migrations', import.meta.url)
+).filter((f) => /^\d{3}_.+\.sql$/.test(f));
 
 function tableNames(db) {
   return db
@@ -54,7 +60,7 @@ test('migrations are idempotent and only apply each migration once', () => {
     runMigrations(db);
     runMigrations(db);
     const n = db.prepare('SELECT COUNT(*) AS n FROM schema_migrations').get().n;
-    assert.equal(n, 1, 'each migration file must be recorded exactly once');
+    assert.equal(n, MIGRATION_FILES.length, 'each migration file must be recorded exactly once');
   } finally {
     db.close();
   }

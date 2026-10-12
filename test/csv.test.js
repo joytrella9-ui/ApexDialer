@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { withServer, api } from '../test-support/helpers.js';
+import { withServer, api, ensureAuth } from '../test-support/helpers.js';
 import { createDb } from '../src/db/db.js';
 import { importLeads } from '../src/services/csv.js';
 
@@ -18,14 +18,16 @@ const EXPORT_HEADER =
   'Lead ID,Name,Phone,Company,Call Type,Timezone,Consent Status,Consent Source,Consent Date,Consent Evidence,Status,Disposition,Notes,Suppressed,Created At,Updated At';
 
 async function getCsv(base, path) {
-  const res = await fetch(`${base}${path}`);
+  const cookie = await ensureAuth(base);
+  const res = await fetch(`${base}${path}`, { headers: cookie ? { cookie } : {} });
   return { status: res.status, headers: res.headers, text: await res.text() };
 }
 
 async function postCsv(base, path, csv) {
+  const cookie = await ensureAuth(base);
   const res = await fetch(`${base}${path}`, {
     method: 'POST',
-    headers: { 'content-type': 'text/csv' },
+    headers: { 'content-type': 'text/csv', ...(cookie ? { cookie } : {}) },
     body: csv,
   });
   const text = await res.text();
