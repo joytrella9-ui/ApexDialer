@@ -55,6 +55,8 @@ loads from the backend.
 | GET    | `/api/health`         | Liveness check                                      |
 | GET    | `/api/health/config`  | Demo mode, telephony status, database status        |
 | GET    | `/api/leads`          | List leads. Query: `q`, `status`, `callType`, `eligible` |
+| GET    | `/api/leads/export`   | Download leads as CSV (same query filters as the list) |
+| POST   | `/api/leads/import`   | Import leads from CSV (`text/csv` body or JSON `{ "csv": "..." }`) |
 | GET    | `/api/leads/:id`      | Get one lead                                        |
 | POST   | `/api/leads`          | Create a lead (validated)                           |
 | PUT    | `/api/leads/:id`      | Update a lead (validated)                           |
@@ -100,7 +102,41 @@ are `pending` and not suppressed — the safe candidate list for dialing.
 national/state Do Not Call registries, calling-hour windows, and provider
 registrations are separate requirements handled in later milestones.
 
-More endpoints (CSV, compliance engine, auth) arrive in later milestones.
+More endpoints (compliance engine, auth) arrive in later milestones.
+
+### CSV import & export
+
+`GET /api/leads/export` streams a CSV attachment with a stable column order:
+
+```
+Lead ID, Name, Phone, Company, Call Type, Timezone,
+Consent Status, Consent Source, Consent Date, Consent Evidence,
+Status, Disposition, Notes, Suppressed, Created At, Updated At
+```
+
+- Export applies the same `q`, `status`, `callType`, `eligible` filters as `GET /api/leads`.
+- Cells that begin with `=`, `+`, `-`, `@`, tab, or CR are prefixed with `'` to prevent
+  spreadsheet formula injection. The `Phone` column is exempt (already validated).
+- `POST /api/leads/import` accepts a UTF-8 CSV body (`Content-Type: text/csv`, up to 2 MB),
+  or JSON `{ "csv": "<csv text>" }`. Headers are matched case-insensitively; `Name` and
+  `Phone` are required, all other columns are optional. `Call Type` accepts
+  `sales` / `existing-customer` (spaces and underscores are normalized).
+
+Import rules (returned in the summary as `total`, `imported`, `rejected`, `skipped`,
+plus row-level `errors` and `warnings`):
+
+- Each row is validated server-side. Invalid or missing `name`/`phone` rows are
+  **rejected** with the offending line number and reason.
+- Phones already in the database, or duplicated within the file, are **skipped**.
+- Internal DNC suppression is always applied: any row whose phone is on the internal
+  Do Not Call list is imported as `blocked`, never eligible.
+- Imported consent claims are **not trusted as verified**. A row claiming
+  `Consent Status = recorded` with no source, date, or evidence is downgraded to `none`
+  and reported as a warning.
+- Valid rows are written in a single all-or-nothing transaction: if a write fails, the
+  whole batch is rolled back and nothing is saved.
+- Files are limited to 5000 rows per import.
+
 
 ## Tests
 
@@ -109,7 +145,8 @@ npm test
 ```
 
 Covers the database schema/migrations/seed, the API, leads CRUD, input validation,
-and Do Not Call suppression behavior. Run this after every change.
+Do Not Call suppression, and CSV import/export (round-trip, quoting, row-level errors,
+formula-injection escaping, limits, and transaction rollback). Run this after every change.
 
 ## Data & security
 
@@ -136,7 +173,7 @@ src/
   db/seed.js         default settings (demo mode)
   lib/errors.js      HTTP error, zod error mapping, async handler
   routes/            API routers (health, leads)
-  services/          business logic + SQL (leads)
+  services/          business logic + SQL (leads, csv import/export)
   validate/          zod schemas for server-side validation
 test/                automated tests (node:test)
 test-support/        shared test helpers (not treated as tests)
@@ -148,7 +185,7 @@ See `docs/architecture.md` for the desktop-packaging strategy and roadmap.
 
 1. Backend foundation — done, tested.
 2. Leads API (server-side CRUD/search/filter + internal DNC enforcement) — done, tested.
-3. CSV import/export with call type, consent, timezone, suppression.
+3. CSV import/export with call type, consent, timezone, suppression — done, tested.
 4. Compliance engine (consent, internal DNC, 8am–9pm recipient-local calling hours).
 5. Single-operator authentication (role-ready).
 6. Twilio integration in test mode, then live calling — only with explicit approval.

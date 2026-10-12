@@ -14,6 +14,10 @@ function activeDncKeys(db) {
   );
 }
 
+export function loadDncKeys(db) {
+  return activeDncKeys(db);
+}
+
 export function isSuppressed(db, phone) {
   const key = phoneKey(phone);
   if (!key) return false;
@@ -82,6 +86,11 @@ export function createLead(db, input) {
     data.status = 'blocked';
     data.suppression_blocked = 1;
   }
+  const id = insertLead(db, data);
+  return getLead(db, id);
+}
+
+export function insertLead(db, data) {
   const info = db
     .prepare(
       `INSERT INTO leads
@@ -94,7 +103,7 @@ export function createLead(db, input) {
           @status, @disposition, @notes, @suppression_blocked)`
     )
     .run(data);
-  return getLead(db, Number(info.lastInsertRowid));
+  return Number(info.lastInsertRowid);
 }
 
 export function updateLead(db, id, input) {

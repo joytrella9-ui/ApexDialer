@@ -12,6 +12,7 @@ export function createApp(db) {
   const app = express();
   app.disable('x-powered-by');
   app.use(express.json({ limit: '256kb' }));
+  app.use(express.text({ type: ['text/csv', 'text/plain'], limit: '2mb' }));
 
   app.get('/', (req, res) => res.sendFile(FRONTEND_HTML));
 

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { HttpError } from '../lib/errors.js';
 import * as leads from '../services/leads.js';
+import { importLeads, leadsToCsv } from '../services/csv.js';
 
 function parseId(value) {
   const id = Number(value);
@@ -27,6 +28,27 @@ export function leadsRouter(db) {
       eligible: boolParam(req.query.eligible),
     });
     res.json({ data, count: data.length });
+  });
+
+  router.get('/export', (req, res) => {
+    const data = leads.listLeads(db, {
+      q: typeof req.query.q === 'string' ? req.query.q.trim() : undefined,
+      status: typeof req.query.status === 'string' ? req.query.status : undefined,
+      callType: typeof req.query.callType === 'string' ? req.query.callType : undefined,
+      eligible: boolParam(req.query.eligible),
+    });
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="apexdialer-leads.csv"');
+    res.send(leadsToCsv(data));
+  });
+
+  router.post('/import', (req, res) => {
+    const csv = typeof req.body === 'string' ? req.body : req.body?.csv;
+    if (typeof csv !== 'string' || csv.trim() === '') {
+      throw new HttpError(400, 'missing_csv');
+    }
+    const summary = importLeads(db, csv);
+    res.status(201).json({ data: summary });
   });
 
   router.get('/:id', (req, res) => {
