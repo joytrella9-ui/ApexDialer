@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { withServer, raw, cookieHeader, AUTH_CREDS } from '../test-support/helpers.js';
+import { loadFrontend } from '../test-support/domshim.js';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 const ORIGINAL = new URL('../ApexDialer_Working_MVP.html', import.meta.url);
@@ -284,4 +285,70 @@ test('compliance decisions the UI depends on: allowed, review, and blocked', asy
     assert.equal(blockedRes.body.data.mayDial, false);
     assert.ok(blockedRes.body.data.reasons.some((r) => r.code === 'missing_consent'));
   });
+});
+
+test('startup: the hidden attribute is not defeated by overlay display rules', () => {
+  const html = readFileSync(INTEGRATED, 'utf8');
+  const styles = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n');
+  assert.match(styles, /\.loginwrap\s*\{[^}]*display:grid/, '.loginwrap sets display:grid (the trigger)');
+  assert.match(styles, /\.loginform\s*\{[^}]*display:grid/, '.loginform sets display:grid (the trigger)');
+  assert.ok(
+    styles.includes('[hidden]{display:none!important}'),
+    'an author [hidden] rule with !important must outrank the overlay display rules',
+  );
+  assert.ok(/id="loginView" hidden/.test(html), 'login overlay must start hidden');
+  assert.ok(/id="setupForm" hidden/.test(html), 'setup form must start hidden');
+  assert.ok(!/id="loadingView" hidden/.test(html), 'loading overlay must start visible');
+});
+
+test('startup: failures surface a clear error with a Retry control, never a silent hang', () => {
+  const html = readFileSync(INTEGRATED, 'utf8');
+  for (const needle of [
+    'id="startupError" hidden',
+    'id="startupErrorMsg"',
+    'id="startupRetry"',
+    "window.addEventListener('error'",
+    "window.addEventListener('unhandledrejection'",
+    'showStartupError(',
+    'location.reload()',
+  ]) {
+    assert.ok(html.includes(needle), `frontend must include "${needle}"`);
+  }
+});
+
+test('startup behavior: reachable server reveals setup; failed request reveals error + working Retry', async () => {
+  const html = readFileSync(INTEGRATED, 'utf8');
+
+  const ok = loadFrontend(html, {
+    fetch: async (path) => ({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () =>
+        JSON.stringify(path === '/api/auth/config' ? { setupRequired: true } : {}),
+    }),
+  });
+  await ok.flush();
+  assert.equal(ok.get('loadingView').hidden, true, 'loading overlay must hide once startup resolves');
+  assert.equal(ok.get('loginView').hidden, false, 'login overlay must be visible');
+  assert.equal(ok.get('setupForm').hidden, false, 'setup form must be shown on first run');
+  assert.equal(ok.get('loginForm').hidden, true, 'login form must be hidden while setup is required');
+
+  const broken = loadFrontend(html, {
+    fetch: async () => {
+      throw new Error('network down');
+    },
+    location: {
+      reload() {
+        this.calls = (this.calls || 0) + 1;
+      },
+    },
+  });
+  await broken.flush();
+  assert.equal(broken.get('startupError').hidden, false, 'startup error screen must be shown');
+  assert.match(broken.get('startupErrorMsg').textContent, /server|retry/i);
+  assert.equal(broken.get('loadingView').hidden, true, 'loading overlay must not stay stuck');
+  assert.equal(broken.reloads(), 0);
+  broken.get('startupRetry').click();
+  assert.equal(broken.reloads(), 1, 'Retry must reload the page');
 });

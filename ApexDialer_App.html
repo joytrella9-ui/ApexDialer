@@ -17,6 +17,7 @@
 .loginform .field{margin:0}
 .loginerror{padding:10px 12px;border:1px solid var(--red);color:var(--red);border-radius:10px;font-size:12px;display:none;margin-bottom:12px}
 .loginerror.show{display:block}
+[hidden]{display:none!important}
 button.avatar{border:1px solid transparent;font:inherit;font-weight:800;cursor:pointer}
 button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 .fieldset{border:1px solid var(--line);border-radius:12px;padding:14px 14px 4px;margin:14px 0}
@@ -59,6 +60,13 @@ button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 </div>
 <div class="loginwrap" id="loadingView">
   <div class="logincard" style="text-align:center"><div class="logo" style="margin:0 auto 14px">A</div><p class="muted" style="margin:0">Connecting to ApexDialer…</p></div>
+</div>
+<div class="loginwrap" id="startupError" hidden>
+  <div class="logincard">
+    <div class="loginhead"><div class="logo">!</div><div><strong style="letter-spacing:.04em">STARTUP FAILED</strong><small style="color:var(--muted);display:block">ApexDialer could not initialize</small></div></div>
+    <p class="sub" id="startupErrorMsg" style="margin:0 0 14px">The app could not start. Make sure the server is running, then retry.</p>
+    <button class="btn primary" id="startupRetry" type="button">Retry</button>
+  </div>
 </div>
 <div class="app" hidden>
 <aside>
@@ -130,7 +138,7 @@ const STATUS_LABEL = {pending:'Pending',completed:'Completed',dnc:'Do not call',
 const STATUS_OPTION = {pending:'Pending',completed:'Completed',dnc:'DNC',blocked:'Blocked'};
 const STATUS_FROM_OPTION = {Pending:'pending',Completed:'completed',DNC:'dnc',Blocked:'blocked'};
 const titles = {overview:'Call center overview',leads:'Lead queue',dialer:'Dialer workspace',activity:'Activity log','settings':'Settings & data'};
-const state = {leads:[],logs:[],operator:null,signedIn:false,setupRequired:false,activeLeadId:null,callStart:null,callTicker:null,callSeconds:0,compliance:null};
+const state = {leads:[],logs:[],operator:null,signedIn:false,setupRequired:false,activeLeadId:null,callStart:null,callTicker:null,callSeconds:0,compliance:null,watchdog:null,startupDone:false,startupErr:false};
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function toast(msg,type='ok'){const el=document.createElement('div');el.className='toast '+type;el.textContent=msg;$('toastArea').append(el);setTimeout(()=>el.remove(),3600);}
@@ -171,6 +179,7 @@ function authErrText(err){
 function showAuthError(msg){const el=$('authError');el.textContent=msg;el.classList.add('show');}
 function clearAuthError(){const el=$('authError');el.classList.remove('show');el.textContent='';}
 function showLogin(msg){clearAuthError();state.signedIn=false;$('setupForm').hidden=!state.setupRequired;$('loginForm').hidden=!!state.setupRequired;$('loadingView').hidden=true;$('loginView').hidden=false;if(msg)showAuthError(msg);}
+function showStartupError(msg){state.startupErr=true;clearTimeout(state.watchdog);clearAuthError();state.signedIn=false;$('startupErrorMsg').textContent=msg;$('loginView').hidden=true;$('loadingView').hidden=true;document.querySelector('.app').hidden=true;$('startupError').hidden=false;}
 function showApp(){$('loginView').hidden=true;$('loadingView').hidden=true;document.querySelector('.app').hidden=false;}
 function activeLead(){return state.leads.find(x=>x.id===state.activeLeadId)||null;}
 function nextEligible(){return state.leads.find(l=>l.status==='pending'&&!l.suppressed)||null;}
@@ -423,17 +432,24 @@ async function submitChangePass(e){
 }
 
 async function boot(){
+  state.watchdog=setTimeout(function(){if(!state.startupDone&&!state.startupErr)showStartupError('ApexDialer is taking too long to start. Make sure the server is running, then retry.');},8000);
   let cfg=null;
-  try{cfg=await api('GET','/api/auth/config');}catch(err){showLogin('Could not reach the ApexDialer server. Make sure npm start is running.');return;}
+  try{cfg=await api('GET','/api/auth/config');}
+  catch(err){showStartupError('Could not reach the ApexDialer server. Make sure npm start is running, then retry.');return;}
   state.setupRequired=cfg.setupRequired;
-  if(cfg.setupRequired){showLogin('Create the operator account to begin. This is the only way to sign in.');return;}
+  if(cfg.setupRequired){showLogin('Create the operator account to begin. This is the only way to sign in.');clearTimeout(state.watchdog);state.startupDone=true;return;}
   try{
     const me=await api('GET','/api/auth/me');
     state.operator=me.data.operator;state.signedIn=true;
     renderOperator();showApp();
     await refreshAll();
     log('Workspace opened. Data is served by the ApexDialer backend.');
-  }catch(err){if(err.status===401)showLogin('Sign in to open your workspace.');else showLogin(authErrText(err));}
+    clearTimeout(state.watchdog);state.startupDone=true;
+  }catch(err){
+    clearTimeout(state.watchdog);
+    if(err.status===401){showLogin('Sign in to open your workspace.');state.startupDone=true;}
+    else showStartupError(authErrText(err));
+  }
 }
 
 document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
@@ -476,6 +492,9 @@ $('changePassForm').addEventListener('submit',submitChangePass);
 $('closeComp').onclick=$('compCloseBtn').onclick=closeCompModal;
 $('compModal').addEventListener('click',e=>{if(e.target===$('compModal'))closeCompModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeCompModal();}});
+$('startupRetry').addEventListener('click',()=>location.reload());
+window.addEventListener('error',function(e){if(!state.startupDone&&!state.startupErr)showStartupError('A runtime error interrupted startup: '+(e.message||'unknown error'));});
+window.addEventListener('unhandledrejection',function(e){if(!state.startupDone&&!state.startupErr)showStartupError('A request failed during startup: '+(e.reason&&e.reason.message?e.reason.message:'connection failure'));});
 boot();
 })();
 </script>
