@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ApexDialer — Call Center Workspace</title>
+<style>
+:root{color-scheme:dark;--bg:#090e19;--panel:#111a2a;--panel2:#172337;--line:#26364d;--muted:#8ea1bb;--text:#e8eff8;--cyan:#41c8e8;--green:#43d6a0;--amber:#f5bd58;--red:#ff7285;--purple:#b6a0ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% -10%,#172d48 0,transparent 42%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}button:disabled{opacity:.4;cursor:not-allowed}.app{min-height:100vh;display:grid;grid-template-columns:230px minmax(0,1fr)}aside{border-right:1px solid var(--line);background:#0b1220;padding:22px 14px;display:flex;flex-direction:column;gap:25px}.brand{display:flex;gap:11px;align-items:center;padding:0 8px}.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#52d5ed,#3978df);display:grid;place-items:center;color:#071321;font-weight:900;font-size:20px}.brand strong{display:block;font-size:15px;letter-spacing:.04em}.brand small{color:var(--muted);font-size:11px}.navlabel{color:#657992;font-size:10px;font-weight:800;letter-spacing:.16em;padding:0 12px}.nav{display:grid;gap:5px}.nav button{border:1px solid transparent;background:transparent;color:#9eb0c7;text-align:left;padding:11px 12px;border-radius:10px;display:flex;gap:11px;align-items:center}.nav button.active,.nav button:hover{background:#15283b;border-color:#254259;color:#eafaff}.nav .ico{width:18px;text-align:center;color:var(--cyan)}.sidefoot{margin-top:auto;background:#101b2b;border:1px solid var(--line);padding:13px;border-radius:12px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:7px}.sidefoot small{color:var(--muted);display:block;margin-top:5px;font-size:11px}.main{min-width:0}.topbar{height:74px;padding:0 28px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:15px;background:#0b1220cc;position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}.crumb{color:var(--muted);font-size:12px}.topbar h1{font-size:19px;margin:2px 0 0}.topactions{display:flex;gap:9px;align-items:center}.avatar{height:34px;width:34px;border-radius:50%;display:grid;place-items:center;background:#243957;color:#b9eafa;font-weight:800}.content{padding:25px 28px 40px;max-width:1700px;margin:auto}.page{display:none}.page.active{display:block}.sectionhead{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:19px}.sectionhead h2{margin:0;font-size:23px;letter-spacing:-.03em}.sub{color:var(--muted);margin-top:4px;font-size:12px}.btn{border:1px solid #344760;background:#172337;color:#e5effa;border-radius:9px;padding:9px 13px;font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:7px}.btn:hover{filter:brightness(1.13)}.btn.primary{background:linear-gradient(135deg,#26b6d7,#3c8ee8);color:#061522;border-color:transparent}.btn.success{background:#103c34;border-color:#1b725f;color:#72edc3}.btn.danger{background:#401d2a;border-color:#713245;color:#ff9aa8}.btn.ghost{background:transparent}.btn.small{padding:6px 9px;font-size:12px}.grid{display:grid;gap:15px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:17px}.card{background:linear-gradient(150deg,#141f31,#0f1827);border:1px solid var(--line);border-radius:15px;padding:18px;min-width:0;box-shadow:0 12px 30px #00000012}.statlabel{color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:8px}.statvalue{font-size:28px;font-weight:800;letter-spacing:-.04em;margin-top:8px}.statnote{font-size:11px;color:#8094ae;margin-top:4px}.staticon{color:var(--cyan);font-size:18px}.workspace{grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);align-items:start}.cardhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.cardhead h3{font-size:14px;margin:0}.pill{font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:99px;background:#153b35;color:#6be3ba;font-weight:800}.pill.warn{background:#3b301c;color:#ffd27b}.pill.red{background:#401d2a;color:#ff9cab}.muted{color:var(--muted)}.callbox{background:radial-gradient(ellipse at 50% 0,#1a3b54,#111a2a 68%);border:1px solid #29465e;border-radius:12px;padding:20px;text-align:center}.callring{width:68px;height:68px;border-radius:50%;border:1px solid #2b6c85;background:#102e43;color:#69d9f1;display:grid;place-items:center;font-size:27px;margin:3px auto 12px}.callbox h3{margin:0;font-size:17px}.callbox p{color:var(--muted);font-size:12px;margin:4px 0 14px}.calltime{font-size:25px;font-variant-numeric:tabular-nums;font-weight:750;margin:7px 0 14px}.callcontrols{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.formrow{display:flex;gap:8px}.field{display:grid;gap:6px;margin-bottom:12px;min-width:0}.field label{font-size:11px;color:#9fb2ca;font-weight:700}.field input,.field select,.field textarea,.search{width:100%;min-width:0;background:#0b1422;border:1px solid #2b3c53;border-radius:8px;color:var(--text);padding:10px 11px}.field textarea{resize:vertical;min-height:84px}.field input::placeholder,.search::placeholder{color:#62748b}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:11px}table{width:100%;border-collapse:collapse;white-space:nowrap}th{background:#111d2d;color:#8197b3;text-align:left;font-size:10px;letter-spacing:.09em;text-transform:uppercase;padding:12px}td{padding:12px;border-top:1px solid #1f2d41;font-size:12px}tbody tr:hover{background:#17253a}td.name{font-weight:750;color:#e7f1fd}.badge{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:4px 7px;font-size:10px;font-weight:750;background:#1b2b40;color:#b8cae0}.badge.pending{color:#ffd37e;background:#352c1d}.badge.completed{color:#7fe3b9;background:#16372f}.badge.dnc{color:#ff9eac;background:#411e2b}.filters{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.filters .search{flex:1;min-width:180px}.filters select{background:#0b1422;border:1px solid #2b3c53;color:var(--text);border-radius:8px;padding:10px}.tablefoot{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:11px;margin-top:12px}.log{display:grid;gap:8px;max-height:270px;overflow:auto}.logitem{display:flex;gap:10px;padding:9px 10px;background:#0c1523;border-radius:8px;border:1px solid #1e2c40;font-size:12px}.logtime{color:#758ba6;font:11px ui-monospace,monospace;white-space:nowrap}.logmsg{overflow-wrap:anywhere}.empty{padding:30px;text-align:center;color:var(--muted)}.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:repeat(3,1fr)}.notice{border:1px solid #5d4b26;background:#2a2417;color:#f3d28c;border-radius:10px;padding:11px 13px;font-size:12px;margin-bottom:15px}.modalback{position:fixed;inset:0;background:#020711c9;z-index:20;display:none;align-items:center;justify-content:center;padding:18px}.modalback.open{display:flex}.modal{width:min(540px,100%);background:#111b2b;border:1px solid #344860;border-radius:16px;padding:22px;box-shadow:0 25px 90px #0009;max-height:90vh;overflow:auto}.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modalhead h3{margin:0}.toastarea{position:fixed;right:18px;bottom:18px;z-index:40;display:grid;gap:8px;width:min(360px,calc(100vw - 36px))}.toast{background:#16263a;border:1px solid #38526c;padding:12px 14px;border-radius:10px;box-shadow:0 8px 30px #0006;font-size:12px}.toast.error{border-color:#874052}.toast.ok{border-color:#28745e}.bar{height:7px;background:#223249;border-radius:99px;overflow:hidden}.bar span{height:100%;display:block;background:linear-gradient(90deg,#36c7df,#638cf4);border-radius:99px}.hidden{display:none!important}.mobile-nav{display:none}
+@media(max-width:1100px){.app{grid-template-columns:76px minmax(0,1fr)}aside{padding:20px 9px}.brand{justify-content:center;padding:0}.brandtext,.navlabel,.navtext,.sidefoot{display:none}.nav button{justify-content:center;padding:12px 5px;font-size:17px}.workspace{grid-template-columns:1fr}.content{padding:20px}.topbar{padding:0 20px}}
+@media(max-width:720px){.app{display:block}aside{display:none}.content{padding-bottom:92px}.mobile-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;position:fixed;left:0;right:0;bottom:0;z-index:10;padding:8px max(8px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));background:#0b1220f2;border-top:1px solid var(--line);backdrop-filter:blur(14px)}.mobile-nav button{border:1px solid transparent;background:transparent;color:#9eb0c7;border-radius:8px;padding:7px 2px;font-size:10px;display:grid;justify-items:center;gap:3px}.mobile-nav button .ico{font-size:16px;color:var(--cyan)}.mobile-nav button.active{background:#15283b;border-color:#254259;color:#eafaff}.topbar{height:auto;min-height:68px;padding:12px 15px}.topbar h1{font-size:16px}.content{padding:16px 12px 28px}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.card{padding:14px}.statvalue{font-size:24px}.sectionhead{flex-direction:column}.two,.three{grid-template-columns:1fr}.topactions .hide-mobile{display:none}.formrow{flex-direction:column}.tablefoot{align-items:flex-start;flex-direction:column}}
+</style>
+<style>
+.loginwrap{position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at 15% -10%,#172d48 0,transparent 42%),var(--bg);z-index:30}
+.logincard{width:min(440px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 18px 60px #0009}
+.loginhead{display:flex;gap:13px;align-items:center;margin-bottom:16px}
+.loginform{display:grid;gap:13px}
+.loginform .field{margin:0}
+.loginerror{padding:10px 12px;border:1px solid var(--red);color:var(--red);border-radius:10px;font-size:12px;display:none;margin-bottom:12px}
+.loginerror.show{display:block}
+button.avatar{border:1px solid transparent;font:inherit;font-weight:800;cursor:pointer}
+button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.fieldset{border:1px solid var(--line);border-radius:12px;padding:14px 14px 4px;margin:14px 0}
+.fieldsethead{font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--muted);margin:-14px -14px 12px;padding:10px 14px;border-bottom:1px solid var(--line);border-radius:12px 12px 0 0;background:#0e1726}
+.decision{font-weight:800;margin:6px 0 2px}
+.decision.allowed{color:var(--green)}.decision.review{color:var(--amber)}.decision.blocked{color:var(--red)}
+.pill.blocked{background:#3a1620;color:var(--red);border-color:#5b2533}
+.pill.review{background:#3a2f16;color:var(--amber);border-color:#5b4825}
+.pill.allowed{background:#14362c;color:var(--green);border-color:#22503f}
+.compReasons{display:grid;gap:7px;margin-top:10px}
+.reason{border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:12px;background:#0d1524}
+.reason b{display:block;margin-bottom:2px}
+.reason.blocked{color:var(--red)}
+.reason.review{color:var(--amber)}
+.reason.info{color:var(--muted)}
+.modalbody{max-height:62vh;overflow:auto}
+.emptystate{border:1px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="loginwrap" id="loginView" hidden>
+  <div class="logincard">
+    <div class="loginhead"><div class="logo">A</div><div><strong style="letter-spacing:.04em">APEXDIALER</strong><small style="color:var(--muted);display:block">CALL CENTER WORKSPACE</small></div></div>
+    <div id="authError" class="loginerror"></div>
+    <form class="loginform" id="setupForm" hidden>
+      <div class="field"><label for="setupUsername">Username</label><input id="setupUsername" autocomplete="username" maxlength="50" required></div>
+      <div class="field"><label for="setupDisplay">Display name</label><input id="setupDisplay" maxlength="50" placeholder="Optional"></div>
+      <div class="field"><label for="setupPass">Password</label><input id="setupPass" type="password" autocomplete="new-password" minlength="12" maxlength="72" required></div>
+      <div class="field"><label for="setupPass2">Confirm password</label><input id="setupPass2" type="password" autocomplete="new-password" minlength="12" maxlength="72" required></div>
+      <button class="btn primary" type="submit">Create operator account</button>
+      <p class="sub" style="margin:0">First-run setup only. After creating the account you will be signed in.</p>
+    </form>
+    <form class="loginform" id="loginForm">
+      <div class="field"><label for="loginUsername">Username</label><input id="loginUsername" autocomplete="username" maxlength="50" required></div>
+      <div class="field"><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required></div>
+      <button class="btn primary" type="submit">Sign in</button>
+      <p class="sub" style="margin:0">This app is bound to this machine. Sessions expire automatically and passwords are never stored by the browser.</p>
+    </form>
+  </div>
+</div>
+<div class="loginwrap" id="loadingView">
+  <div class="logincard" style="text-align:center"><div class="logo" style="margin:0 auto 14px">A</div><p class="muted" style="margin:0">Connecting to ApexDialer…</p></div>
+</div>
+<div class="app" hidden>
+<aside>
+  <div class="brand"><div class="logo">A</div><div class="brandtext"><strong>APEXDIALER</strong><small>CALL CENTER WORKSPACE</small></div></div>
+  <div><div class="navlabel">WORKSPACE</div><nav class="nav" aria-label="Main navigation">
+    <button class="active" data-page="overview"><span class="ico">◫</span><span class="navtext">Overview</span></button>
+    <button data-page="leads"><span class="ico">♙</span><span class="navtext">Lead queue</span></button>
+    <button data-page="dialer"><span class="ico">☎</span><span class="navtext">Dialer</span></button>
+    <button data-page="activity"><span class="ico">☷</span><span class="navtext">Activity log</span></button>
+    <button data-page="settings"><span class="ico">⚙</span><span class="navtext">Settings & data</span></button>
+  </nav></div>
+  <div class="sidefoot"><span class="dot"></span><strong>Connected to ApexDialer</strong><small>Data lives on this server. Demo mode — no carrier connected.</small><button class="btn small ghost" id="logoutBtn" style="margin-top:10px;width:100%">⇥ Log out</button></div>
+</aside>
+<div class="main">
+<header class="topbar"><div><div class="crumb">APEXDIALER / <span id="crumb">OVERVIEW</span></div><h1 id="pageTitle">Call center overview</h1></div><div class="topactions"><button class="btn ghost hide-mobile" id="exportTop">⇩ Export CSV</button><button class="btn primary" id="addTop">＋ Add lead</button><button class="avatar" id="logoutTop" title="Log out">OP</button></div></header>
+<main class="content">
+<section class="page active" id="page-overview">
+ <div class="sectionhead"><div><h2>Good work starts with a clear queue.</h2><div class="sub">Your campaign snapshot, calling workspace, and next best action.</div></div><button class="btn" data-goto="leads">View lead queue →</button></div>
+ <div class="notice">Demo mode: call actions simulate outcomes locally. This page does not connect to a phone carrier, place real calls, or provide live AI. Use only contacts you are authorized to call.</div>
+ <div class="grid stats">
+  <div class="card"><div class="statlabel">Total leads <span class="staticon">♙</span></div><div class="statvalue" id="statTotal">0</div><div class="statnote">Contacts in this workspace</div></div>
+  <div class="card"><div class="statlabel">Ready to call <span class="staticon">↗</span></div><div class="statvalue" id="statPending">0</div><div class="statnote">Excludes completed and DNC</div></div>
+  <div class="card"><div class="statlabel">Completed <span class="staticon">✓</span></div><div class="statvalue" id="statCompleted">0</div><div class="statnote">Disposition recorded</div></div>
+  <div class="card"><div class="statlabel">Do not call <span class="staticon">⊘</span></div><div class="statvalue" id="statDnc">0</div><div class="statnote">Suppressed from dialing</div></div>
+ </div>
+ <div class="grid workspace">
+  <div class="card"><div class="cardhead"><h3>Lead queue preview</h3><button class="btn small" data-goto="leads">Manage leads →</button></div><div id="overviewLeads"></div></div>
+  <div class="card"><div class="cardhead"><h3>Dialer control</h3><span class="pill warn" id="callModeBadge">DEMO MODE</span></div>
+   <div class="callbox"><div class="callring">☎</div><h3 id="activeName">No active contact</h3><p id="activePhone">Choose a lead to begin a demo call</p><div class="calltime" id="callTimer">00:00</div><div class="callcontrols"><button class="btn primary" id="startNext">▶ Start next</button><button class="btn danger" id="endCall" disabled>■ End call</button></div></div>
+   <div class="field" style="margin-top:15px"><label for="manualPhone">Manual number (demo only)</label><div class="formrow"><input id="manualPhone" placeholder="+1 555 010 1234" inputmode="tel"><button class="btn" id="manualCall">Call</button></div></div>
+   <div class="sub">Call controls update the local demo state only.</div>
+  </div>
+ </div>
+ <div class="grid two" style="margin-top:15px"><div class="card"><div class="cardhead"><h3>Campaign completion</h3><span id="completionText" class="muted">0%</span></div><div class="bar"><span id="completionBar" style="width:0%"></span></div><div class="sub" style="margin-top:10px">Completed leads / all eligible leads</div></div><div class="card"><div class="cardhead"><h3>Recent activity</h3><button class="btn small" data-goto="activity">Open log →</button></div><div id="recentLogs" class="log"></div></div></div>
+</section>
+<section class="page" id="page-leads">
+ <div class="sectionhead"><div><h2>Lead queue</h2><div class="sub">Import, search, update, and suppress contacts from your local workspace.</div></div><div class="formrow"><button class="btn" id="importBtn">⇧ Import CSV</button><button class="btn primary" id="addLeadBtn">＋ Add lead</button><input class="hidden" id="csvFile" type="file" accept=".csv,text/csv"></div></div>
+ <div class="card"><div class="filters"><input class="search" id="leadSearch" placeholder="Search name, phone, company or ID…" aria-label="Search leads"><select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option>Pending</option><option>Completed</option><option>DNC</option></select><button class="btn" id="exportLeads">⇩ Export CSV</button></div><div class="tablewrap" id="leadTable"></div><div class="tablefoot"><span id="leadCount">0 leads</span><span>Tip: DNC contacts stay suppressed when resetting the queue.</span></div></div>
+</section>
+<section class="page" id="page-dialer">
+ <div class="sectionhead"><div><h2>Dialer</h2><div class="sub">A safe local simulation of a single-contact calling workflow.</div></div><span class="pill warn">NOT CONNECTED TO TELEPHONY</span></div>
+ <div class="notice">To make real calls, this app needs a telephony provider, a secure backend, authentication, and jurisdiction-specific compliance checks. Never put provider secrets in this HTML file.</div>
+ <div class="grid workspace"><div class="card"><div class="cardhead"><h3>Current contact</h3><span class="pill" id="dialStatus">IDLE</span></div><div class="callbox"><div class="callring">☎</div><h3 id="dialName">No active contact</h3><p id="dialPhone">Select a lead from the queue</p><div class="calltime" id="dialTimer">00:00</div><div class="callcontrols"><button class="btn primary" id="dialStartNext">▶ Start next lead</button><button class="btn danger" id="dialEnd" disabled>■ End call</button></div></div><div class="grid two" style="margin-top:15px"><button class="btn" data-disposition="No answer">No answer</button><button class="btn" data-disposition="Voicemail">Voicemail</button><button class="btn success" data-disposition="Interested">Interested</button><button class="btn danger" data-disposition="Add to DNC">Add to DNC</button></div></div><div class="card"><div class="cardhead"><h3>Compliance check</h3><span class="pill" id="compStatus">IDLE</span></div><div id="compBody" class="sub">Compliance is evaluated on the server before any call can start. Review and blocked leads are not dialable.</div><div id="compReasons" class="compReasons"></div><p class="sub" id="compDisclaimer" style="margin:10px 0 0"></p></div></div><div class="card"><div class="cardhead"><h3>Call notes</h3><span class="muted">Saved with the lead</span></div><div class="field"><label for="callNotes">Notes for active contact</label><textarea id="callNotes" placeholder="Record outcome, follow-up date, or context…"></textarea></div><button class="btn primary" id="saveNotes">Save notes</button><hr style="border-color:var(--line);margin:20px 0"><div class="field"><label for="dialManual">Manual number</label><input id="dialManual" placeholder="+1 555 010 1234" inputmode="tel"></div><button class="btn" id="dialManualBtn">Start demo call</button></div></div>
+</section>
+<section class="page" id="page-activity">
+ <div class="sectionhead"><div><h2>Activity log</h2><div class="sub">Actions performed in this session (not stored server-side).</div></div><button class="btn" id="clearLogs">Clear log</button></div>
+ <div class="card"><div id="allLogs" class="log"></div></div>
+</section>
+<section class="page" id="page-settings">
+ <div class="sectionhead"><div><h2>Settings & data</h2><div class="sub">Manage this browser's workspace data.</div></div></div>
+ <div class="grid two"><div class="card"><div class="cardhead"><h3>Workspace data</h3></div><p class="muted">Lead records and their consent/compliance fields are stored on this server by the authenticated ApexDialer API. Nothing sensitive is kept in browser storage.</p><div class="callcontrols" style="justify-content:flex-start"><button class="btn" id="exportSettings">Export backup CSV</button><button class="btn" id="resetQueue">Reset eligible lead statuses</button></div><p class="sub">Reset leaves Do Not Call and suppressed records untouched.</p></div><div class="card"><div class="cardhead"><h3>Production checklist</h3></div><ul class="muted" style="padding-left:18px;display:grid;gap:9px"><li>Secure sign-in and role permissions</li><li>Server-side database and audit trail</li><li>Telephony provider integration and verified call events</li><li>Consent, suppression lists, and allowed calling hours</li><li>Secure AI service integration with API keys held server-side</li><li>Backups, monitoring, and browser/device testing</li></ul></div></div>
+  <div class="card" style="margin-top:15px"><div class="cardhead"><h3>Operator account</h3><span class="pill" id="acctName">—</span></div><p class="sub" style="margin:0 0 12px">Change your sign-in password. This signs out every other active session.</p><form id="changePassForm" class="formrow" style="gap:10px"><input id="changeCurrent" type="password" autocomplete="current-password" placeholder="Current password" required><input id="changeNew" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="New password" required><input id="changeNew2" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="Confirm new password" required><button class="btn primary" type="submit">Change password</button></form></div>
+</section>
+</main><nav class="mobile-nav" aria-label="Mobile navigation">
+<button class="active" data-page="overview"><span class="ico">◫</span><span>Home</span></button>
+<button data-page="leads"><span class="ico">♙</span><span>Leads</span></button>
+<button data-page="dialer"><span class="ico">☎</span><span>Dialer</span></button>
+<button data-page="activity"><span class="ico">☷</span><span>Activity</span></button>
+<button data-page="settings"><span class="ico">⚙</span><span>Settings</span></button>
+</nav></div></div>
+<div class="modalback" id="leadModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modalhead"><h3 id="modalTitle">Add lead</h3><button class="btn small" id="closeModal" aria-label="Close">✕</button></div><form id="leadForm"><input type="hidden" id="editId"><div class="grid two"><div class="field"><label for="leadName">Full name *</label><input id="leadName" required maxlength="120" autocomplete="name"></div><div class="field"><label for="leadPhone">Phone number *</label><input id="leadPhone" required inputmode="tel" maxlength="40" placeholder="+1 555 010 1234"></div><div class="field"><label for="leadCompany">Company</label><input id="leadCompany" maxlength="120" autocomplete="organization"></div><div class="field" id="leadStatusField"><label for="leadStatus">Status</label><select id="leadStatus"><option>Pending</option><option>Completed</option><option>DNC</option><option>Blocked</option></select></div></div><div class="fieldset"><div class="fieldsethead">COMPLIANCE &amp; CONSENT</div><div class="grid two"><div class="field"><label for="leadCallType">Call type</label><select id="leadCallType"><option value="sales">Sales</option><option value="existing-customer">Existing customer</option></select></div><div class="field"><label for="leadTimezone">Timezone (IANA)</label><input id="leadTimezone" maxlength="64" list="tzList" placeholder="America/New_York"><datalist id="tzList"><option value="America/New_York"></option><option value="America/Chicago"></option><option value="America/Denver"></option><option value="America/Los_Angeles"></option><option value="America/Phoenix"></option><option value="America/Anchorage"></option><option value="Pacific/Honolulu"></option><option value="Europe/London"></option><option value="Europe/Berlin"></option></datalist></div><div class="field"><label for="leadConsent">Consent status</label><select id="leadConsent"><option value="none">None</option><option value="recorded">Recorded</option><option value="revoked">Revoked</option></select></div><div class="field"><label for="leadConsentDate">Consent date</label><input id="leadConsentDate" type="date" max="2100-12-31"></div><div class="field"><label for="leadConsentSource">Consent source</label><input id="leadConsentSource" maxlength="120" placeholder="web-form"></div><div class="field"><label for="leadConsentEvidence">Evidence</label><input id="leadConsentEvidence" maxlength="500" placeholder="recorded line / signed form"></div></div><p class="sub" style="margin:10px 0 12px">Consent is self-asserted and is used by the compliance check, not independently verified.</p></div><div class="field"><label for="leadNotes">Notes</label><textarea id="leadNotes" maxlength="4000"></textarea></div><div class="callcontrols" style="justify-content:flex-end"><button type="button" class="btn" id="cancelModal">Cancel</button><button class="btn primary" type="submit">Save lead</button></div></form></div></div>
+<div class="modalback" id="compModal" role="dialog" aria-modal="true" aria-labelledby="compTitle"><div class="modal"><div class="modalhead"><h3 id="compTitle">Compliance check</h3><button class="btn small" id="closeComp" aria-label="Close">✕</button></div><div class="modalbody" id="compDetail"></div><div class="callcontrols" style="justify-content:flex-end"><button type="button" class="btn" id="compCloseBtn">Close</button></div></div></div>
+<div class="toastarea" id="toastArea" aria-live="polite"></div>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const STATUS_LABEL = {pending:'Pending',completed:'Completed',dnc:'Do not call',blocked:'Blocked'};
+const STATUS_OPTION = {pending:'Pending',completed:'Completed',dnc:'DNC',blocked:'Blocked'};
+const STATUS_FROM_OPTION = {Pending:'pending',Completed:'completed',DNC:'dnc',Blocked:'blocked'};
+const titles = {overview:'Call center overview',leads:'Lead queue',dialer:'Dialer workspace',activity:'Activity log','settings':'Settings & data'};
+const state = {leads:[],logs:[],operator:null,signedIn:false,setupRequired:false,activeLeadId:null,callStart:null,callTicker:null,callSeconds:0,compliance:null};
+
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toast(msg,type='ok'){const el=document.createElement('div');el.className='toast '+type;el.textContent=msg;$('toastArea').append(el);setTimeout(()=>el.remove(),3600);}
+function log(msg,type='info'){state.logs.unshift({time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}),msg:String(msg),type});if(state.logs.length>200)state.logs=state.logs.slice(0,200);renderLogs();renderRecent();}
+function digits(phone){return String(phone).replace(/\D/g,'');}
+function validPhone(phone){return /^[+0-9().\s-]+$/.test(phone.trim())&&digits(phone).length>=7&&digits(phone).length<=15;}
+
+function isAuthPath(p){return /^\/api\/auth\//.test(p);}
+async function api(method, path, body, {csv=false}={}){
+  const init={method,headers:{},credentials:'same-origin'};
+  if(body!==undefined){
+    if(csv){init.headers['content-type']='text/csv';init.body=body;}
+    else{init.headers['content-type']='application/json';init.body=JSON.stringify(body);}
+  }
+  const res=await fetch(path,init);
+  const text=await res.text();
+  let data=null;try{data=text?JSON.parse(text):null;}catch{data=text;}
+  if(res.status===401&&!isAuthPath(path))handleSessionExpired();
+  if(!res.ok){const err=new Error(data?.error||'Request failed');err.status=res.status;err.error=data?.error;err.details=data?.details;err.path=path;throw err;}
+  return data;
+}
+function handleSessionExpired(){if(state.signedIn){state.signedIn=false;clearInterval(state.callTicker);state.callTicker=null;state.activeLeadId=null;showLogin('Your session expired. Please sign in again.');}}
+function handleErr(err,fallback='Request failed'){
+  if(err.status===401)return;
+  if(err.status===403){toast('Request blocked by the server (cross-origin guard).','error');return;}
+  if(err.status===429){toast('Rate limit reached. Please wait a moment and try again.','error');return;}
+  const first=Array.isArray(err.details)?err.details.slice(0,3).map(d=>d.message||d.errors?.map(i=>i.message).join('; ')).filter(Boolean).join('; '):null;
+  toast(`${fallback} ${first||err.error||err.message||''}`.trim(),'error');
+}
+function authErrText(err){
+  if(err.status===429)return 'Too many attempts. Please wait a moment and try again.';
+  if(err.status===409)return 'An operator account already exists. Sign in instead.';
+  if(err.status===400&&Array.isArray(err.details))return err.details.map(d=>d.message).join('; ');
+  if(err.error==='invalid_credentials')return 'Invalid username or password.';
+  return err.error||err.message||'Request failed.';
+}
+
+function showAuthError(msg){const el=$('authError');el.textContent=msg;el.classList.add('show');}
+function clearAuthError(){const el=$('authError');el.classList.remove('show');el.textContent='';}
+function showLogin(msg){clearAuthError();state.signedIn=false;$('setupForm').hidden=!state.setupRequired;$('loginForm').hidden=!!state.setupRequired;$('loadingView').hidden=true;$('loginView').hidden=false;if(msg)showAuthError(msg);}
+function showApp(){$('loginView').hidden=true;$('loadingView').hidden=true;document.querySelector('.app').hidden=false;}
+function activeLead(){return state.leads.find(x=>x.id===state.activeLeadId)||null;}
+function nextEligible(){return state.leads.find(l=>l.status==='pending'&&!l.suppressed)||null;}
+function replaceLead(l){const i=state.leads.findIndex(x=>x.id===l.id);if(i>=0)state.leads[i]=l;}
+
+function badge(status,suppressed){const label=STATUS_LABEL[status]||String(status);const cls=status==='dnc'||status==='blocked'?'dnc':status==='completed'?'completed':'pending';return `<span class="badge ${cls}">${esc(label)}${suppressed?' ⊘':''}</span>`;}
+function leadRows(list,compact=false){if(!list.length)return '<div class="empty">No leads match. Add a contact or change your filters.</div>';return `<table><thead><tr><th>Contact</th><th>Company</th><th>Status</th>${compact?'':'<th>Last outcome</th><th>Actions</th>'}</tr></thead><tbody>${list.map(l=>{const callable=(l.status==='pending')&&!l.suppressed;return `<tr><td><div class="name">${esc(l.name)}</div><div class="muted">${esc(l.phone)}</div></td><td>${esc(l.company||'—')}</td><td>${badge(l.status,l.suppressed)}</td>${compact?'':`<td>${esc(l.disposition||'—')}</td><td><div class="formrow"><button class="btn small" data-action="call" data-id="${l.id}" ${callable&&!state.activeLeadId?'':'disabled'}>Call</button><button class="btn small" data-action="compliance" data-id="${l.id}" title="Compliance check">◎</button><button class="btn small" data-action="edit" data-id="${l.id}">Edit</button><button class="btn small danger" data-action="delete" data-id="${l.id}" ${l.id===state.activeLeadId?'disabled':''}>×</button></div></td>`}</tr>`;}).join('')}</tbody></table>`;}
+
+function renderWorkspace(){
+  const pending=state.leads.filter(l=>l.status==='pending'),done=state.leads.filter(l=>l.status==='completed'),dnc=state.leads.filter(l=>l.status==='dnc');
+  $('statTotal').textContent=state.leads.length;$('statPending').textContent=pending.length;$('statCompleted').textContent=done.length;$('statDnc').textContent=dnc.length;
+  $('overviewLeads').innerHTML=leadRows(state.leads.filter(l=>l.status==='pending'&&!l.suppressed).slice(0,5),true);
+  const eligible=state.leads.filter(l=>l.status!=='dnc'&&l.status!=='blocked'&&!l.suppressed);
+  const pct=eligible.length?Math.round(done.length/eligible.length*100):0;
+  $('completionText').textContent=pct+'%';$('completionBar').style.width=pct+'%';
+  syncCallUI();renderLogs();renderRecent();
+}
+let tableToken=0;
+async function loadTable(){
+  const t=++tableToken;const params=new URLSearchParams();
+  const q=$('leadSearch').value.trim().toLowerCase()||'',st=$('statusFilter').value;
+  if(q)params.set('q',$('leadSearch').value.trim());
+  if(st!=='all')params.set('status',st);
+  let list=[];
+  try{const res=await api('GET','/api/leads?'+params.toString());if(t===tableToken){list=res.data||[];$('leadTable').innerHTML=leadRows(list);$('leadCount').textContent=`${list.length} of ${state.leads.length} leads`;}}
+  catch(err){handleErr(err,'Could not load leads.');}
+}
+let tableTimer=null;
+function scheduleTable(){clearTimeout(tableTimer);tableTimer=setTimeout(loadTable,180);}
+function render(){renderWorkspace();loadTable();}
+function renderLogs(){const make=()=>state.logs.length?state.logs.map(x=>`<div class="logitem"><span class="logtime">${esc(x.time)}</span><span class="logmsg">${esc(x.msg)}</span></div>`).join(''):'<div class="empty">No activity this session.</div>';$('allLogs').innerHTML=make();}
+function renderRecent(){$('recentLogs').innerHTML=state.logs.slice(0,4).map(x=>`<div class="logitem"><span class="logtime">${esc(x.time)}</span><span class="logmsg">${esc(x.msg)}</span></div>`).join('')||'<div class="empty">Your activity will appear here.</div>';}
+function showPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+name));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$('pageTitle').textContent=titles[name]||titles.overview;$('crumb').textContent=name.toUpperCase();if(name==='leads')loadTable();}
+
+function openModal(lead=null){
+  $('leadForm').reset();$('editId').value=lead?lead.id:'';
+  $('modalTitle').textContent=lead?'Edit lead':'Add lead';
+  $('leadStatusField').style.display=lead?'':'none';
+  if(lead){
+    $('leadName').value=lead.name;$('leadPhone').value=lead.phone;$('leadCompany').value=lead.company||'';
+    $('leadStatus').value=STATUS_OPTION[lead.status]||'Pending';
+    $('leadCallType').value=(lead.callType==='existing-customer')?'existing-customer':'sales';
+    $('leadTimezone').value=lead.timezone||'';
+    $('leadConsent').value=(lead.consent&&lead.consent.status)||'none';
+    $('leadConsentDate').value=(lead.consent&&lead.consent.date)||'';
+    $('leadConsentSource').value=(lead.consent&&lead.consent.source)||'';
+    $('leadConsentEvidence').value=(lead.consent&&lead.consent.evidence)||'';
+    $('leadNotes').value=lead.notes||'';
+  }else{
+    $('leadStatus').value='Pending';$('leadCallType').value='sales';$('leadConsent').value='none';
+  }
+  $('leadModal').classList.add('open');$('leadName').focus();
+}
+function closeModal(){$('leadModal').classList.remove('open');}
+async function saveLead(e){
+  e.preventDefault();
+  const id=$('editId').value,name=$('leadName').value.trim(),phone=$('leadPhone').value.trim(),company=$('leadCompany').value.trim();
+  if(!name){toast('Enter the contact name.','error');return;}
+  if(!validPhone(phone)){toast('Enter a valid phone number with 7–15 digits.','error');return;}
+  const body={name,phone,company,callType:$('leadCallType').value,timezone:$('leadTimezone').value.trim(),consent:{status:$('leadConsent').value,evidence:$('leadConsentEvidence').value.trim(),source:$('leadConsentSource').value.trim(),date:$('leadConsentDate').value},notes:$('leadNotes').value.trim()};
+  try{
+    if(id){body.status=STATUS_FROM_OPTION[$('leadStatus').value]||'pending';const res=await api('PUT',`/api/leads/${id}`,body);replaceLead(res.data);log(`Updated lead: ${name}`);}
+    else{const res=await api('POST','/api/leads',body);state.leads.unshift(res.data);log(`Added lead: ${name}`);}
+  }catch(err){handleErr(err,'Could not save lead.');return;}
+  closeModal();await refreshAll();toast('Lead saved.');
+}
+
+async function checkCompliance(lead){const res=await api('GET',`/api/leads/${lead.id}/compliance`);return res.data;}
+async function refreshCompliance(){
+  const lead=activeLead()||nextEligible();
+  if(!lead){state.compliance=null;renderComplianceCard(null);return;}
+  try{state.compliance=await checkCompliance(lead);}catch(err){state.compliance=null;}
+  renderComplianceCard(state.compliance);
+}
+function codeLabel(c){return String(c||'').replace(/_/g,' ').replace(/\b\w/g,ch=>ch.toUpperCase());}
+function sevCls(s){return s==='block'?'blocked':s==='review'?'review':'info';}
+function compSummaryHtml(dec){
+  const d=dec.details||{},c=d.consent||{},s=d.schedule||null,parts=[];
+  parts.push(`<p class="decision ${dec.decision==='allowed'?'allowed':dec.decision==='review'?'review':'blocked'}">${esc(String(dec.decision).toUpperCase())}</p>`);
+  parts.push(`<p class="muted" style="margin:0 0 4px">${esc(dec.callType||'')} call · status <b>${esc(STATUS_LABEL[dec.leadStatus]||dec.leadStatus||'-')}</b>${d.suppression&&d.suppression.flagged?' · suppressed ⊘':''}</p>`);
+  parts.push(`<p class="muted" style="margin:0 0 4px">${esc(c.status||'none')} consent${c.evidence?' · evidence on file':''}${c.source?' · source: '+esc(c.source):''}${c.date?' · '+esc(c.date):''}</p>`);
+  if(s&&s.localTime)parts.push(`<p class="muted" style="margin:0 0 4px">Recipient local time: <b>${esc(s.localTime)}</b>${s.timeZone?' · '+esc(s.timeZone):''} · UTC offset ${s.utcOffsetMinutes>=0?'+':''}${esc(String(s.utcOffsetMinutes))} min${s.window?' · window '+esc(s.window.start)+'-'+esc(s.window.end):''}</p>`);
+  if(dec.reasons&&dec.reasons.length)parts.push('<div class="compReasons">'+dec.reasons.map(r=>`<div class="reason ${sevCls(r.severity)}"><b>${esc(codeLabel(r.code))}</b>${esc(r.message)}</div>`).join('')+'</div>');
+  else parts.push('<p class="sub" style="margin:4px 0 0">No blocking reasons returned by the server.</p>');
+  parts.push(`<p class="sub" style="margin:10px 0 0">${esc(dec.disclaimer||'')}</p>`);
+  return parts.join('');
+}
+function renderComplianceCard(dec){
+  const pill=$('compStatus');
+  if(!dec){pill.className='pill';pill.textContent='IDLE';$('compBody').innerHTML='No contact selected. Choose a lead to run a compliance check.';$('compReasons').innerHTML='';$('compDisclaimer').textContent='';return;}
+  pill.className='pill '+(dec.decision==='allowed'?'allowed':dec.decision==='review'?'review':'blocked');
+  pill.textContent=String(dec.decision).toUpperCase();
+  $('compBody').innerHTML=compSummaryHtml(dec);$('compReasons').innerHTML='';$('compDisclaimer').textContent='';
+}
+function openCompModal(dec,lead){
+  $('compTitle').textContent=dec.decision==='allowed'?'Compliance — allowed':dec.decision==='review'?'Compliance — needs review':'Compliance — not dialable';
+  $('compDetail').innerHTML=`<p class="muted" style="margin:0 0 8px">Lead <b>${esc(lead.name)}</b> · ${esc(lead.phone)}</p>`+compSummaryHtml(dec);
+  $('compModal').classList.add('open');
+}
+function closeCompModal(){$('compModal').classList.remove('open');}
+function openImportReport(s){
+  $('compTitle').textContent='CSV import report';
+  const lines=[];
+  (s.warnings||[]).forEach(w=>lines.push(`<div class="reason info"><b>Row ${esc(w.row)}</b>${esc(w.message)}</div>`));
+  (s.errors||[]).forEach(w=>{const msgs=(w.errors||[]).map(i=>i.message).join('; ');lines.push(`<div class="reason review"><b>Row ${esc(w.row)} rejected</b>${esc(msgs)}</div>`);});
+  $('compDetail').innerHTML=`<p class="muted" style="margin:0 0 8px">${s.imported||0} imported · ${s.rejected||0} rejected · ${s.skipped||0} skipped</p>`+(lines.length?lines.join(''):'');
+  $('compModal').classList.add('open');
+}
+
+async function gatedStart(lead){
+  if(state.activeLeadId){toast('End the active call first.','error');return;}
+  if(!lead){toast('No eligible leads are ready.','error');return;}
+  let dec;
+  try{dec=await checkCompliance(lead);}catch(err){handleErr(err,'Compliance check failed.');return;}
+  state.compliance=dec;renderComplianceCard(dec);
+  if(dec.decision!=='allowed'){openCompModal(dec,lead);toast(`Not dialable — ${dec.decision}. Review the reasons.`,'error');return;}
+  startDemoCall(lead,dec);
+}
+function startDemoCall(lead,dec){
+  if(state.activeLeadId){toast('End the active call first.','error');return;}
+  state.activeLeadId=lead.id;state.callStart=Date.now();state.callSeconds=0;
+  $('callNotes').value=lead.notes||'';
+  clearInterval(state.callTicker);state.callTicker=setInterval(()=>{state.callSeconds=Math.floor((Date.now()-state.callStart)/1000);syncCallUI();},1000);
+  state.compliance=dec||null;renderComplianceCard(state.compliance);
+  log(`Demo call started for ${lead.name}. No real call was placed.`);
+  render();showPage('dialer');
+}
+function startNextLead(){gatedStart(nextEligible());}
+function formatTime(sec){return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');}
+function syncCallUI(){
+  const l=activeLead(),time=formatTime(state.callSeconds);
+  ['callTimer','dialTimer'].forEach(id=>$(id).textContent=time);
+  ['activeName','dialName'].forEach(id=>$(id).textContent=l?l.name:'No active contact');
+  ['activePhone','dialPhone'].forEach(id=>$(id).textContent=l?l.phone:'Select a lead from the queue');
+  ['endCall','dialEnd'].forEach(id=>$(id).disabled=!l);
+  ['startNext','dialStartNext','manualCall','dialManualBtn'].forEach(id=>$(id).disabled=!!l);
+  $('dialStatus').textContent=l?'SIMULATED CALL':'IDLE';
+  document.querySelectorAll('[data-disposition]').forEach(b=>b.disabled=!l);
+}
+async function endCall(disposition='Completed'){
+  const lead=activeLead();if(!lead)return;
+  const duration=state.callSeconds,id=lead.id;
+  const body={notes:$('callNotes').value.trim()};
+  if(disposition==='Add to DNC'){body.status='dnc';body.disposition='Add to DNC';}
+  else{body.status='completed';body.disposition=disposition==='Completed'?'Completed':disposition;}
+  try{const res=await api('PUT',`/api/leads/${id}`,body);if(res.data)replaceLead(res.data);}
+  catch(err){handleErr(err,'Could not save the call outcome.');}
+  state.activeLeadId=null;state.callStart=null;state.callSeconds=0;state.compliance=null;
+  clearInterval(state.callTicker);state.callTicker=null;
+  log(`Demo call ended: ${lead.name} · ${disposition} · ${formatTime(duration)}. No carrier was connected.`);
+  await refreshAll();
+  toast(disposition==='Add to DNC'?'Contact added to Do Not Call suppression.':'Call outcome saved.');
+}
+async function saveNotes(){
+  const lead=activeLead();if(!lead){toast('Start a demo call to attach notes.','error');return;}
+  try{const res=await api('PUT',`/api/leads/${lead.id}`,{notes:$('callNotes').value.trim()});if(res.data)replaceLead(res.data);log(`Notes saved for ${lead.name}.`);toast('Notes saved.');}
+  catch(err){handleErr(err,'Could not save notes.');}
+}
+async function manualCall(inputId){
+  const phone=$(inputId).value.trim();
+  if(!validPhone(phone)){toast('Enter a valid phone number with 7–15 digits.','error');return;}
+  if(state.activeLeadId){toast('End the active call first.','error');return;}
+  let created;
+  try{created=await api('POST','/api/leads',{name:'Manual contact',phone,company:'Manual dial'});}
+  catch(err){handleErr(err,'Could not create the contact.');return;}
+  state.leads.unshift(created.data);
+  log('Created manual demo contact.');
+  await refreshAll();
+  gatedStart(created.data);
+}
+
+async function resetQueue(){
+  if(!confirm('Reset all non-DNC lead statuses to Pending?'))return;
+  try{
+    const res=await api('GET','/api/leads?eligible=true');
+    const list=res.data||[];let n=0;
+    for(const l of list){await api('PUT',`/api/leads/${l.id}`,{status:'pending',disposition:''});n++;}
+    log(`Reset eligible leads; DNC records preserved. (${n} updated)`);
+    await refreshAll();toast('Eligible leads reset.');
+  }catch(err){handleErr(err,'Reset failed.');}
+}
+async function exportCsv(){
+  try{
+    const res=await fetch('/api/leads/export',{credentials:'same-origin'});
+    if(res.status===401){handleSessionExpired();return;}
+    if(!res.ok){toast('Export failed (server returned an error).','error');return;}
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='apexdialer-leads.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    log('Lead CSV exported.');
+  }catch{toast('Export failed.','error');}
+}
+async function importCsvFile(e){
+  const file=e.target.files?.[0];if(!file)return;
+  e.target.value='';
+  let text;try{text=await file.text();}catch{toast('Could not read that CSV file.','error');return;}
+  try{
+    const res=await api('POST','/api/leads/import',text,{csv:true});
+    const s=res.data||{};
+    log(`CSV import finished: ${s.imported||0} added, ${s.rejected||0} rejected, ${s.skipped||0} skipped.`);
+    toast(`${s.imported||0} imported · ${s.rejected||0} rejected · ${s.skipped||0} skipped`);
+    await refreshAll();
+    if((s.errors&&s.errors.length)||(s.warnings&&s.warnings.length))openImportReport(s);
+  }catch(err){handleErr(err,'CSV import failed');}
+}
+
+function renderOperator(){const op=state.operator;const ini=op?String(op.displayName||op.username||'OP').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase()||'OP':'OP';$('logoutTop').textContent=ini;$('logoutTop').title=op?`${op.username} — Log out`:'Log out';$('acctName').textContent=op?esc(op.username):'—';}
+async function enterWorkspace(){
+  const me=await api('GET','/api/auth/me');
+  state.operator=me.data.operator;state.signedIn=true;state.setupRequired=false;
+  renderOperator();showApp();
+  await refreshAll();
+}
+async function submitLogin(e){
+  e.preventDefault();
+  const username=$('loginUsername').value.trim(),password=$('loginPass').value;
+  clearAuthError();
+  try{await api('POST','/api/auth/login',{username,password});state.setupRequired=false;await enterWorkspace();$('loginPass').value='';}
+  catch(err){$('loginPass').value='';showAuthError(authErrText(err));}
+}
+async function submitSetup(e){
+  e.preventDefault();
+  const username=$('setupUsername').value.trim(),displayName=$('setupDisplay').value.trim(),password=$('setupPass').value,confirm=$('setupPass2').value;
+  if(username.length<3){showAuthError('Username must be at least 3 characters.');return;}
+  if(password.length<12||password.length>72){showAuthError('Password must be 12 to 72 characters.');return;}
+  if(password!==confirm){showAuthError('Passwords do not match.');return;}
+  clearAuthError();
+  try{
+    await api('POST','/api/auth/setup',{username,password,displayName});
+    await api('POST','/api/auth/login',{username,password});
+    state.setupRequired=false;
+    await enterWorkspace();
+    $('setupPass').value='';$('setupPass2').value='';
+    log('Operator account created and signed in.');
+  }catch(err){$('setupPass').value='';$('setupPass2').value='';showAuthError(authErrText(err));}
+}
+function resetWorkspace(){state.leads=[];state.logs=[];state.operator=null;state.signedIn=false;state.compliance=null;state.activeLeadId=null;state.callStart=null;state.callSeconds=0;clearInterval(state.callTicker);state.callTicker=null;showPage('overview');}
+async function logout(){
+  try{await api('POST','/api/auth/logout');}catch{}
+  resetWorkspace();renderLogs();renderRecent();showLogin('Signed out. Sign in to continue.');
+}
+async function submitChangePass(e){
+  e.preventDefault();
+  const currentPassword=$('changeCurrent').value,newPassword=$('changeNew').value,confirm=$('changeNew2').value;
+  if(newPassword!==confirm){toast('New passwords do not match.','error');return;}
+  try{
+    await api('PUT','/api/auth/password',{currentPassword,newPassword});
+    $('changePassForm').reset();toast('Password changed. Other sessions were signed out.');
+    log('Password changed.');
+  }catch(err){if(err.status===401){toast('Current password is incorrect.','error');return;}handleErr(err,'Could not change password.');}
+}
+
+async function boot(){
+  let cfg=null;
+  try{cfg=await api('GET','/api/auth/config');}catch(err){showLogin('Could not reach the ApexDialer server. Make sure npm start is running.');return;}
+  state.setupRequired=cfg.setupRequired;
+  if(cfg.setupRequired){showLogin('Create the operator account to begin. This is the only way to sign in.');return;}
+  try{
+    const me=await api('GET','/api/auth/me');
+    state.operator=me.data.operator;state.signedIn=true;
+    renderOperator();showApp();
+    await refreshAll();
+    log('Workspace opened. Data is served by the ApexDialer backend.');
+  }catch(err){if(err.status===401)showLogin('Sign in to open your workspace.');else showLogin(authErrText(err));}
+}
+
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.goto)));
+$('addTop').onclick=$('addLeadBtn').onclick=()=>openModal();
+$('closeModal').onclick=$('cancelModal').onclick=closeModal;
+$('leadForm').addEventListener('submit',saveLead);
+$('leadModal').addEventListener('click',e=>{if(e.target===$('leadModal'))closeModal();});
+$('leadSearch').addEventListener('input',scheduleTable);
+$('statusFilter').addEventListener('change',scheduleTable);
+$('importBtn').onclick=()=>$('csvFile').click();
+$('csvFile').addEventListener('change',importCsvFile);
+$('exportTop').onclick=$('exportLeads').onclick=$('exportSettings').onclick=exportCsv;
+$('leadTable').addEventListener('click',async e=>{
+  const b=e.target.closest('button[data-action]');if(!b)return;
+  const l=state.leads.find(x=>String(x.id)===String(b.dataset.id));if(!l)return;
+  if(b.dataset.action==='call'){if(state.activeLeadId){toast('End the active call first.','error');return;}gatedStart(l);}
+  else if(b.dataset.action==='compliance'){let dec;try{dec=await checkCompliance(l);}catch(err){handleErr(err,'Compliance check failed.');return;}state.compliance=dec;renderComplianceCard(dec);openCompModal(dec,l);}
+  else if(b.dataset.action==='edit')openModal(l);
+  else if(b.dataset.action==='delete'){
+    if(l.id===state.activeLeadId){toast('End the active call before deleting this contact.','error');return;}
+    if(!confirm(`Delete ${l.name} from the workspace?`))return;
+    try{await api('DELETE',`/api/leads/${l.id}`);}catch(err){handleErr(err,'Could not delete lead.');return;}
+    state.leads=state.leads.filter(x=>x.id!==l.id);log(`Deleted lead: ${l.name}`);
+    await refreshAll();
+  }
+});
+$('startNext').onclick=$('dialStartNext').onclick=startNextLead;
+$('endCall').onclick=$('dialEnd').onclick=()=>endCall('Completed');
+$('manualCall').onclick=()=>manualCall('manualPhone');
+$('dialManualBtn').onclick=()=>manualCall('dialManual');
+$('saveNotes').onclick=saveNotes;
+document.querySelectorAll('[data-disposition]').forEach(b=>b.addEventListener('click',()=>{if(!state.activeLeadId)return;const d=b.dataset.disposition;const l=activeLead();if(l&&$('callNotes').value.trim())l.notes=$('callNotes').value.trim();endCall(d);}));
+$('resetQueue').onclick=resetQueue;
+$('clearLogs').onclick=()=>{if(confirm('Clear activity history for this session?')){state.logs=[];renderLogs();renderRecent();toast('Activity log cleared (this session).');}};
+$('logoutBtn').onclick=$('logoutTop').onclick=logout;
+$('loginForm').addEventListener('submit',submitLogin);
+$('setupForm').addEventListener('submit',submitSetup);
+$('changePassForm').addEventListener('submit',submitChangePass);
+$('closeComp').onclick=$('compCloseBtn').onclick=closeCompModal;
+$('compModal').addEventListener('click',e=>{if(e.target===$('compModal'))closeCompModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeCompModal();}});
+boot();
+})();
+</script>
+</body>
+</html>

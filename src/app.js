@@ -10,7 +10,7 @@ import { parseCookies, originGuard } from './middleware/security.js';
 import { errorHandler } from './lib/errors.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-export const FRONTEND_HTML = path.resolve(HERE, '..', 'ApexDialer_Working_MVP.html');
+export const FRONTEND_HTML = path.resolve(HERE, '..', 'ApexDialer_App.html');
 
 function mergeConfig(overrides) {
   return {

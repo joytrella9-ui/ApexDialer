@@ -24,13 +24,16 @@ test('GET /api/health/config reports demo mode on and telephony off', async () =
   });
 });
 
-test('GET / serves the preserved original frontend HTML', async () => {
+test('GET / serves the integrated frontend app', async () => {
   await withServer(async (base) => {
     const res = await fetch(`${base}/`);
     assert.equal(res.status, 200);
     assert.match(res.headers.get('content-type'), /text\/html/);
     const html = await res.text();
-    assert.ok(html.includes('<title>ApexDialer'), 'expected original ApexDialer title');
+    assert.ok(html.includes('<title>ApexDialer'), 'expected ApexDialer title');
+    assert.ok(html.includes('id="loginForm"'), 'expected login screen');
+    assert.ok(html.includes('api/auth/me'), 'expected session check');
+    assert.ok(html.includes('api/auth/config'), 'expected setup-config check');
   });
 });
 

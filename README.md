@@ -45,7 +45,17 @@ npm start
 ```
 
 Then open <http://127.0.0.1:3210> in Chrome/Edge/Firefox (the server binds to
-`127.0.0.1` by default and loads the preserved ApexDialer UI).
+`127.0.0.1` by default). The app opens a sign-in screen (or first-run operator setup).
+After signing in, the ApexDialer workspace loads from the backend.
+
+### Frontend source of truth
+
+- The app now serves **`ApexDialer_App.html`** — the integrated frontend connected to the
+  authenticated API (sign-in, server-stored leads, CSV, and compliance display).
+- The original **`ApexDialer_Working_MVP.html`** is preserved **byte-for-byte** in this
+  repository (SHA-256 `FB922BC05D876A7593F868B9693D97AC48B802B6255063FE6051700DA8CDEBF9`)
+  and is no longer served. Its SQL/backup `.bak` is unchanged.
+- `test/frontend.test.js` guards both facts.
 
 ### API endpoints
 
@@ -163,7 +173,44 @@ sessions automatically.
 
 **Notes / limitations:** rate-limit state is in-memory (resets on restart); sessions are
 not IP-bound (appropriate for a localhost desktop app); the login screen is a later
-frontend milestone — the preserved HTML UI is untouched by M5.
+frontend milestone — the login screen was added by the frontend-integration milestone.
+
+### Frontend integration (connected workspace)
+
+`ApexDialer_App.html` keeps the original visual design, navigation, and pages while
+replacing browser storage with the authenticated API:
+
+- **Sign in & first-run setup.** A login card (or operator-creation card when no
+  operator exists yet) is shown before the workspace. The session cookie is
+  `HttpOnly` + `SameSite=Strict`; the frontend never writes passwords, tokens, or lead
+  data to `localStorage`/`sessionStorage` — the server is the only copy.
+- **Session handling.** On load the app calls `/api/auth/config` and `/api/auth/me`.
+  Any `401` from the API switches back to the login screen ("Your session expired").
+  Logout and password change use `/api/auth/logout` and `/api/auth/password`.
+- **Leads.** Add, edit, delete, search, and status filters hit `/api/leads`; consent,
+  call type, and IANA timezone are editable so round-trips are lossless. DNC/suppressed
+  leads reflect the server's answer.
+- **CSV.** Import posts the file to `/api/leads/import` (server validation, DNC
+  enforcement, dedupe) and surfaces the row-level report; export downloads
+  `/api/leads/export`.
+- **Compliance gate.** The Dialer page shows the server's compliance decision for the
+  next/current contact (`allowed` / `review` / `blocked`) with reason codes and the
+  disclaimer. Starting any call (including the local demo dialer and manual numbers)
+  is **gated on `allowed`**; `review` and `blocked` open the decision panel and never
+  start. No real or simulated provider call is ever initiated automatically.
+- **Dispositions.** Ending a demo call saves `status`/`disposition`/`notes` to the lead
+  via the API ("Add to DNC" sets the lead status to `dnc`).
+
+**Existing UI features without full backend support (shown honestly, not faked):**
+
+- The **Activity log** is session-only: it lists actions performed in the current
+  session and is explicitly labeled "not stored server-side" (cleared on reload). The
+  schema has an `audit_log` table but no read endpoint for it yet.
+- The **dialer** remains a local simulation (timer + outcome recording). No telephony
+  provider is connected and no calls (real or simulated) start automatically.
+- The original auto-seeded sample-lead list is gone: leads come only from the server
+  (add, or CSV-import, your own). There is no provider-secret material anywhere in the
+  HTML.
 
 ### Do Not Call (internal suppression)
 
@@ -308,10 +355,12 @@ Covers the database schema/migrations/seed, the API, leads CRUD, input validatio
 Do Not Call suppression, CSV import/export (round-trip, quoting, row-level errors,
 formula-injection escaping, limits, and transaction rollback), the compliance engine
 (allowed/blocked/review decisions, DNC, consent, call types, timezones, calling window,
-DST transitions, and HTTP endpoint validation), and authentication (setup, login/logout,
+DST transitions, and HTTP endpoint validation), authentication (setup, login/logout,
 wrong-credential behavior, session cookies, expiry, garbage/expired tokens, unauthorized
-API access, password change, rate limiting, and CSRF/origin checks). Run this after
-every change.
+API access, password change, rate limiting, and CSRF/origin checks), and the frontend
+integration (original HTML hash guards, integrated frontend contract, session-expiry
+handling, CSRF same-origin behavior, and the UI-equivalent auth/lead/CSV/compliance
+flows). Run this after every change.
 
 ## Data & security
 
@@ -332,6 +381,8 @@ The database is a single file, `data/apexdialer.db`. Copy it while the app is st
 ## Project layout
 
 ```
+ApexDialer_App.html    integrated frontend (served by the app; source of truth for the UI)
+ApexDialer_Working_MVP.html   preserved original UI (unmodified, no longer served)
 src/
   server.js          entry point (binds to 127.0.0.1)
   app.js             Express app factory (public routes then auth gate)
@@ -361,8 +412,9 @@ See `docs/architecture.md` for the desktop-packaging strategy and roadmap.
 3. CSV import/export with call type, consent, timezone, suppression — done, tested.
 4. Compliance engine (consent, internal DNC, 8am–9pm recipient-local calling hours) — done, tested (preliminary guardrail, not certification).
 5. Single-operator authentication (bcrypt, sessions, rate limiting, CSRF guards) — done, tested.
-6. Twilio integration in test mode, then live calling — only with explicit approval.
-7. Desktop packaging (Electron evaluation in `docs/architecture.md`).
+6. Frontend integration (sign-in screen, server-backed leads, CSV and compliance display; original UI preserved) — done, tested.
+7. Twilio integration in test mode, then live calling — only with explicit approval.
+8. Desktop packaging (Electron evaluation in `docs/architecture.md`).
 
 Nothing above is claimed to be production-ready, legally compliant, or capable of real
 calls until implemented and verified.

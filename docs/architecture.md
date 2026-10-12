@@ -2,16 +2,34 @@
 
 ## Current architecture
 
-- **Frontend:** the preserved `ApexDialer_Working_MVP.html` single-file interface.
-  It reads and writes browser `localStorage` today. Over Phase 1 it will be upgraded
-  incrementally so its data operations call the backend API instead, while the UI,
-  branding, and layout stay intact.
+- **Frontend:** **`ApexDialer_App.html`** is the served, integrated single-file
+  interface (login/setup screen, server-backed leads, CSV, and compliance display). The
+  preserved **`ApexDialer_Working_MVP.html`** original remains byte-for-byte in the repo
+  (hash-guarded by `test/frontend.test.js`) but is no longer served. The UI, branding,
+  and layout stay intact; only the data layer was swapped from `localStorage` to the
+  authenticated API.
 - **Backend:** Node.js + Express, SQLite via `better-sqlite3`, versioned SQL
   migrations, `zod` validation. The backend is a plain HTTP server today; this keeps it
-  testable without a GUI and lets the UI stay browser-strandard.
+  testable without a GUI and lets the UI stay browser-standard.
 - **Telephony:** not connected. The plan is the Twilio Voice SDK (`@twilio/voice-sdk`),
   with a server-minted short-lived Access Token and signature-verified webhooks. Live
   calling stays behind an explicit server-side toggle (`live_enabled`), default `false`.
+
+## Frontend integration (implemented)
+
+`ApexDialer_App.html` opens on a login card (or first-run operator setup), then the
+workspace loads from the API. Session is the `HttpOnly` + `SameSite=Strict` cookie; the
+frontend never touches `localStorage` and holds no secrets. Any `401` returns the user to
+the login screen with a session-expired message. Leads CRUD/search/filter, CSV
+import/export, and compliance checks all round-trip through the server. The Dialer page
+shows the server compliance decision and **starts a call only when the decision is
+`allowed`** (`review`/`blocked` open the decision panel and never dial); the demo dialer
+remains a local simulation and nothing dials automatically.
+
+Known UI features without full backend support yet (shown as such, not faked): the
+**activity log** is session-only (there is no audit-read endpoint yet), and the dialer
+has no telephony provider. The original auto-seeded sample leads were removed — leads
+come only from the server.
 
 ## Desktop packaging: Electron evaluation
 
@@ -35,8 +53,8 @@ Why it fits here:
 Why it is **not being packaged yet** (decision):
 
 - Packaging Electron before the API surface is stable means rebuilding installers for
-  every milestone. Packaging is cheapest once leads, CSV, compliance, auth, and the
-  test-mode telephony path are done.
+  every milestone. Packaging is cheapest once leads, CSV, compliance, auth, frontend
+  integration, and the test-mode telephony path are done.
 - `better-sqlite3` is a native module and must be rebuilt for Electron's Node ABI. This
   is a solved problem (`electron-rebuild` / electron-builder's `npmRebuild`) but it is
   exactly the class of issue to defer until packaging actually starts.
