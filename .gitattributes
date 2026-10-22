@@ -1,0 +1,12 @@
+# Normalize text files to LF in the repository and on checkout, regardless of OS
+# or local core.autocrlf settings.
+* text=auto eol=lf
+
+# Binary assets should never be line-ending converted.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.sqlite binary
+*.db binary
