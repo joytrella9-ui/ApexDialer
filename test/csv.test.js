@@ -175,6 +175,16 @@ test('import enforces internal DNC suppression regardless of file contents', asy
   });
 });
 
+test('import warns when the timezone is not a valid IANA zone', async () => {
+  await withServer(async (base) => {
+    const csv = 'Name,Phone,Timezone\r\nMars Guy,5550106008,Mars/Olympus\r\nEarth Guy,5550106009,America/Chicago\r\n';
+    const { body } = await postCsv(base, '/api/leads/import', csv);
+    assert.equal(body.data.imported, 2);
+    assert.equal(body.data.warnings.length, 1);
+    assert.match(body.data.warnings[0].message, /not a valid IANA timezone/);
+  });
+});
+
 test('import does not trust unsubstantiated consent claims', async () => {
   await withServer(async (base) => {
     const csv = [

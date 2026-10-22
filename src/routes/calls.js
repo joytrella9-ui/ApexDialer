@@ -26,6 +26,11 @@ export function callsRouter(db, cfg) {
   const opts = () => ({
     window: window(),
     maxAttemptMinutes: cfg.calls.maxAttemptMinutes,
+    dialing: {
+      demoMode: cfg.demoMode,
+      provider: cfg.voice.provider,
+      liveEnabled: cfg.voice.liveEnabled === true || cfg.telephony.liveEnabled === true,
+    },
   });
 
   router.get('/', (req, res) => {

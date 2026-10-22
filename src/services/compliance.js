@@ -1,6 +1,7 @@
 import { config } from '../config.js';
 import { HttpError } from '../lib/errors.js';
 import { getLead, isSuppressed, phoneKey } from './leads.js';
+import { isOptedOut } from './optouts.js';
 
 export const DISCLAIMER =
   'Preliminary internal guardrail only. It is NOT a legal compliance certification. ' +
@@ -179,9 +180,13 @@ export function evaluateLead(db, lead, options = {}) {
 
   const callType = lead.callType;
   const dncMatched = isSuppressed(db, lead.phone);
+  const optedOut = isOptedOut(db, lead.phone);
   const row = db.prepare('SELECT suppression_blocked FROM leads WHERE id = ?').get(lead.id) ?? {};
   const suppressionFlagged = row.suppression_blocked === 1;
 
+  if (optedOut) {
+    add('opted_out', 'block', 'Contact has persistently opted out and must not be called.');
+  }
   if (dncMatched) {
     add('internal_dnc', 'block', 'Phone number matches the internal Do Not Call list.');
   }
@@ -217,6 +222,7 @@ export function evaluateLead(db, lead, options = {}) {
     details: {
       evaluatedAt: now.toISOString(),
       dnc: { matched: dncMatched },
+      optOut: { matched: optedOut },
       suppression: { flagged: suppressionFlagged },
       consent,
       schedule,

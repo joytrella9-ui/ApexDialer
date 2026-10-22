@@ -11,10 +11,19 @@ const CORE_TABLES = [
   'dnc_entries',
   'calls',
   'call_events',
+  'provider_events',
   'audit_log',
   'settings',
   'sessions',
   'schema_migrations',
+  'campaigns',
+  'campaign_leads',
+  'campaign_events',
+  'ivr_responses',
+  'ai_transcripts',
+  'opt_outs',
+  'voice_sessions',
+  'voice_events',
 ];
 
 const MIGRATION_FILES = readdirSync(

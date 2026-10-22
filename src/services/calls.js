@@ -2,6 +2,7 @@ import { HttpError } from '../lib/errors.js';
 import { audit } from './auth.js';
 import { evaluateLead } from './compliance.js';
 import { getLead, listLeads } from './leads.js';
+import { INTERNAL_TERMINAL_STATUSES } from '../providers/twilio.js';
 import {
   ACTIVE_STATUSES,
   attemptSchema,
@@ -114,8 +115,25 @@ export function nextEligibleLead(db, { exclude = [], window, now } = {}) {
   return null;
 }
 
+// Manual (power-dialer) attempts have no campaign and therefore no campaign
+// compliance profile, so the profile/consent gate cannot evaluate them. They are
+// permitted ONLY as the offline simulation: demo mode, the in-process fake provider,
+// and live calling off. Any other configuration is refused before a row is written.
+// Fail closed: a missing dialing context is treated as live.
+export function assertSimulatedManualDialing(dialing) {
+  const simulated =
+    dialing?.demoMode === true && dialing?.provider === 'fake' && dialing?.liveEnabled !== true;
+  if (!simulated) {
+    throw new HttpError(409, 'manual_dial_requires_campaign_gate', {
+      reason: 'Manual dialing has no campaign compliance profile. Live dialing must run through a campaign.',
+    });
+  }
+  return 'simulated';
+}
+
 export function startAttempt(db, userId, username, input, opts = {}) {
   const parsed = attemptSchema.parse(input);
+  const dialingMode = assertSimulatedManualDialing(opts.dialing);
 
   const existing = getActiveCall(db, userId, opts);
   if (existing) {
@@ -167,7 +185,7 @@ export function startAttempt(db, userId, username, input, opts = {}) {
   });
 
   const id = create();
-  return { call: getCall(db, id), lead: getLead(db, lead.id), compliance };
+  return { call: getCall(db, id), lead: getLead(db, lead.id), compliance, dialingMode };
 }
 
 function applyLeadOutcome(db, leadId, { disposition, notes, addToDnc }) {
@@ -279,4 +297,73 @@ export function skipLead(db, userId, username, input, opts = {}) {
   const parsed = skipSchema.parse(input);
   audit(db, username, 'lead_skipped', 'lead', String(parsed.leadId));
   return nextEligibleLead(db, { exclude: [parsed.leadId], window: opts.window, now: opts.now });
+}
+
+// Records a verified provider status callback (telephony sandbox). The route
+// layer authenticates the webhook; this service maps the state transition onto
+// the call and appends a durable, deduplicated provider_events row so retries
+// from the provider are harmless.
+export function acceptProviderEvent(db, input) {
+  const provider = String(input.provider ?? '');
+  const sid = String(input.sid ?? '');
+  if (!sid) return { type: 'ignored', reason: 'missing_sid' };
+
+  const call = db.prepare('SELECT * FROM calls WHERE provider_call_sid = ?').get(sid);
+  if (!call) return { type: 'ignored', reason: 'call_not_found' };
+
+  const eventId = String(input.eventId ?? '');
+  const duplicate = db.prepare('SELECT 1 FROM provider_events WHERE provider = ? AND event_id = ?').get(
+    provider,
+    eventId
+  );
+  if (duplicate) return { type: 'ignored', reason: 'duplicate', callId: call.id };
+
+  const status = input.status ?? null;
+  const rawStatus = String(input.rawStatus ?? status ?? '');
+
+  const apply = db.transaction(() => {
+    db.prepare(
+      'INSERT INTO provider_events (provider, event_id, call_id, event_type, event_data) VALUES (?, ?, ?, ?, ?)'
+    ).run(provider, eventId, call.id, rawStatus, JSON.stringify(input.details ?? {}));
+
+    if (status === null) {
+      return { type: 'recorded', reason: 'unknown_status', callId: call.id };
+    }
+    if (INTERNAL_TERMINAL_STATUSES.has(call.status) && status === 'in_progress') {
+      return { type: 'ignored', reason: 'call_terminal', callId: call.id };
+    }
+
+    if (input.terminal) {
+      db.prepare(
+        `UPDATE calls
+            SET status = ?,
+                ended_at = COALESCE(ended_at, datetime('now')),
+                duration_seconds = CASE WHEN duration_seconds > 0 THEN duration_seconds
+                                        ELSE CAST(strftime('%s','now') - strftime('%s', COALESCE(started_at, 'now')) AS INTEGER) END
+          WHERE id = ?`
+      ).run(status, call.id);
+    } else {
+      db.prepare('UPDATE calls SET status = ? WHERE id = ?').run(status, call.id);
+    }
+
+    addEvent(db, call.id, 'provider_status', {
+      provider,
+      sid,
+      eventId,
+      status,
+      rawStatus,
+      ...(input.details ?? {}),
+    });
+    audit(
+      db,
+      'provider',
+      'provider_status',
+      'call',
+      String(call.id),
+      JSON.stringify({ provider, sid, eventId, status, rawStatus })
+    );
+    return { type: 'applied', callId: call.id, status };
+  });
+
+  return { ...apply(), call: getCall(db, call.id) };
 }

@@ -17,6 +17,7 @@ export function toIso(sqliteDatetime) {
 }
 
 export function createSession(db, userId, { ttlHours, token = createSessionToken() }) {
+  db.prepare("DELETE FROM sessions WHERE expires_at <= datetime('now')").run();
   const expiresAt = db
     .prepare("SELECT datetime('now', ?) AS expires_at")
     .get(`+${ttlHours} hours`).expires_at;

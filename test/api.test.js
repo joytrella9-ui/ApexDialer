@@ -9,6 +9,29 @@ test('GET /api/health reports ok', async () => {
     const body = await res.json();
     assert.equal(body.ok, true);
     assert.equal(body.service, 'apexdialer-api');
+    assert.equal(body.database, 'ok');
+  });
+});
+
+test('GET /api/health returns 503 when the database is unavailable', async () => {
+  await withServer(async (base, db) => {
+    db.close();
+    const res = await fetch(`${base}/api/health`);
+    assert.equal(res.status, 503);
+    const body = await res.json();
+    assert.equal(body.ok, false);
+    assert.equal(body.database, 'error');
+  });
+});
+
+test('responses carry security headers and API responses are not cached', async () => {
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/api/health`);
+    assert.equal(res.headers.get('x-content-type-options'), 'nosniff');
+    assert.equal(res.headers.get('x-frame-options'), 'DENY');
+    assert.equal(res.headers.get('referrer-policy'), 'no-referrer');
+    assert.match(res.headers.get('content-security-policy'), /default-src 'self'/);
+    assert.equal(res.headers.get('cache-control'), 'no-store');
   });
 });
 

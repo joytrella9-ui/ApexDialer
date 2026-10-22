@@ -20,6 +20,10 @@ export function authRouter(db, cfg) {
     windowMs: cfg.auth.setupWindowMs,
     max: cfg.auth.setupMax,
   });
+  const passwordLimiter = createRateLimiter({
+    windowMs: cfg.auth.loginWindowMs,
+    max: cfg.auth.loginFailureMax,
+  });
 
   router.get('/config', (req, res) => {
     res.json({
@@ -98,9 +102,15 @@ export function authRouter(db, cfg) {
 
   router.put('/password', requireAuth(db), (req, res) => {
     const currentToken = readCookie(req);
+    const attempt = passwordLimiter.check(`password:${req.ip}`);
+    if (!attempt.allowed) {
+      res.setHeader('Retry-After', String(attempt.retryAfterSeconds));
+      throw new HttpError(429, 'too_many_attempts');
+    }
     auth.changeOperatorPassword(db, req.auth.userId, req.body, {
       bcryptRounds: cfg.auth.bcryptRounds,
     });
+    passwordLimiter.reset(`password:${req.ip}`);
     deleteUserSessions(db, req.auth.userId, currentToken);
     res.json({ data: { changed: true } });
   });

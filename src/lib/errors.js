@@ -20,11 +20,15 @@ export function errorHandler(err, req, res, _next) {
       details: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
     });
   }
-  const status = err instanceof HttpError ? err.status : 500;
-  if (status >= 500) {
-    console.error('[apexdialer] unhandled error:', err);
+  // HttpError is always thrown deliberately by our own code with a safe,
+  // machine-readable message — expose it even for 5xx (e.g. 502 provider
+  // failures). Only truly unexpected errors are masked as internal_error.
+  if (err instanceof HttpError) {
+    if (err.status >= 500) console.error('[apexdialer] request failed:', err.message);
+    const body = { error: err.message };
+    if (err.details) body.details = err.details;
+    return res.status(err.status).json(body);
   }
-  const body = { error: status >= 500 ? 'internal_error' : err.message };
-  if (err instanceof HttpError && err.details) body.details = err.details;
-  res.status(status).json(body);
+  console.error('[apexdialer] unhandled error:', err);
+  res.status(500).json({ error: 'internal_error' });
 }

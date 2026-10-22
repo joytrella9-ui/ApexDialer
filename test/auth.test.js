@@ -225,6 +225,53 @@ test('password change requires the current password', async () => {
   });
 });
 
+test('password change is rate limited to stop current-password guessing', async () => {
+  await withServer(
+    async (base) => {
+      await setup(base);
+      const { cookie } = await login(base);
+      const wrong = { currentPassword: 'wrong-current-pass', newPassword: NEW_PASSWORD };
+
+      for (let i = 0; i < 3; i++) {
+        const res = await raw(base, 'PUT', '/api/auth/password', { body: wrong, cookie });
+        assert.equal(res.status, 401);
+        assert.equal(res.body.error, 'invalid_credentials');
+      }
+
+      const blocked = await raw(base, 'PUT', '/api/auth/password', { body: wrong, cookie });
+      assert.equal(blocked.status, 429);
+      assert.equal(blocked.body.error, 'too_many_attempts');
+      assert.ok(blocked.headers.get('retry-after'));
+
+      const stillBlocked = await raw(base, 'PUT', '/api/auth/password', {
+        body: { currentPassword: OP.password, newPassword: NEW_PASSWORD },
+        cookie,
+      });
+      assert.equal(stillBlocked.status, 429);
+    },
+    createDb(':memory:'),
+    { auth: { loginFailureMax: 3, loginMaxPerIp: 100 } }
+  );
+});
+
+test('expired sessions are purged when a new session is created', async () => {
+  await withServer(async (base, db) => {
+    const setupRes = await setup(base);
+    const userId = setupRes.body.data.operator.id;
+    const expiredToken = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+    db.prepare(
+      "INSERT INTO sessions (user_id, token_hash, expires_at) VALUES (?, ?, datetime('now', '-1 hours'))"
+    ).run(userId, hashToken(expiredToken));
+
+    const res = await login(base);
+    assert.equal(res.status, 200);
+    const token = res.cookie.split('=')[1];
+    const rows = db.prepare('SELECT token_hash FROM sessions').all();
+    assert.equal(rows.length, 1, 'expired sessions must be removed on next session creation');
+    assert.equal(rows[0].token_hash, hashToken(token));
+  });
+});
+
 // ---- rate limiting ---------------------------------------------------------
 
 test('login failures are rate limited and recover after a successful login', async () => {

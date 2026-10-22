@@ -11,7 +11,10 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "test": "node --test",
-    "reset-operator": "node scripts/reset-operator.js"
+    "test:e2e": "node --test \"e2e/**/*.e2e.mjs\"",
+    "reset-operator": "node scripts/reset-operator.js",
+    "backup": "node scripts/backup.js",
+    "retention": "node scripts/retention.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -20,6 +23,10 @@
     "csv-stringify": "^6.9.0",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
+    "ws": "^8.22.0",
     "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.64.0"
   }
 }

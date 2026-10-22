@@ -227,3 +227,26 @@ test('phoneKey normalizes US numbers to their last 10 digits', () => {
   assert.equal(phoneKey('5550101234'), '5550101234');
   assert.equal(phoneKey('15550101234'), '5550101234');
 });
+
+// ---- audit trail ----------------------------------------------------------
+
+test('lead create/update/delete/import are recorded in the audit log', async () => {
+  await withServer(async (base, db) => {
+    const created = await api(base, 'POST', '/api/leads', VALID);
+    const id = created.body.data.id;
+    await api(base, 'PUT', `/api/leads/${id}`, { notes: 'touched' });
+    await api(base, 'DELETE', `/api/leads/${id}`);
+    await api(base, 'POST', '/api/leads/import', {
+      csv: 'Name,Phone\r\nImport Guy,5550101999\r\n',
+    });
+
+    const actions = db
+      .prepare("SELECT action, entity_id FROM audit_log WHERE entity_type = 'lead' ORDER BY id")
+      .all();
+    const byAction = Object.fromEntries(actions.map((a) => [a.action, a.entity_id]));
+    assert.equal(byAction.lead_created, String(id));
+    assert.equal(byAction.lead_updated, String(id));
+    assert.equal(byAction.lead_deleted, String(id));
+    assert.ok('leads_imported' in byAction, 'import must be audited');
+  });
+});

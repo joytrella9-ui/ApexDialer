@@ -2,6 +2,7 @@ import { parse } from 'csv-parse/sync';
 import { stringify } from 'csv-stringify/sync';
 import { HttpError } from '../lib/errors.js';
 import { LEAD_STATUSES, createLeadSchema, parseLead } from '../validate/lead.js';
+import { isValidTimeZone } from './compliance.js';
 import { phoneKey, loadDncKeys, insertLead } from './leads.js';
 
 export const MAX_IMPORT_ROWS = 5000;
@@ -139,7 +140,7 @@ function buildConsent(record, row, warnings) {
   return { status: status || undefined, evidence, source, date };
 }
 
-export function importLeads(db, text, { maxRows = MAX_IMPORT_ROWS } = {}) {
+export function importLeads(db, text, { maxRows = MAX_IMPORT_ROWS, dryRun = false } = {}) {
   if (typeof text !== 'string' || text.trim() === '') {
     throw new HttpError(400, 'empty_csv');
   }
@@ -202,6 +203,13 @@ export function importLeads(db, text, { maxRows = MAX_IMPORT_ROWS } = {}) {
       continue;
     }
 
+    if (candidate.timezone && !isValidTimeZone(candidate.timezone)) {
+      warnings.push({
+        row,
+        message: `"${candidate.timezone}" is not a valid IANA timezone; recipient-local calling hours cannot be verified`,
+      });
+    }
+
     const status = normalizeEnum(record.status);
     if (status && !LEAD_STATUSES.includes(status)) {
       errors.push({ row, errors: [{ path: 'status', message: `status must be one of: ${LEAD_STATUSES.join(', ')}` }] });
@@ -235,22 +243,31 @@ export function importLeads(db, text, { maxRows = MAX_IMPORT_ROWS } = {}) {
     pending.push(data);
   }
 
-  const insertAll = db.transaction((rows) => rows.map((r) => insertLead(db, r)));
-  let ids;
-  try {
-    ids = insertAll(pending);
-  } catch (err) {
-    throw new HttpError(500, 'import_failed', [
-      { message: 'Import was rolled back; no rows were saved.', cause: err.message },
-    ]);
+  let ids = [];
+  if (!dryRun) {
+    const insertAll = db.transaction((rows) => rows.map((r) => insertLead(db, r)));
+    try {
+      ids = insertAll(pending);
+    } catch (err) {
+      throw new HttpError(500, 'import_failed', [
+        { message: 'Import was rolled back; no rows were saved.', cause: err.message },
+      ]);
+    }
+  } else {
+    ids = pending.map((_, i) => i + 1);
   }
 
   return {
+    dryRun: Boolean(dryRun),
     total: records.length,
-    imported: ids.length,
+    imported: dryRun ? pending.length : ids.length,
     rejected: errors.length,
     skipped,
     errors,
     warnings,
   };
+}
+
+export function previewLeads(db, text, opts = {}) {
+  return importLeads(db, text, { ...opts, dryRun: true });
 }

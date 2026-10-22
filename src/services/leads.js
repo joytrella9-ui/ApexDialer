@@ -1,4 +1,5 @@
 import { parseLead, mapLeadUpdate } from '../validate/lead.js';
+import { HttpError } from '../lib/errors.js';
 import { audit } from './auth.js';
 
 export function phoneKey(phone) {
@@ -50,6 +51,17 @@ function toLead(row, dncKeys) {
   };
 }
 
+export function findLeadByPhone(db, phone) {
+  const key = phoneKey(phone);
+  if (!key) return null;
+  const dncKeys = activeDncKeys(db);
+  const rows = db.prepare('SELECT * FROM leads ORDER BY id DESC').all();
+  for (const row of rows) {
+    if (phoneKey(row.phone) === key) return toLead(row, dncKeys);
+  }
+  return null;
+}
+
 export function listLeads(db, { q, status, callType, eligible } = {}) {
   const clauses = [];
   const params = {};
@@ -83,6 +95,13 @@ export function getLead(db, id) {
 
 export function createLead(db, input) {
   const data = parseLead(input);
+  const duplicate = findLeadByPhone(db, data.phone);
+  if (duplicate) {
+    throw new HttpError(409, 'duplicate_phone', {
+      existingId: duplicate.id,
+      existingName: duplicate.name,
+    });
+  }
   if (isSuppressed(db, data.phone)) {
     data.status = 'blocked';
     data.suppression_blocked = 1;
