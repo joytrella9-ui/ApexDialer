@@ -15,8 +15,13 @@ const BASE = {
   notes: '',
 };
 
+// Each generated lead gets a unique phone so one test can create several leads
+// in the same database without tripping the duplicate_phone check.
+let phoneSeq = 0;
 function makeLead(db, overrides = {}) {
-  return createLead(db, { ...BASE, ...overrides });
+  phoneSeq += 1;
+  const phone = `555${String(phoneSeq).padStart(7, '0')}`;
+  return createLead(db, { ...BASE, phone, ...overrides });
 }
 
 function codes(result) {

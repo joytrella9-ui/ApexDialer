@@ -75,10 +75,11 @@ button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
     <button class="active" data-page="overview"><span class="ico">◫</span><span class="navtext">Overview</span></button>
     <button data-page="leads"><span class="ico">♙</span><span class="navtext">Lead queue</span></button>
     <button data-page="dialer"><span class="ico">☎</span><span class="navtext">Dialer</span></button>
+    <button data-page="campaigns"><span class="ico">▤</span><span class="navtext">Campaigns</span></button>
     <button data-page="activity"><span class="ico">☷</span><span class="navtext">Activity log</span></button>
     <button data-page="settings"><span class="ico">⚙</span><span class="navtext">Settings & data</span></button>
   </nav></div>
-  <div class="sidefoot"><span class="dot"></span><strong>Connected to ApexDialer</strong><small>Data lives on this server. Demo mode — no carrier connected.</small><button class="btn small ghost" id="logoutBtn" style="margin-top:10px;width:100%">⇥ Log out</button></div>
+  <div class="sidefoot"><span class="dot"></span><strong>Server connected</strong><small>Data lives on this server. Demo mode — no carrier connected.</small><button class="btn small ghost" id="logoutBtn" style="margin-top:10px;width:100%">⇥ Log out</button></div>
 </aside>
 <div class="main">
 <header class="topbar"><div><div class="crumb">APEXDIALER / <span id="crumb">OVERVIEW</span></div><h1 id="pageTitle">Call center overview</h1></div><div class="topactions"><button class="btn ghost hide-mobile" id="exportTop">⇩ Export CSV</button><button class="btn primary" id="addTop">＋ Add lead</button><button class="avatar" id="logoutTop" title="Log out">OP</button></div></header>
@@ -118,15 +119,23 @@ button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 </section>
 <section class="page" id="page-settings">
  <div class="sectionhead"><div><h2>Settings & data</h2><div class="sub">Manage your workspace data and operator account, and review the server's read-only configuration.</div></div></div>
- <div class="grid two"><div class="card"><div class="cardhead"><h3>Workspace data</h3></div><p class="muted">Lead records and their consent/compliance fields are stored on this server by the authenticated ApexDialer API. Nothing sensitive is kept in browser storage.</p><div class="callcontrols" style="justify-content:flex-start"><button class="btn" id="exportSettings">Export leads CSV</button><button class="btn" id="resetQueue">Reset completed leads to Pending</button></div><p class="sub">Resets completed contacts so they can be dialed again. Do Not Call and suppressed contacts stay blocked and are never made dialable again.</p></div><div class="card"><div class="cardhead"><h3>Production checklist</h3></div><ul class="muted" style="padding-left:18px;display:grid;gap:9px"><li>Secure sign-in and role permissions</li><li>Server-side database and audit trail</li><li>Telephony provider integration and verified call events</li><li>Consent, suppression lists, and allowed calling hours</li><li>Secure AI service integration with API keys held server-side</li><li>Backups, monitoring, and browser/device testing</li></ul></div></div>
+ <div class="grid two"><div class="card"><div class="cardhead"><h3>Workspace data</h3></div><p class="muted">Lead records and their consent/compliance fields are stored on this server by the authenticated ApexDialer API. Nothing sensitive is kept in browser storage.</p><div class="callcontrols" style="justify-content:flex-start"><button class="btn" id="exportSettings">Export leads CSV</button><button class="btn" id="resetQueue">Reset completed leads to Pending</button></div><p class="sub">Resets completed contacts so they can be dialed again. Do Not Call and suppressed contacts stay blocked and are never made dialable again.</p></div><div class="card"><div class="cardhead"><h3>Production checklist</h3></div><ul class="muted" style="padding-left:18px;display:grid;gap:9px"><li>Secure sign-in and role permissions: sign-in and sessions are in place; role checks cover retention and compliance admin routes only</li><li>Server-side database and audit trail: SQLite with audit log and audit API</li><li>Telephony provider integration and verified call events: adapters are built; live calling is not enabled</li><li>Consent, suppression lists, and allowed calling hours: enforced on the server before every call</li><li>Secure AI service integration with API keys held server-side: keys stay on the server</li><li>Backups, monitoring, and browser/device testing: backup and retention scripts, health route, and e2e tests exist; no external monitoring</li></ul></div></div>
   <div class="card" style="margin-top:15px"><div class="cardhead"><h3>Server configuration</h3><span class="pill">READ-ONLY</span></div><p class="sub" style="margin:0 0 12px">These values come from the running server's configuration (environment variables). To change one, edit <code>.env</code> and restart the server — they cannot be changed from this page.</p><div id="sysConfig" class="sub">Loading…</div></div>
-  <div class="card" style="margin-top:15px"><div class="cardhead"><h3>Operator account</h3><span class="pill" id="acctName">—</span></div><p class="sub" style="margin:0 0 12px">Change your sign-in password. This signs out every other active session.</p><form id="changePassForm" class="formrow" style="gap:10px"><input id="changeCurrent" type="password" autocomplete="current-password" placeholder="Current password" required><input id="changeNew" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="New password" required><input id="changeNew2" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="Confirm new password" required><button class="btn primary" type="submit">Change password</button></form></div>
-</section>
+ <div class="card" style="margin-top:15px" id="readinessCard" aria-labelledby="readinessTitle"><div class="cardhead"><h3 id="readinessTitle">Readiness</h3><span class="pill review" id="readinessLive">CHECKING</span></div><p class="sub" style="margin:0 0 10px">Demo mode and live-call readiness are separate. Readiness is a configuration check, not a verified call. Live calling cannot be turned on from this page.</p><div class="formrow" style="margin-bottom:10px"><span class="pill" id="readinessDemo">CHECKING</span></div><div id="readinessBox" role="status" aria-live="polite"><span class="muted">Loading readiness...</span></div></div><div class="card" style="margin-top:15px"><div class="cardhead"><h3>Operator account</h3><span class="pill" id="acctName">—</span></div><p class="sub" style="margin:0 0 12px">Change your sign-in password. This signs out every other active session.</p><form id="changePassForm" class="formrow" style="gap:10px"><input id="changeCurrent" type="password" autocomplete="current-password" placeholder="Current password" required><input id="changeNew" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="New password" required><input id="changeNew2" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="Confirm new password" required><button class="btn primary" type="submit">Change password</button></form></div>
+ </section>
+ <section class="page" id="page-campaigns">
+  <div class="sectionhead"><div><h2>Campaigns</h2><div class="sub">Design calling campaigns, enroll eligible leads, and simulate IVR / AI outcomes.</div></div><button class="btn danger" id="cpEmergency">■ Emergency stop all</button></div>
+  <div class="notice">Simulated outbound engine. The background runner is off by default — nothing dials on its own. Each dial is claimed by an explicit <b>Tick</b> and resolved through the IVR / AI simulator; no carrier is contacted and no audio is processed.</div>
+  <div class="card"><div class="cardhead"><h3>New campaign</h3></div><div class="formrow"><input id="cpName" placeholder="Campaign name" maxlength="120"><input id="cpMax" type="number" min="1" max="20" placeholder="Max attempts" style="max-width:160px"><button class="btn primary" id="cpCreate">＋ Create campaign</button></div></div>
+  <div class="card" style="margin-top:15px"><div class="cardhead"><h3>Campaigns</h3><span class="muted" id="cpStatus"></span></div><div id="cpList" class="sub">Loading…</div></div>
+  <div class="card" style="margin-top:15px" id="cpLeadCard" hidden><div class="cardhead"><h3>Simulate engagement</h3><span class="pill" id="cpLeadPill">IDLE</span></div><div id="cpLead" class="sub">Run a Tick to claim a lead, then choose a simulated IVR digit or type what the contact says to the AI.</div><div class="callcontrols" style="justify-content:flex-start;margin-top:10px"><button class="btn" data-cp-ivr="1">IVR 1 · Interested</button><button class="btn" data-cp-ivr="2">IVR 2 · Callback</button><button class="btn" data-cp-ivr="3">IVR 3 · Representative</button><button class="btn danger" data-cp-ivr="9">IVR 9 · Opt out</button></div><div class="formrow" style="margin-top:10px"><input id="cpAiText" placeholder="What the contact says (AI simulator)"><button class="btn" id="cpAiSend">Send to AI</button></div></div>
+ </section>
 </main><nav class="mobile-nav" aria-label="Mobile navigation">
 <button class="active" data-page="overview"><span class="ico">◫</span><span>Home</span></button>
 <button data-page="leads"><span class="ico">♙</span><span>Leads</span></button>
-<button data-page="dialer"><span class="ico">☎</span><span>Dialer</span></button>
-<button data-page="activity"><span class="ico">☷</span><span>Activity</span></button>
+ <button data-page="dialer"><span class="ico">☎</span><span>Dialer</span></button>
+ <button data-page="campaigns"><span class="ico">▤</span><span>Campaigns</span></button>
+ <button data-page="activity"><span class="ico">☷</span><span>Activity</span></button>
 <button data-page="settings"><span class="ico">⚙</span><span>Settings</span></button>
 </nav></div></div>
 <div class="modalback" id="leadModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modalhead"><h3 id="modalTitle">Add lead</h3><button class="btn small" id="closeModal" aria-label="Close">✕</button></div><form id="leadForm"><input type="hidden" id="editId"><div class="grid two"><div class="field"><label for="leadName">Full name *</label><input id="leadName" required maxlength="120" autocomplete="name"></div><div class="field"><label for="leadPhone">Phone number *</label><input id="leadPhone" required inputmode="tel" maxlength="40" placeholder="+1 555 010 1234"></div><div class="field"><label for="leadCompany">Company</label><input id="leadCompany" maxlength="120" autocomplete="organization"></div><div class="field" id="leadStatusField"><label for="leadStatus">Status</label><select id="leadStatus"><option>Pending</option><option>Completed</option><option>DNC</option><option>Blocked</option></select></div></div><div class="fieldset"><div class="fieldsethead">COMPLIANCE &amp; CONSENT</div><div class="grid two"><div class="field"><label for="leadCallType">Call type</label><select id="leadCallType"><option value="sales">Sales</option><option value="existing-customer">Existing customer</option></select></div><div class="field"><label for="leadTimezone">Timezone (IANA)</label><input id="leadTimezone" maxlength="64" list="tzList" placeholder="America/New_York"><datalist id="tzList"><option value="America/New_York"></option><option value="America/Chicago"></option><option value="America/Denver"></option><option value="America/Los_Angeles"></option><option value="America/Phoenix"></option><option value="America/Anchorage"></option><option value="Pacific/Honolulu"></option><option value="Europe/London"></option><option value="Europe/Berlin"></option></datalist></div><div class="field"><label for="leadConsent">Consent status</label><select id="leadConsent"><option value="none">None</option><option value="recorded">Recorded</option><option value="revoked">Revoked</option></select></div><div class="field"><label for="leadConsentDate">Consent date</label><input id="leadConsentDate" type="date" max="2100-12-31"></div><div class="field"><label for="leadConsentSource">Consent source</label><input id="leadConsentSource" maxlength="120" placeholder="web-form"></div><div class="field"><label for="leadConsentEvidence">Evidence</label><input id="leadConsentEvidence" maxlength="500" placeholder="recorded line / signed form"></div></div><p class="sub" style="margin:10px 0 12px">Consent is self-asserted and is used by the compliance check, not independently verified.</p></div><div class="field"><label for="leadNotes">Notes</label><textarea id="leadNotes" maxlength="4000"></textarea></div><div class="callcontrols" style="justify-content:flex-end"><button type="button" class="btn" id="cancelModal">Cancel</button><button class="btn primary" type="submit">Save lead</button></div></form></div></div>
@@ -139,8 +148,8 @@ const $ = id => document.getElementById(id);
 const STATUS_LABEL = {pending:'Pending',completed:'Completed',dnc:'Do not call',blocked:'Blocked'};
 const STATUS_OPTION = {pending:'Pending',completed:'Completed',dnc:'DNC',blocked:'Blocked'};
 const STATUS_FROM_OPTION = {Pending:'pending',Completed:'completed',DNC:'dnc',Blocked:'blocked'};
-const titles = {overview:'Call center overview',leads:'Lead queue',dialer:'Dialer workspace',activity:'Activity log','settings':'Settings & data'};
-const state = {leads:[],logs:[],operator:null,signedIn:false,setupRequired:false,activeLeadId:null,callStart:null,callTicker:null,callSeconds:0,compliance:null,watchdog:null,startupDone:false,startupErr:false,pd:{session:false,call:null,preview:null,excluded:[]}};
+const titles = {overview:'Call center overview',leads:'Lead queue',dialer:'Dialer workspace',campaigns:'Campaigns',activity:'Activity log','settings':'Settings & data'};
+const state = {leads:[],logs:[],operator:null,signedIn:false,setupRequired:false,activeLeadId:null,callStart:null,callTicker:null,callSeconds:0,compliance:null,watchdog:null,startupDone:false,startupErr:false,campaigns:[],cpCurrent:null,pd:{session:false,call:null,preview:null,excluded:[]}};
 const inflight=new Set();
 async function guard(key,fn){if(inflight.has(key))return;inflight.add(key);try{return await fn();}finally{inflight.delete(key);}}
 
@@ -223,7 +232,7 @@ async function refreshAll(){
 }
 function renderLogs(){const make=()=>state.logs.length?state.logs.map(x=>`<div class="logitem"><span class="logtime">${esc(x.time)}</span><span class="logmsg">${esc(x.msg)}</span></div>`).join(''):'<div class="empty">No activity this session.</div>';$('allLogs').innerHTML=make();}
 function renderRecent(){$('recentLogs').innerHTML=state.logs.slice(0,4).map(x=>`<div class="logitem"><span class="logtime">${esc(x.time)}</span><span class="logmsg">${esc(x.msg)}</span></div>`).join('')||'<div class="empty">Your activity will appear here.</div>';}
-function showPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+name));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$('pageTitle').textContent=titles[name]||titles.overview;$('crumb').textContent=name.toUpperCase();if(name==='leads')loadTable();if(name==='settings')renderSettings();}
+function showPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+name));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$('pageTitle').textContent=titles[name]||titles.overview;$('crumb').textContent=name.toUpperCase();if(name==='leads')loadTable();if(name==='settings')renderSettings();if(name==='campaigns')renderCampaigns();}
 
 function openModal(lead=null){
   $('leadForm').reset();$('editId').value=lead?lead.id:'';
@@ -494,7 +503,41 @@ async function resetQueue(){
   }catch(err){handleErr(err,'Reset failed.');}
   finally{btn.disabled=false;btn.textContent=label;}
 }
-async function renderSettings(){
+const READINESS_LABEL={ok:'OK',info:'INFO',blocker:'BLOCKER'};
+async function renderReadiness(){
+  const box=$('readinessBox'),live=$('readinessLive'),demo=$('readinessDemo');
+  if(!box||!live||!demo)return;
+  box.textContent='Loading readiness...';
+  let r;
+  try{r=(await api('GET','/api/settings/readiness')).data;}
+  catch(err){box.textContent='Readiness is unavailable right now. Try again later.';live.textContent='UNKNOWN';live.className='pill review';demo.textContent='UNKNOWN';demo.className='pill review';return;}
+  if(!r||typeof r!=='object'||!Array.isArray(r.checks)){box.textContent='No readiness information was returned.';live.textContent='UNKNOWN';live.className='pill review';demo.textContent='UNKNOWN';demo.className='pill review';return;}
+  demo.textContent=r.demoReady?'DEMO READY':'DEMO NOT READY';
+  demo.className='pill '+(r.demoReady?'allowed':'review');
+  live.textContent=r.readyForLive?'LIVE READY':'LIVE CALLING UNAVAILABLE';
+  live.className='pill '+(r.readyForLive?'allowed':'blocked');
+  const list=document.createElement('ul');
+  list.style.cssText='list-style:none;margin:0;padding:0;display:grid;gap:8px';
+  for(const check of r.checks){
+    const li=document.createElement('li');
+    li.style.cssText='display:flex;gap:10px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:8px';
+    const tag=document.createElement('b');
+    tag.textContent=READINESS_LABEL[check.status]||'UNKNOWN';
+    tag.style.cssText='min-width:72px;font-size:12px;color:'+(check.status==='blocker'?'var(--red)':check.status==='ok'?'var(--green)':'var(--muted)');
+    const text=document.createElement('span');
+    text.textContent=String(check.message||'');
+    li.append(tag,text);
+    list.append(li);
+  }
+  box.textContent='';
+  box.append(list);
+  const notes=document.createElement('p');
+  notes.className='sub';
+  notes.style.margin='10px 0 0';
+  notes.textContent='Legal and compliance approval is not established by this page. Credential values are never shown.';
+  box.append(notes);
+}async function renderSettings(){
+  renderReadiness();
   const box=$('sysConfig');if(!box)return;
   box.innerHTML='Loading…';
   let s;
@@ -511,6 +554,63 @@ async function renderSettings(){
     ['Stale attempt limit',`${calls.maxAttemptMinutes??'—'} min`],
   ];
   box.innerHTML=rows.map(([k,v])=>`<div class="formrow" style="justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)"><span class="muted">${esc(k)}</span><b>${esc(String(v))}</b></div>`).join('');
+}
+function cpStatusCls(s){return s==='running'?'allowed':s==='paused'?'review':s==='completed'?'completed':'pending';}
+async function renderCampaigns(){
+  const box=$('cpList');if(!box)return;
+  box.innerHTML='Loading…';
+  let list;
+  try{list=(await api('GET','/api/campaigns')).data||[];}
+  catch(err){box.innerHTML='<span class="muted">Campaigns are unavailable.</span>';return;}
+  state.campaigns=list;
+  $('cpStatus').textContent=`${list.length} campaign(s)`;
+  if(!list.length){box.innerHTML='<div class="empty">No campaigns yet. Create one above.</div>';return;}
+  box.innerHTML=list.map(cp=>{const s=cp.stats||{};const startable=['draft','paused','stopped'].includes(cp.status),pausable=cp.status==='running',resumable=cp.status==='paused',stoppable=cp.status!=='stopped'&&cp.status!=='completed';
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px"><div class="formrow" style="justify-content:space-between;align-items:flex-start"><div><b>${esc(cp.name)}</b> <span class="badge ${cpStatusCls(cp.status)}">${esc(String(cp.status).toUpperCase())}</span>${cp.aiEnabled?' <span class="pill">AI</span>':''}</div><div class="muted">${s.queued||0} queued · ${s.dialing||0} dialing · ${s.completed||0} completed · ${s.opted_out||0} opted out · ${s.failed||0} failed</div></div><div class="callcontrols" style="justify-content:flex-start;margin-top:8px"><button class="btn small" data-cp-action="start" data-id="${cp.id}" ${startable?'':'disabled'}>▶ Start</button><button class="btn small" data-cp-action="pause" data-id="${cp.id}" ${pausable?'':'disabled'}>⏸ Pause</button><button class="btn small" data-cp-action="resume" data-id="${cp.id}" ${resumable?'':'disabled'}>⏵ Resume</button><button class="btn small danger" data-cp-action="stop" data-id="${cp.id}" ${stoppable?'':'disabled'}>■ Stop</button><button class="btn small" data-cp-action="queue" data-id="${cp.id}">＋ Queue eligible</button><button class="btn small primary" data-cp-action="tick" data-id="${cp.id}">☎ Tick</button></div></div>`;}).join('');
+}
+function showCpLead(msg){const card=$('cpLeadCard');if(!card)return;const cur=state.cpCurrent;if(!cur){card.hidden=true;return;}card.hidden=false;$('cpLeadPill').textContent='DIALING';$('cpLead').innerHTML=`<b>${esc(cur.name||('Lead #'+cur.leadId))}</b> · ${esc(cur.phone||'')} <span class="muted">(campaign #${esc(String(cur.campaignId))})</span>${msg?'<br>'+esc(msg):''}`;}
+function clearCpLead(){$('cpLeadCard').hidden=true;$('cpLeadPill').textContent='IDLE';state.cpCurrent=null;}
+async function cpCreate(){
+  const name=$('cpName').value.trim();if(!name){toast('Enter a campaign name.','error');return;}
+  const max=Number($('cpMax').value);const body={name};if(max>=1)body.maxAttempts=max;
+  try{await api('POST','/api/campaigns',body);$('cpName').value='';$('cpMax').value='';toast('Campaign created.');log(`Campaign created: ${name}`);}
+  catch(err){handleErr(err,'Could not create campaign.');return;}
+  await renderCampaigns();
+}
+async function cpEmergency(){
+  if(!confirm('Stop every running and paused campaign immediately?'))return;
+  try{const r=await api('POST','/api/campaigns/emergency-stop');toast(`${r.data.stopped||0} campaign(s) stopped.`);log(`Emergency stop: ${r.data.stopped||0} campaign(s) stopped.`);clearCpLead();}
+  catch(err){handleErr(err,'Emergency stop failed.');}
+  await renderCampaigns();
+}
+async function cpAction(action,id){
+  try{
+    if(action==='queue'){const r=await api('POST',`/api/campaigns/${id}/queue`,{});toast(`${r.data.queued||0} lead(s) queued · ${r.data.skipped||0} skipped.`);}
+    else if(action==='tick'){
+      const r=await api('POST',`/api/campaigns/${id}/tick`);
+      const c=r.data&&r.data.claimed;
+      if(c){state.cpCurrent={campaignId:id,leadId:c.leadId,name:c.lead&&c.lead.name,phone:c.lead&&c.lead.phone};showCpLead('Simulated dial (attempt '+(c.attemptCount||1)+').');toast(`Simulated dial: ${(c.lead&&c.lead.name)||'lead'}`);log(`Simulated dial claimed for campaign #${id}.`);}
+      else{toast(`No lead claimed (${r.data.reason||'none eligible'}).`,'error');}
+    }else{
+      await api('POST',`/api/campaigns/${id}/${action}`);
+      log(`Campaign ${action}: #${id}`);
+      if(action==='stop'&&state.cpCurrent&&String(state.cpCurrent.campaignId)===String(id))clearCpLead();
+    }
+  }catch(err){handleErr(err,'Campaign action failed.');}
+  await renderCampaigns();
+}
+async function cpIvr(digit){
+  const cur=state.cpCurrent;if(!cur){toast('Run a Tick to claim a lead first.','error');return;}
+  try{const r=await api('POST',`/api/campaigns/${cur.campaignId}/ivr`,{leadId:cur.leadId,digit});const ivr=r.data.ivr||{};toast(`IVR ${digit}: ${ivr.route}${ivr.valid?'':' (invalid)'}`);log(`IVR input ${digit} → ${ivr.route}.`);if(ivr.outcome)clearCpLead();}
+  catch(err){handleErr(err,'IVR action failed.');}
+  await renderCampaigns();
+}
+async function cpAiSend(){
+  const cur=state.cpCurrent;if(!cur){toast('Run a Tick to claim a lead first.','error');return;}
+  const text=$('cpAiText').value.trim();if(!text){toast('Type what the contact said.','error');return;}
+  try{const r=await api('POST',`/api/campaigns/${cur.campaignId}/ai`,{leadId:cur.leadId,text});const ai=r.data.ai||{};toast(`AI intent: ${ai.intent}`);log(`AI turn → intent ${ai.intent} (route ${ai.route}).`);$('cpAiText').value='';if(ai.outcome)clearCpLead();}
+  catch(err){handleErr(err,'AI action failed.');}
+  await renderCampaigns();
 }
 async function exportCsv(){
   try{
@@ -648,6 +748,11 @@ $('pdNext').onclick=()=>guard('pdNext',pdNext);
 $('pdStop').onclick=()=>guard('pdStop',pdStop);
 $('pdSaveNext').onclick=()=>guard('pdSaveNext',pdSaveNext);
 $('resetQueue').onclick=()=>guard('resetQueue',resetQueue);
+$('cpCreate').onclick=()=>guard('cpCreate',cpCreate);
+$('cpEmergency').onclick=()=>guard('cpEmergency',cpEmergency);
+$('cpAiSend').onclick=()=>guard('cpAiSend',cpAiSend);
+$('cpList').addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('button[data-cp-action]'):null;if(!b)return;guard('cpAction',()=>cpAction(b.dataset.cpAction,b.dataset.id));});
+document.querySelectorAll('[data-cp-ivr]').forEach(b=>b.addEventListener('click',()=>guard('cpIvr',()=>cpIvr(b.dataset.cpIvr))));
 $('clearLogs').onclick=()=>{if(confirm('Clear activity history for this session?')){state.logs=[];renderLogs();renderRecent();toast('Activity log cleared (this session).');}};
 $('logoutBtn').onclick=$('logoutTop').onclick=logout;
 $('loginForm').addEventListener('submit',e=>guard('login',()=>submitLogin(e)));
