@@ -6,8 +6,14 @@ import { buildReadinessReport } from '../services/readiness.js';
 // controlled by environment variables / the running process, never by the
 // browser, so this route only ever reads. It never exposes secrets: only
 // provider names, flags, and the names of any missing config keys.
-export function settingsRouter(db, cfg) {
+export function settingsRouter(db, cfg, metrics = null) {
   const router = Router();
+
+  // Admin-only request counters and process memory (see policy.js). Counts only.
+  router.get('/metrics', (req, res) => {
+    if (!metrics) return res.status(404).json({ error: 'metrics_disabled' });
+    res.json({ data: metrics.snapshot() });
+  });
 
   router.get('/', (req, res) => {
     res.json({

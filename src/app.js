@@ -16,6 +16,8 @@ import { voiceWebhookRouter, voiceRouter } from './routes/voice.js';
 import { createStreamTokenStore } from './services/mediaStreamTokens.js';
 import { createCallLifecycle } from './services/callLifecycle.js';
 import { requireAuth } from './middleware/auth.js';
+import { authorize } from './middleware/policy.js';
+import { createMetrics } from './lib/metrics.js';
 import { parseCookies, originGuard, securityHeaders, noStore } from './middleware/security.js';
 import { errorHandler } from './lib/errors.js';
 
@@ -69,6 +71,9 @@ export function createApp(db, overrides = {}, options = {}) {
   const lifecycle = options.lifecycle ?? createCallLifecycle({ db, cfg });
   app.locals.lifecycle = lifecycle;
   app.disable('x-powered-by');
+  const metrics = createMetrics();
+  app.locals.metrics = metrics;
+  app.use(metrics.middleware);
   app.use(securityHeaders);
   app.use(express.json({ limit: '256kb' }));
   app.use(express.text({ type: ['text/csv', 'text/plain'], limit: '2mb' }));
@@ -94,6 +99,7 @@ export function createApp(db, overrides = {}, options = {}) {
   );
 
   app.use('/api', requireAuth(db));
+  app.use('/api', authorize);
   app.use('/api/leads', leadsRouter(db));
   app.use('/api/calls', callsRouter(db, cfg));
   app.use('/api/campaigns', campaignsRouter(db, cfg));
@@ -101,7 +107,7 @@ export function createApp(db, overrides = {}, options = {}) {
   app.use('/api/reports', reportsRouter(db, cfg));
   app.use('/api/audit', auditRouter(db));
   app.use('/api/voice', voiceRouter(db, cfg));
-  app.use('/api/settings', settingsRouter(db, cfg));
+  app.use('/api/settings', settingsRouter(db, cfg, metrics));
 
   app.use('/api', (req, res) => {
     res.status(404).json({ error: 'not_found', path: req.path });
