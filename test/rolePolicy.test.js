@@ -35,6 +35,7 @@ test('policy table: destructive and control actions require supervisor or admin'
   assert.deepEqual(requiredRolesFor('POST', '/leads/reset-queue'), ['admin', 'supervisor']);
   assert.deepEqual(requiredRolesFor('POST', '/campaigns/3/tick'), ['admin', 'supervisor']);
   assert.deepEqual(requiredRolesFor('POST', '/compliance/retention/execute'), ['admin']);
+  assert.deepEqual(requiredRolesFor('PUT', '/compliance/campaigns/3'), ['admin', 'supervisor']);
   assert.equal(requiredRolesFor('GET', '/campaigns'), null);
   assert.equal(requiredRolesFor('POST', '/calls/attempt'), null);
   assert.ok(ROLES.includes('operator'));

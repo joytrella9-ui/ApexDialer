@@ -20,8 +20,12 @@ const RULES = [
   { methods: ['DELETE'], pattern: /^\/leads\/\d+$/, roles: SUPERVISOR_UP },
   { methods: ['POST'], pattern: /^\/leads\/(import|reset-queue)$/, roles: SUPERVISOR_UP },
   { methods: ['POST'], pattern: /^\/compliance\/consent\/revoke$/, roles: SUPERVISOR_UP },
+  // Editing a campaign's compliance profile changes the calling rules themselves.
+  { methods: ['PUT'], pattern: /^\/compliance\/campaigns\/\d+$/, roles: SUPERVISOR_UP },
   { methods: ['POST'], pattern: /^\/compliance\/retention\/execute$/, roles: ADMIN_ONLY },
   { methods: ['GET'], pattern: /^\/settings\/metrics$/, roles: ADMIN_ONLY },
+  // User management: list, create, change role, disable/enable.
+  { methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'], pattern: /^\/users(\/|$)/, roles: ADMIN_ONLY },
   // Campaign creation, edits, and every run-control action (start/pause/tick/stop/...).
   { methods: ['POST', 'PUT', 'PATCH', 'DELETE'], pattern: /^\/campaigns(\/|$)/, roles: SUPERVISOR_UP },
 ];

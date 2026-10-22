@@ -59,7 +59,9 @@ export function setupOperator(db, input, { bcryptRounds }) {
 export function verifyCredentials(db, username, password, { bcryptRounds }) {
   const row = db.prepare('SELECT * FROM users WHERE username = ?').get(username ?? '');
   const candidateHash = row?.password_hash ?? bcrypt.hashSync('dummy-password-not-real', bcryptRounds);
-  if (!bcrypt.compareSync(password ?? '', candidateHash)) return null;
+  // Compare first so the response time does not reveal whether the account is disabled.
+  const passwordOk = bcrypt.compareSync(password ?? '', candidateHash);
+  if (!passwordOk || !row || row.disabled_at != null) return null;
   return operatorFromRow(row);
 }
 

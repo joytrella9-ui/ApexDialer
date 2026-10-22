@@ -37,7 +37,7 @@ export function findSession(db, token) {
               u.username, u.display_name, u.role
          FROM sessions s
          JOIN users u ON u.id = s.user_id
-        WHERE s.token_hash = ? AND s.expires_at > datetime('now')`
+        WHERE s.token_hash = ? AND s.expires_at > datetime('now') AND u.disabled_at IS NULL`
     )
     .get(hashToken(token));
   if (!row) return null;

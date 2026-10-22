@@ -18,6 +18,7 @@ import { createCallLifecycle } from './services/callLifecycle.js';
 import { requireAuth } from './middleware/auth.js';
 import { authorize } from './middleware/policy.js';
 import { createMetrics } from './lib/metrics.js';
+import { usersRouter } from './routes/users.js';
 import { parseCookies, originGuard, securityHeaders, noStore } from './middleware/security.js';
 import { errorHandler } from './lib/errors.js';
 
@@ -108,6 +109,7 @@ export function createApp(db, overrides = {}, options = {}) {
   app.use('/api/audit', auditRouter(db));
   app.use('/api/voice', voiceRouter(db, cfg));
   app.use('/api/settings', settingsRouter(db, cfg, metrics));
+  app.use('/api/users', usersRouter(db, cfg));
 
   app.use('/api', (req, res) => {
     res.status(404).json({ error: 'not_found', path: req.path });
