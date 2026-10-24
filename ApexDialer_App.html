@@ -953,7 +953,7 @@ async function boot(){
   state.watchdog=setTimeout(function(){if(!state.startupDone&&!state.startupErr)showStartupError('ApexDialer is taking too long to start. Make sure the server is running, then retry.');},8000);
   let cfg=null;
   try{cfg=await api('GET','/api/auth/config');}
-  catch(err){showStartupError('Could not reach the ApexDialer server. Make sure npm start is running, then retry.');return;}
+  catch(err){showStartupError('Could not reach the ApexDialer API. Use http://127.0.0.1:3210 with npm start. A Vercel static/serverless host cannot run this Node+SQLite dialer.');return;}
   state.setupRequired=cfg.setupRequired;
   state.operatorHint=cfg.operatorHint||'';
   state.localRecovery=!!cfg.localRecovery;
@@ -969,7 +969,7 @@ async function boot(){
     clearTimeout(state.watchdog);state.startupDone=true;
   }catch(err){
     clearTimeout(state.watchdog);
-    if(err.status===401){showLogin('Sign in to open your workspace.');state.startupDone=true;}
+    if(err.status===401){showLogin();state.startupDone=true;}
     else showStartupError(authErrText(err));
   }
 }
