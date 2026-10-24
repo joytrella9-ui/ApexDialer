@@ -45,8 +45,12 @@ npm start
 ```
 
 Then open <http://127.0.0.1:3210> in Chrome/Edge/Firefox (the server binds to
-`127.0.0.1` by default). The app opens a sign-in screen (or first-run operator setup).
-After signing in, the ApexDialer workspace loads from the backend.
+`127.0.0.1` by default). Use **Create account** for the first admin or for later
+guest operators, or **Sign in** if you already have a username. After signing in,
+the ApexDialer workspace loads from the backend.
+
+**Hosting:** push this repo to GitHub, then run it on an always-on Node host
+(see `docs/DEPLOYMENT.md`). This app cannot launch on Vercel.
 
 ### Frontend source of truth
 
@@ -61,7 +65,8 @@ After signing in, the ApexDialer workspace loads from the backend.
 
 Public (no login needed): `GET /` (frontend HTML), `GET /api/health`,
 `GET /api/health/config`, `GET /api/auth/config`, `POST /api/auth/setup` (only when no
-operator exists), `POST /api/auth/login`, `POST /api/auth/logout`. Everything else under
+operator exists), `POST /api/auth/register` (guest signup; first user is admin),
+`POST /api/auth/login`, `POST /api/auth/logout`. Everything else under
 `/api` requires a valid session cookie.
 
 | Method | Route                 | Purpose                                             |
@@ -71,6 +76,7 @@ operator exists), `POST /api/auth/login`, `POST /api/auth/logout`. Everything el
 | GET    | `/api/health/config`  | Demo mode, telephony status, database status (public) |
 | GET    | `/api/auth/config`    | Setup status + session policy (public)              |
 | POST   | `/api/auth/setup`     | First-run operator creation (public, refused once an operator exists) |
+| POST   | `/api/auth/register`  | Guest signup; first account is admin, later accounts are operators |
 | POST   | `/api/auth/login`     | Log in and receive a session cookie (public, rate limited) |
 | POST   | `/api/auth/logout`    | End the current session (works with or without a session) |
 | GET    | `/api/auth/me`        | Current operator + session expiry                   |
@@ -248,11 +254,9 @@ replacing browser storage with the authenticated API:
 - **Dispositions.** Ending a demo call saves `status`/`disposition`/`notes` to the lead
   via the API ("Add to DNC" sets the lead status to `dnc`).
 
-**Existing UI features without full backend support (shown honestly, not faked):**
-
-- The **Activity log** is session-only: it lists actions performed in the current
-  session (cleared on reload). The server records the same actions in `audit_log`, but
-  there is no read endpoint to browse the full audit trail yet.
+**Activity log:** supervisors and admins load `GET /api/audit`. Operators still see
+this-session notes only (the durable trail is restricted). Overview metrics come from
+`GET /api/reports/overview`; unavailable carrier rates are labeled, not invented.
 - The **dialer** runs a server-backed **power-dialer session** (see below) but still
   simulates calls: no telephony provider is connected and no calls (real or simulated)
   start automatically.

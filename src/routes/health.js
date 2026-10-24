@@ -41,7 +41,7 @@ export function healthRouter(db, cfg = config) {
       // Real outbound calling is always off in this foundation; a campaign must
       // additionally carry a complete compliance profile before any live call.
       dialer: {
-        liveCalling: false,
+        liveCalling: cfg.workspace?.ready === true,
         provider: cfg.voice.provider,
         complianceProfileRequired: cfg.compliance.requireComplianceProfile,
         recordingAllowed: false,

@@ -124,6 +124,7 @@ export function loadConfig(env = process.env) {
       loginFailureMax: positiveNumber(env.APEX_LOGIN_FAILURE_MAX, 5),
       setupWindowMs: positiveNumber(env.APEX_SETUP_WINDOW_MS, 60 * 60 * 1000),
       setupMax: positiveNumber(env.APEX_SETUP_MAX, 10),
+      publicSignup: truthy(env.APEX_PUBLIC_SIGNUP, true),
     },
   };
 }

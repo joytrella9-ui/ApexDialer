@@ -62,6 +62,9 @@ test('GET /api/auth/config is public and reports setup status', async () => {
     await setup(base);
     const after = await raw(base, 'GET', '/api/auth/config');
     assert.equal(after.body.setupRequired, false);
+    assert.equal(after.body.operatorHint, 'operator');
+    assert.equal(after.body.signupEnabled, true);
+    assert.equal(after.body.localRecovery, true);
     assert.ok(after.body.sessionTtlHours > 0);
   });
 });
@@ -327,5 +330,68 @@ test('state-changing requests from a foreign origin are rejected', async () => {
       headers: { origin: base },
     });
     assert.equal(same.status, 201);
+  });
+});
+
+test('local recovery resets the password on loopback demo and then allows login', async () => {
+  await withServer(async (base) => {
+    await setup(base);
+    const reset = await raw(base, 'POST', '/api/auth/local-recovery', {
+      body: { username: OP.username, newPassword: NEW_PASSWORD },
+    });
+    assert.equal(reset.status, 200);
+    assert.equal(reset.body.data.username, OP.username);
+
+    const oldLogin = await login(base);
+    assert.equal(oldLogin.status, 401);
+
+    const next = await login(base, { username: OP.username, password: NEW_PASSWORD });
+    assert.equal(next.status, 200);
+  });
+});
+
+test('guest register creates an operator and signs them in after an admin exists', async () => {
+  await withServer(async (base) => {
+    await setup(base);
+    const guest = await raw(base, 'POST', '/api/auth/register', {
+      body: { username: 'guest.one', password: NEW_PASSWORD, displayName: 'Guest' },
+    });
+    assert.equal(guest.status, 201);
+    assert.equal(guest.body.data.operator.username, 'guest.one');
+    assert.equal(guest.body.data.operator.role, 'operator');
+    const cookie = cookieHeader(guest.headers.get('set-cookie'));
+    assert.ok(cookie);
+    const me = await raw(base, 'GET', '/api/auth/me', { cookie });
+    assert.equal(me.status, 200);
+    assert.equal(me.body.data.operator.username, 'guest.one');
+
+    const taken = await raw(base, 'POST', '/api/auth/register', {
+      body: { username: 'guest.one', password: NEW_PASSWORD },
+    });
+    assert.equal(taken.status, 409);
+    assert.equal(taken.body.error, 'username_taken');
+  });
+});
+
+test('register is refused when public signup is disabled', async () => {
+  await withServer(
+    async (base) => {
+      const res = await raw(base, 'POST', '/api/auth/register', {
+        body: { username: 'nope', password: NEW_PASSWORD },
+      });
+      assert.equal(res.status, 403);
+    },
+    createDb(':memory:'),
+    { auth: { publicSignup: false } }
+  );
+});
+
+test('local recovery rejects an unknown username', async () => {
+  await withServer(async (base) => {
+    await setup(base);
+    const reset = await raw(base, 'POST', '/api/auth/local-recovery', {
+      body: { username: 'nobody', newPassword: NEW_PASSWORD },
+    });
+    assert.equal(reset.status, 401);
   });
 });

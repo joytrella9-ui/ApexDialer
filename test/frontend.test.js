@@ -57,14 +57,20 @@ test('the integrated frontend wires the authenticated API contract', () => {
   const html = readFileSync(INTEGRATED, 'utf8');
   for (const needle of [
     'api/auth/config',
-    'api/auth/setup',
+    'api/auth/register',
     'api/auth/login',
     'api/auth/me',
     'api/auth/logout',
     'api/auth/password',
+    'api/auth/local-recovery',
     'api/leads',
     'api/leads/export',
     'api/leads/import',
+    'api/leads/import/preview',
+    'api/reports/overview',
+    'api/audit',
+    'api/users',
+    'api/settings/integrations',
     'compliance',
     'credentials',
     'same-origin',
@@ -333,6 +339,31 @@ test('startup behavior: reachable server reveals setup; failed request reveals e
   assert.equal(ok.get('loginView').hidden, false, 'login overlay must be visible');
   assert.equal(ok.get('setupForm').hidden, false, 'setup form must be shown on first run');
   assert.equal(ok.get('loginForm').hidden, true, 'login form must be hidden while setup is required');
+
+  const existing = loadFrontend(html, {
+    fetch: async (path) => {
+      if (path === '/api/auth/config') {
+        return {
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          text: async () =>
+            JSON.stringify({
+              setupRequired: false,
+              operatorHint: 'jajabinx',
+              localRecovery: true,
+            }),
+        };
+      }
+      return { ok: false, status: 401, statusText: 'Unauthorized', text: async () => JSON.stringify({ error: 'unauthenticated' }) };
+    },
+  });
+  await existing.flush();
+  assert.equal(existing.get('setupForm').hidden, true, 'setup form must stay hidden once an operator exists');
+  assert.equal(existing.get('loginForm').hidden, false, 'login form must be shown once an operator exists');
+  assert.equal(existing.get('loginUsername').value, 'jajabinx');
+  assert.match(existing.get('loginHint').textContent, /jajabinx/);
+  assert.equal(existing.get('showRecovery').hidden, false);
 
   const broken = loadFrontend(html, {
     fetch: async () => {

@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { HttpError } from '../lib/errors.js';
-import { setupSchema, loginSchema, changePasswordSchema } from '../validate/auth.js';
-import { createSession, deleteSession } from '../lib/sessions.js';
+import { setupSchema, loginSchema, changePasswordSchema, localRecoverySchema } from '../validate/auth.js';
+import { createSession, deleteSession, deleteUserSessions } from '../lib/sessions.js';
 
 function operatorFromRow(row) {
   return {
@@ -25,6 +25,13 @@ export function operatorCount(db) {
 
 export function operatorExists(db) {
   return operatorCount(db) > 0;
+}
+
+export function firstOperatorUsername(db) {
+  const row = db
+    .prepare("SELECT username FROM users WHERE disabled_at IS NULL ORDER BY id LIMIT 1")
+    .get();
+  return row?.username ?? null;
 }
 
 export function getOperatorById(db, userId) {
@@ -93,4 +100,40 @@ export function changeOperatorPassword(db, userId, input, { bcryptRounds }) {
 
 export function logout(db, token) {
   if (token) deleteSession(db, token);
+}
+
+export function registerAccount(db, input, opts) {
+  const parsed = setupSchema.parse(input);
+  if (getOperatorByUsername(db, parsed.username)) throw new HttpError(409, 'username_taken');
+  const first = !operatorExists(db);
+  const role = first ? 'admin' : 'operator';
+  const passwordHash = bcrypt.hashSync(parsed.password, opts.bcryptRounds);
+  const create = db.transaction(() => {
+    const info = db
+      .prepare(
+        'INSERT INTO users (username, password_hash, display_name, role) VALUES (?, ?, ?, ?)'
+      )
+      .run(parsed.username, passwordHash, parsed.displayName, role);
+    const id = Number(info.lastInsertRowid);
+    audit(db, parsed.username, first ? 'operator_created' : 'guest_registered', 'user', String(id), JSON.stringify({ role }));
+    return getOperatorById(db, id);
+  });
+  const operator = create();
+  const session = createSession(db, operator.id, { ttlHours: opts.sessionTtlHours });
+  audit(db, operator.username, 'login', 'user', String(operator.id));
+  return { operator, session };
+}
+
+export function localRecoverPassword(db, input, { bcryptRounds }) {
+  const parsed = localRecoverySchema.parse(input);
+  const row = db.prepare('SELECT * FROM users WHERE username = ?').get(parsed.username);
+  if (!row || row.disabled_at != null) throw new HttpError(401, 'invalid_credentials');
+  const passwordHash = bcrypt.hashSync(parsed.newPassword, bcryptRounds);
+  db.prepare("UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?").run(
+    passwordHash,
+    row.id
+  );
+  deleteUserSessions(db, row.id, null);
+  audit(db, row.username, 'password_local_recovery', 'user', String(row.id));
+  return { username: row.username };
 }

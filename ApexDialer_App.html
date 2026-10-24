@@ -7,16 +7,28 @@
 :root{color-scheme:dark;--bg:#090e19;--panel:#111a2a;--panel2:#172337;--line:#26364d;--muted:#8ea1bb;--text:#e8eff8;--cyan:#41c8e8;--green:#43d6a0;--amber:#f5bd58;--red:#ff7285;--purple:#b6a0ff}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% -10%,#172d48 0,transparent 42%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}button:disabled{opacity:.4;cursor:not-allowed}.app{min-height:100vh;display:grid;grid-template-columns:230px minmax(0,1fr)}aside{border-right:1px solid var(--line);background:#0b1220;padding:22px 14px;display:flex;flex-direction:column;gap:25px}.brand{display:flex;gap:11px;align-items:center;padding:0 8px}.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#52d5ed,#3978df);display:grid;place-items:center;color:#071321;font-weight:900;font-size:20px}.brand strong{display:block;font-size:15px;letter-spacing:.04em}.brand small{color:var(--muted);font-size:11px}.navlabel{color:#657992;font-size:10px;font-weight:800;letter-spacing:.16em;padding:0 12px}.nav{display:grid;gap:5px}.nav button{border:1px solid transparent;background:transparent;color:#9eb0c7;text-align:left;padding:11px 12px;border-radius:10px;display:flex;gap:11px;align-items:center}.nav button.active,.nav button:hover{background:#15283b;border-color:#254259;color:#eafaff}.nav .ico{width:18px;text-align:center;color:var(--cyan)}.sidefoot{margin-top:auto;background:#101b2b;border:1px solid var(--line);padding:13px;border-radius:12px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:7px}.sidefoot small{color:var(--muted);display:block;margin-top:5px;font-size:11px}.main{min-width:0}.topbar{height:74px;padding:0 28px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:15px;background:#0b1220cc;position:sticky;top:0;z-index:5;backdrop-filter:blur(14px)}.crumb{color:var(--muted);font-size:12px}.topbar h1{font-size:19px;margin:2px 0 0}.topactions{display:flex;gap:9px;align-items:center}.avatar{height:34px;width:34px;border-radius:50%;display:grid;place-items:center;background:#243957;color:#b9eafa;font-weight:800}.content{padding:25px 28px 40px;max-width:1700px;margin:auto}.page{display:none}.page.active{display:block}.sectionhead{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:19px}.sectionhead h2{margin:0;font-size:23px;letter-spacing:-.03em}.sub{color:var(--muted);margin-top:4px;font-size:12px}.btn{border:1px solid #344760;background:#172337;color:#e5effa;border-radius:9px;padding:9px 13px;font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:7px}.btn:hover{filter:brightness(1.13)}.btn.primary{background:linear-gradient(135deg,#26b6d7,#3c8ee8);color:#061522;border-color:transparent}.btn.success{background:#103c34;border-color:#1b725f;color:#72edc3}.btn.danger{background:#401d2a;border-color:#713245;color:#ff9aa8}.btn.ghost{background:transparent}.btn.small{padding:6px 9px;font-size:12px}.grid{display:grid;gap:15px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:17px}.card{background:linear-gradient(150deg,#141f31,#0f1827);border:1px solid var(--line);border-radius:15px;padding:18px;min-width:0;box-shadow:0 12px 30px #00000012}.statlabel{color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:8px}.statvalue{font-size:28px;font-weight:800;letter-spacing:-.04em;margin-top:8px}.statnote{font-size:11px;color:#8094ae;margin-top:4px}.staticon{color:var(--cyan);font-size:18px}.workspace{grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr);align-items:start}.cardhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}.cardhead h3{font-size:14px;margin:0}.pill{font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:99px;background:#153b35;color:#6be3ba;font-weight:800}.pill.warn{background:#3b301c;color:#ffd27b}.pill.red{background:#401d2a;color:#ff9cab}.muted{color:var(--muted)}.callbox{background:radial-gradient(ellipse at 50% 0,#1a3b54,#111a2a 68%);border:1px solid #29465e;border-radius:12px;padding:20px;text-align:center}.callring{width:68px;height:68px;border-radius:50%;border:1px solid #2b6c85;background:#102e43;color:#69d9f1;display:grid;place-items:center;font-size:27px;margin:3px auto 12px}.callbox h3{margin:0;font-size:17px}.callbox p{color:var(--muted);font-size:12px;margin:4px 0 14px}.calltime{font-size:25px;font-variant-numeric:tabular-nums;font-weight:750;margin:7px 0 14px}.callcontrols{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.formrow{display:flex;gap:8px}.field{display:grid;gap:6px;margin-bottom:12px;min-width:0}.field label{font-size:11px;color:#9fb2ca;font-weight:700}.field input,.field select,.field textarea,.search{width:100%;min-width:0;background:#0b1422;border:1px solid #2b3c53;border-radius:8px;color:var(--text);padding:10px 11px}.field textarea{resize:vertical;min-height:84px}.field input::placeholder,.search::placeholder{color:#62748b}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:11px}table{width:100%;border-collapse:collapse;white-space:nowrap}th{background:#111d2d;color:#8197b3;text-align:left;font-size:10px;letter-spacing:.09em;text-transform:uppercase;padding:12px}td{padding:12px;border-top:1px solid #1f2d41;font-size:12px}tbody tr:hover{background:#17253a}td.name{font-weight:750;color:#e7f1fd}.badge{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:4px 7px;font-size:10px;font-weight:750;background:#1b2b40;color:#b8cae0}.badge.pending{color:#ffd37e;background:#352c1d}.badge.completed{color:#7fe3b9;background:#16372f}.badge.dnc{color:#ff9eac;background:#411e2b}.filters{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.filters .search{flex:1;min-width:180px}.filters select{background:#0b1422;border:1px solid #2b3c53;color:var(--text);border-radius:8px;padding:10px}.tablefoot{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:11px;margin-top:12px}.log{display:grid;gap:8px;max-height:270px;overflow:auto}.logitem{display:flex;gap:10px;padding:9px 10px;background:#0c1523;border-radius:8px;border:1px solid #1e2c40;font-size:12px}.logtime{color:#758ba6;font:11px ui-monospace,monospace;white-space:nowrap}.logmsg{overflow-wrap:anywhere}.empty{padding:30px;text-align:center;color:var(--muted)}.two{grid-template-columns:1fr 1fr}.three{grid-template-columns:repeat(3,1fr)}.notice{border:1px solid #5d4b26;background:#2a2417;color:#f3d28c;border-radius:10px;padding:11px 13px;font-size:12px;margin-bottom:15px}.modalback{position:fixed;inset:0;background:#020711c9;z-index:20;display:none;align-items:center;justify-content:center;padding:18px}.modalback.open{display:flex}.modal{width:min(540px,100%);background:#111b2b;border:1px solid #344860;border-radius:16px;padding:22px;box-shadow:0 25px 90px #0009;max-height:90vh;overflow:auto}.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modalhead h3{margin:0}.toastarea{position:fixed;right:18px;bottom:18px;z-index:40;display:grid;gap:8px;width:min(360px,calc(100vw - 36px))}.toast{background:#16263a;border:1px solid #38526c;padding:12px 14px;border-radius:10px;box-shadow:0 8px 30px #0006;font-size:12px}.toast.error{border-color:#874052}.toast.ok{border-color:#28745e}.bar{height:7px;background:#223249;border-radius:99px;overflow:hidden}.bar span{height:100%;display:block;background:linear-gradient(90deg,#36c7df,#638cf4);border-radius:99px}.hidden{display:none!important}.mobile-nav{display:none}
 @media(max-width:1100px){.app{grid-template-columns:76px minmax(0,1fr)}aside{padding:20px 9px}.brand{justify-content:center;padding:0}.brandtext,.navlabel,.navtext,.sidefoot{display:none}.nav button{justify-content:center;padding:12px 5px;font-size:17px}.workspace{grid-template-columns:1fr}.content{padding:20px}.topbar{padding:0 20px}}
-@media(max-width:720px){.app{display:block}aside{display:none}.content{padding-bottom:92px}.mobile-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;position:fixed;left:0;right:0;bottom:0;z-index:10;padding:8px max(8px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));background:#0b1220f2;border-top:1px solid var(--line);backdrop-filter:blur(14px)}.mobile-nav button{border:1px solid transparent;background:transparent;color:#9eb0c7;border-radius:8px;padding:7px 2px;font-size:10px;display:grid;justify-items:center;gap:3px}.mobile-nav button .ico{font-size:16px;color:var(--cyan)}.mobile-nav button.active{background:#15283b;border-color:#254259;color:#eafaff}.topbar{height:auto;min-height:68px;padding:12px 15px}.topbar h1{font-size:16px}.content{padding:16px 12px 28px}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.card{padding:14px}.statvalue{font-size:24px}.sectionhead{flex-direction:column}.two,.three{grid-template-columns:1fr}.topactions .hide-mobile{display:none}.formrow{flex-direction:column}.tablefoot{align-items:flex-start;flex-direction:column}}
+@media(max-width:720px){.app{display:block}aside{display:none}.content{padding-bottom:92px}.mobile-nav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;position:fixed;left:0;right:0;bottom:0;z-index:10;padding:8px max(8px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom));background:#0b1220f2;border-top:1px solid var(--line);backdrop-filter:blur(14px)}.mobile-nav button{border:1px solid transparent;background:transparent;color:#9eb0c7;border-radius:8px;padding:7px 2px;font-size:10px;display:grid;justify-items:center;gap:3px}.mobile-nav button .ico{font-size:16px;color:var(--cyan)}.mobile-nav button.active{background:#15283b;border-color:#254259;color:#eafaff}.topbar{height:auto;min-height:68px;padding:12px 15px}.topbar h1{font-size:16px}.content{padding:16px 12px 28px}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.card{padding:14px}.statvalue{font-size:24px}.sectionhead{flex-direction:column}.two,.three{grid-template-columns:1fr}.topactions .hide-mobile{display:none}.formrow{flex-direction:column}.tablefoot{align-items:flex-start;flex-direction:column}}
 </style>
 <style>
-.loginwrap{position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at 15% -10%,#172d48 0,transparent 42%),var(--bg);z-index:30}
+.loginwrap{position:fixed;inset:0;display:grid;place-items:center;padding:20px;background:radial-gradient(ellipse at 12% -8%,#1a3a58 0,transparent 46%),radial-gradient(ellipse at 90% 110%,#0e2a28 0,transparent 42%),var(--bg);z-index:30}
+.auth-shell{width:min(920px,100%);display:grid;grid-template-columns:1.05fr 1fr;background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:0 24px 80px #000a;min-height:520px}
+.auth-brand{padding:36px 32px;background:linear-gradient(165deg,#12344c 0%,#0c1a2c 55%,#10261f 100%);display:flex;flex-direction:column;justify-content:space-between;gap:24px}
+.auth-brand h2{margin:18px 0 8px;font-size:28px;letter-spacing:-.04em;line-height:1.15}
+.auth-brand p{color:#b7c9dc;margin:0;font-size:13px;line-height:1.6}
+.auth-points{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.auth-points li{color:#d5e6f5;font-size:13px;padding-left:18px;position:relative}
+.auth-points li:before{content:"";position:absolute;left:0;top:7px;width:7px;height:7px;border-radius:99px;background:var(--cyan)}
 .logincard{width:min(440px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px;box-shadow:0 18px 60px #0009}
+.auth-panel{padding:28px 28px 24px;display:flex;flex-direction:column}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#0b1422;border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:16px}
+.auth-tabs button{border:0;background:transparent;color:var(--muted);padding:10px 8px;border-radius:9px;font-weight:700}
+.auth-tabs button.active{background:linear-gradient(135deg,#26b6d7,#3c8ee8);color:#061522}
 .loginhead{display:flex;gap:13px;align-items:center;margin-bottom:16px}
 .loginform{display:grid;gap:13px}
 .loginform .field{margin:0}
 .loginerror{padding:10px 12px;border:1px solid var(--red);color:var(--red);border-radius:10px;font-size:12px;display:none;margin-bottom:12px}
 .loginerror.show{display:block}
+@media(max-width:720px){.auth-shell{grid-template-columns:1fr;min-height:0}.auth-brand{display:none}.auth-panel{padding:22px 18px}}
 [hidden]{display:none!important}
 button.avatar{border:1px solid transparent;font:inherit;font-weight:800;cursor:pointer}
 button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
@@ -39,23 +51,49 @@ button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 </head>
 <body>
 <div class="loginwrap" id="loginView" hidden>
-  <div class="logincard">
-    <div class="loginhead"><div class="logo">A</div><div><strong style="letter-spacing:.04em">APEXDIALER</strong><small style="color:var(--muted);display:block">CALL CENTER WORKSPACE</small></div></div>
-    <div id="authError" class="loginerror"></div>
-    <form class="loginform" id="setupForm" hidden>
-      <div class="field"><label for="setupUsername">Username</label><input id="setupUsername" autocomplete="username" maxlength="50" required></div>
-      <div class="field"><label for="setupDisplay">Display name</label><input id="setupDisplay" maxlength="50" placeholder="Optional"></div>
-      <div class="field"><label for="setupPass">Password</label><input id="setupPass" type="password" autocomplete="new-password" minlength="12" maxlength="72" required></div>
-      <div class="field"><label for="setupPass2">Confirm password</label><input id="setupPass2" type="password" autocomplete="new-password" minlength="12" maxlength="72" required></div>
-      <button class="btn primary" type="submit">Create operator account</button>
-      <p class="sub" style="margin:0">First-run setup only. After creating the account you will be signed in.</p>
-    </form>
-    <form class="loginform" id="loginForm">
-      <div class="field"><label for="loginUsername">Username</label><input id="loginUsername" autocomplete="username" maxlength="50" required></div>
-      <div class="field"><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required></div>
-      <button class="btn primary" type="submit">Sign in</button>
-      <p class="sub" style="margin:0">This app is bound to this machine. Sessions expire automatically and passwords are never stored by the browser.</p>
-    </form>
+  <div class="auth-shell">
+    <aside class="auth-brand">
+      <div>
+        <div class="loginhead" style="margin:0"><div class="logo">A</div><div><strong style="letter-spacing:.08em">APEXDIALER</strong><small style="color:#9ec4d8;display:block">CLOUD CONTACT CENTER</small></div></div>
+        <h2>Call, campaign, and coach from one workspace.</h2>
+        <p>Power dialer, lead queue, compliance checks, and team accounts — organized the way a modern auto-dialer should feel.</p>
+      </div>
+      <ul class="auth-points">
+        <li>Click-to-call and sequential power dialing</li>
+        <li>Guest accounts for operators; admins stay in control</li>
+        <li>Consent, DNC, and calling-window guards on every attempt</li>
+      </ul>
+    </aside>
+    <div class="auth-panel">
+      <div class="auth-tabs" id="authTabs">
+        <button type="button" id="authTabLogin" class="active">Sign in</button>
+        <button type="button" id="authTabSignup">Create account</button>
+      </div>
+      <div id="authError" class="loginerror"></div>
+      <form class="loginform" id="setupForm" hidden>
+        <p class="sub" style="margin:0">Create a guest operator account. The first account on this workspace is an admin; later accounts join as operators.</p>
+        <div class="field"><label for="setupUsername">Username</label><input id="setupUsername" autocomplete="username" maxlength="50" required></div>
+        <div class="field"><label for="setupDisplay">Display name</label><input id="setupDisplay" maxlength="50" placeholder="Optional"></div>
+        <div class="field"><label for="setupPass">Password</label><input id="setupPass" type="password" autocomplete="new-password" minlength="12" maxlength="72" required></div>
+        <div class="field"><label for="setupPass2">Confirm password</label><input id="setupPass2" type="password" autocomplete="new-password" minlength="12" maxlength="72" required></div>
+        <button class="btn primary" type="submit">Create account</button>
+      </form>
+      <form class="loginform" id="loginForm">
+        <p class="sub" id="loginHint" style="margin:0 0 8px">Sign in to open the dialer workspace.</p>
+        <div class="field"><label for="loginUsername">Username</label><input id="loginUsername" autocomplete="username" maxlength="50" required></div>
+        <div class="field"><label for="loginPass">Password</label><input id="loginPass" type="password" autocomplete="current-password" required></div>
+        <button class="btn primary" type="submit">Sign in</button>
+        <button class="btn ghost" type="button" id="showRecovery">Forgot password on this computer?</button>
+      </form>
+      <form class="loginform" id="recoveryForm" hidden>
+        <p class="sub" style="margin:0">Local recovery only. Sets a new password for an account on this machine.</p>
+        <div class="field"><label for="recoverUser">Username</label><input id="recoverUser" maxlength="50" required></div>
+        <div class="field"><label for="recoverPass">New password (12+ characters)</label><input id="recoverPass" type="password" minlength="12" maxlength="72" required></div>
+        <div class="field"><label for="recoverPass2">Confirm new password</label><input id="recoverPass2" type="password" minlength="12" maxlength="72" required></div>
+        <button class="btn primary" type="submit">Set new password</button>
+        <button class="btn ghost" type="button" id="hideRecovery">Back to sign in</button>
+      </form>
+    </div>
   </div>
 </div>
 <div class="loginwrap" id="loadingView">
@@ -70,28 +108,42 @@ button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
 </div>
 <div class="app" hidden>
 <aside>
-  <div class="brand"><div class="logo">A</div><div class="brandtext"><strong>APEXDIALER</strong><small>CALL CENTER WORKSPACE</small></div></div>
-  <div><div class="navlabel">WORKSPACE</div><nav class="nav" aria-label="Main navigation">
-    <button class="active" data-page="overview"><span class="ico">◫</span><span class="navtext">Overview</span></button>
-    <button data-page="leads"><span class="ico">♙</span><span class="navtext">Lead queue</span></button>
+  <div class="brand"><div class="logo">A</div><div class="brandtext"><strong>APEXDIALER</strong><small>AUTO DIALER</small></div></div>
+  <div><div class="navlabel">CALLING</div><nav class="nav" aria-label="Main navigation">
+    <button class="active" data-page="overview"><span class="ico">◫</span><span class="navtext">Home</span></button>
+    <button data-page="leads"><span class="ico">♙</span><span class="navtext">Contacts</span></button>
     <button data-page="dialer"><span class="ico">☎</span><span class="navtext">Dialer</span></button>
     <button data-page="campaigns"><span class="ico">▤</span><span class="navtext">Campaigns</span></button>
-    <button data-page="activity"><span class="ico">☷</span><span class="navtext">Activity log</span></button>
-    <button data-page="settings"><span class="ico">⚙</span><span class="navtext">Settings & data</span></button>
+  </nav>
+  <div class="navlabel" style="margin-top:18px">INSIGHTS</div>
+  <nav class="nav" aria-label="Insights">
+    <button data-page="reports"><span class="ico">▣</span><span class="navtext">Reports</span></button>
+    <button data-page="activity"><span class="ico">☷</span><span class="navtext">Activity</span></button>
+  </nav>
+  <div class="navlabel" style="margin-top:18px">ADMIN</div>
+  <nav class="nav" aria-label="Admin">
+    <button data-page="settings"><span class="ico">⚙</span><span class="navtext">Settings</span></button>
   </nav></div>
   <div class="sidefoot"><span class="dot"></span><strong>Server connected</strong><small>Data lives on this server. Demo mode — no carrier connected.</small><button class="btn small ghost" id="logoutBtn" style="margin-top:10px;width:100%">⇥ Log out</button></div>
 </aside>
 <div class="main">
-<header class="topbar"><div><div class="crumb">APEXDIALER / <span id="crumb">OVERVIEW</span></div><h1 id="pageTitle">Call center overview</h1></div><div class="topactions"><button class="btn ghost hide-mobile" id="exportTop">⇩ Export CSV</button><button class="btn primary" id="addTop">＋ Add lead</button><button class="avatar" id="logoutTop" title="Log out">OP</button></div></header>
+<header class="topbar"><div><div class="crumb">APEXDIALER / <span id="crumb">OVERVIEW</span></div><h1 id="pageTitle">Call center overview</h1></div><div class="topactions"><button class="btn ghost hide-mobile needs-supervisor" id="exportTop">⇩ Export CSV</button><button class="btn primary" id="addTop">＋ Add lead</button><button class="avatar" id="logoutTop" title="Log out">OP</button></div></header>
 <main class="content">
 <section class="page active" id="page-overview">
- <div class="sectionhead"><div><h2>Good work starts with a clear queue.</h2><div class="sub">Your campaign snapshot, calling workspace, and next best action.</div></div><button class="btn" data-goto="leads">View lead queue →</button></div>
+ <div class="sectionhead"><div><h2>Your calling floor, in one view.</h2><div class="sub">Queue, live dialer, campaigns, and outcomes — the next action is always one click away.</div></div><button class="btn" data-goto="leads">Open contacts →</button></div>
  <div class="notice">Demo mode: call actions simulate outcomes locally. This page does not connect to a phone carrier, place real calls, or provide live AI. Use only contacts you are authorized to call.</div>
+ <div id="overviewAlerts" class="notice" hidden></div>
  <div class="grid stats">
   <div class="card"><div class="statlabel">Total leads <span class="staticon">♙</span></div><div class="statvalue" id="statTotal">0</div><div class="statnote">Contacts in this workspace</div></div>
-  <div class="card"><div class="statlabel">Ready to call <span class="staticon">↗</span></div><div class="statvalue" id="statPending">0</div><div class="statnote">Excludes completed and DNC</div></div>
-  <div class="card"><div class="statlabel">Completed <span class="staticon">✓</span></div><div class="statvalue" id="statCompleted">0</div><div class="statnote">Disposition recorded</div></div>
-  <div class="card"><div class="statlabel">Do not call <span class="staticon">⊘</span></div><div class="statvalue" id="statDnc">0</div><div class="statnote">Suppressed from dialing</div></div>
+  <div class="card"><div class="statlabel">Ready to call <span class="staticon">↗</span></div><div class="statvalue" id="statPending">0</div><div class="statnote">Pending and not suppressed</div></div>
+  <div class="card"><div class="statlabel">Completed <span class="staticon">✓</span></div><div class="statvalue" id="statCompleted">0</div><div class="statnote">Lead status completed</div></div>
+  <div class="card"><div class="statlabel">Do not call <span class="staticon">⊘</span></div><div class="statvalue" id="statDnc">0</div><div class="statnote">DNC status plus suppressed</div></div>
+ </div>
+ <div class="grid stats" style="margin-top:9px">
+  <div class="card"><div class="statlabel">Attempts (30d)</div><div class="statvalue" id="statAttempts">—</div><div class="statnote" id="statAttemptsNote">From call records</div></div>
+  <div class="card"><div class="statlabel">Open attempts</div><div class="statvalue" id="statOpen">—</div><div class="statnote">In progress or paused</div></div>
+  <div class="card"><div class="statlabel">Campaigns running</div><div class="statvalue" id="statCampaigns">—</div><div class="statnote" id="statCampaignsNote">Live campaign rows</div></div>
+  <div class="card"><div class="statlabel">Avg duration</div><div class="statvalue" id="statDuration">—</div><div class="statnote">Where duration was recorded</div></div>
  </div>
  <div class="grid workspace">
   <div class="card"><div class="cardhead"><h3>Lead queue preview</h3><button class="btn small" data-goto="leads">Manage leads →</button></div><div id="overviewLeads"></div></div>
@@ -104,8 +156,8 @@ button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
  <div class="grid two" style="margin-top:15px"><div class="card"><div class="cardhead"><h3>Campaign completion</h3><span id="completionText" class="muted">0%</span></div><div class="bar"><span id="completionBar" style="width:0%"></span></div><div class="sub" style="margin-top:10px">Completed leads / all eligible leads</div></div><div class="card"><div class="cardhead"><h3>Recent activity</h3><button class="btn small" data-goto="activity">Open log →</button></div><div id="recentLogs" class="log"></div></div></div>
 </section>
 <section class="page" id="page-leads">
- <div class="sectionhead"><div><h2>Lead queue</h2><div class="sub">Import, search, update, and suppress contacts from your local workspace.</div></div><div class="formrow"><button class="btn" id="importBtn">⇧ Import CSV</button><button class="btn primary" id="addLeadBtn">＋ Add lead</button><input class="hidden" id="csvFile" type="file" accept=".csv,text/csv"></div></div>
- <div class="card"><div class="filters"><input class="search" id="leadSearch" placeholder="Search name, phone or company…" aria-label="Search leads"><select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="pending">Pending</option><option value="completed">Completed</option><option value="dnc">DNC</option><option value="blocked">Blocked</option></select><button class="btn" id="exportLeads">⇩ Export CSV</button></div><div class="tablewrap" id="leadTable"></div><div class="tablefoot"><span id="leadCount">0 leads</span><span>Tip: DNC contacts stay suppressed when resetting the queue.</span></div></div>
+ <div class="sectionhead"><div><h2>Contacts</h2><div class="sub">Import, search, and suppress people you are authorized to call.</div></div><div class="formrow"><button class="btn needs-supervisor" id="importBtn">⇧ Import CSV</button><button class="btn primary" id="addLeadBtn">＋ Add contact</button><input class="hidden" id="csvFile" type="file" accept=".csv,text/csv"></div></div>
+ <div class="card"><div class="filters"><input class="search" id="leadSearch" placeholder="Search name, phone or company…" aria-label="Search leads"><select id="statusFilter" aria-label="Filter by status"><option value="all">All statuses</option><option value="pending">Pending</option><option value="completed">Completed</option><option value="dnc">DNC</option><option value="blocked">Blocked</option></select><button class="btn needs-supervisor" id="exportLeads">⇩ Export CSV</button></div><div class="tablewrap" id="leadTable"></div><div class="tablefoot"><span id="leadCount">0 leads</span><span class="formrow"><button class="btn small" id="leadPrev">← Prev</button><button class="btn small" id="leadNext">Next →</button></span></div></div>
 </section>
 <section class="page" id="page-dialer">
  <div class="sectionhead"><div><h2>Dialer</h2><div class="sub">A safe local simulation of a single-contact calling workflow.</div></div><span class="pill warn">NOT CONNECTED TO TELEPHONY</span></div>
@@ -113,28 +165,38 @@ button.avatar:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
  <div class="card" style="margin-top:15px"><div class="cardhead"><h3>Power dialer</h3><span class="pill warn" id="pdMode">DEMO MODE</span></div><div class="notice" style="margin:0 0 14px">Simulated sequential calling only. No carrier is connected; each attempt is started by an explicit click and its compliance is re-checked on the server.</div><div class="callcontrols" style="justify-content:flex-start"><button class="btn primary" id="pdStart">▶ Start session</button><button class="btn primary" id="pdDial" disabled>☎ Dial</button><button class="btn" id="pdPause" disabled>⏸ Pause</button><button class="btn" id="pdResume" disabled>⏵ Resume</button><button class="btn" id="pdSkip" disabled>⏭ Skip</button><button class="btn" id="pdNext" disabled>↦ Next</button><button class="btn danger" id="pdStop" disabled>■ Stop</button></div><div class="grid two" style="margin-top:15px"><div class="field"><label for="pdDisposition">Disposition</label><select id="pdDisposition"><option>Connected</option><option>Interested</option><option>Not interested</option><option>Callback</option><option>No answer</option><option>Voicemail</option><option>Add to DNC</option></select></div><div class="field"><label>&nbsp;</label><button class="btn success" id="pdSaveNext" disabled>Save disposition &amp; next</button></div></div><div class="sub" style="margin-top:10px">State: <b id="pdState">idle</b> · Lead: <b id="pdLead">—</b> · Queue: <b id="pdQueue">0</b> eligible</div><div id="pdEmpty" class="sub" style="margin-top:4px"></div></div>
  <div class="grid workspace"><div class="card"><div class="cardhead"><h3>Current contact</h3><span class="pill" id="dialStatus">IDLE</span></div><div class="callbox"><div class="callring">☎</div><h3 id="dialName">No active contact</h3><p id="dialPhone">Select a lead from the queue</p><div class="calltime" id="dialTimer">00:00</div><div class="callcontrols"><button class="btn primary" id="dialStartNext">▶ Start next lead</button><button class="btn danger" id="dialEnd" disabled>■ End call</button></div></div><div class="grid two" style="margin-top:15px"><button class="btn" data-disposition="No answer">No answer</button><button class="btn" data-disposition="Voicemail">Voicemail</button><button class="btn success" data-disposition="Interested">Interested</button><button class="btn danger" data-disposition="Add to DNC">Add to DNC</button></div></div><div class="card"><div class="cardhead"><h3>Compliance check</h3><span class="pill" id="compStatus">IDLE</span></div><div id="compBody" class="sub">Compliance is evaluated on the server before any call can start. Review and blocked leads are not dialable.</div><div id="compReasons" class="compReasons"></div><p class="sub" id="compDisclaimer" style="margin:10px 0 0"></p></div></div><div class="card"><div class="cardhead"><h3>Call notes</h3><span class="muted">Saved with the lead</span></div><div class="field"><label for="callNotes">Notes for active contact</label><textarea id="callNotes" placeholder="Record outcome, follow-up date, or context…"></textarea></div><button class="btn primary" id="saveNotes">Save notes</button><hr style="border-color:var(--line);margin:20px 0"><div class="field"><label for="dialManual">Manual number</label><input id="dialManual" placeholder="+1 555 010 1234" inputmode="tel"></div><button class="btn" id="dialManualBtn">Start demo call</button></div></div>
 </section>
+<section class="page" id="page-reports">
+ <div class="sectionhead"><div><h2>Reports</h2><div class="sub">Metrics come from SQLite call, lead, and campaign tables. Unavailable carrier metrics are labeled, not invented.</div></div><div class="formrow"><select id="reportDays" aria-label="Report window"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select><button class="btn needs-supervisor" id="exportCalls">⇩ Export calls CSV</button></div></div>
+ <div id="reportAlerts" class="notice" hidden></div>
+ <div class="grid stats" id="reportStats"></div>
+ <div class="grid two" style="margin-top:15px"><div class="card"><div class="cardhead"><h3>Dispositions</h3></div><div id="reportDispositions" class="sub">Load a report window to see outcomes.</div></div><div class="card"><div class="cardhead"><h3>Formulas</h3></div><div id="reportFormulas" class="sub"></div></div></div>
+</section>
 <section class="page" id="page-activity">
- <div class="sectionhead"><div><h2>Activity log</h2><div class="sub">Actions performed in this session (this view clears on reload; the server keeps a full audit trail).</div></div><button class="btn" id="clearLogs">Clear log</button></div>
- <div class="card"><div id="allLogs" class="log"></div></div>
+ <div class="sectionhead"><div><h2>Activity log</h2><div class="sub" id="activitySub">Supervisors see the durable server audit trail. Session-only notes stay below for this browser session.</div></div><button class="btn" id="clearLogs">Clear session log</button></div>
+ <div class="card"><div class="cardhead"><h3>Server audit</h3><span class="muted" id="auditMeta"></span></div><div id="auditLogs" class="log"><div class="empty">Open this page to load the audit trail.</div></div></div>
+ <div class="card" style="margin-top:15px"><div class="cardhead"><h3>This session</h3></div><div id="allLogs" class="log"></div></div>
 </section>
 <section class="page" id="page-settings">
  <div class="sectionhead"><div><h2>Settings & data</h2><div class="sub">Manage your workspace data and operator account, and review the server's read-only configuration.</div></div></div>
- <div class="grid two"><div class="card"><div class="cardhead"><h3>Workspace data</h3></div><p class="muted">Lead records and their consent/compliance fields are stored on this server by the authenticated ApexDialer API. Nothing sensitive is kept in browser storage.</p><div class="callcontrols" style="justify-content:flex-start"><button class="btn" id="exportSettings">Export leads CSV</button><button class="btn" id="resetQueue">Reset completed leads to Pending</button></div><p class="sub">Resets completed contacts so they can be dialed again. Do Not Call and suppressed contacts stay blocked and are never made dialable again.</p></div><div class="card"><div class="cardhead"><h3>Production checklist</h3></div><ul class="muted" style="padding-left:18px;display:grid;gap:9px"><li>Secure sign-in and role permissions: sign-in, sessions, and a central admin / supervisor / operator policy are in place; admins can create users, assign roles, and disable accounts; users cannot change their own role</li><li>Server-side database and audit trail: SQLite with audit log and audit API</li><li>Telephony provider integration and verified call events: adapters are built; live calling is not enabled</li><li>Consent, suppression lists, and allowed calling hours: enforced on the server before every call</li><li>Secure AI service integration with API keys held server-side: keys stay on the server</li><li>Backups, monitoring, and browser/device testing: backup and retention scripts, health route, admin-only request metrics, and e2e tests exist; no external monitoring service is connected</li></ul></div></div>
+ <div class="grid two"><div class="card"><div class="cardhead"><h3>Workspace data</h3></div><p class="muted">Lead records and their consent/compliance fields are stored on this server by the authenticated ApexDialer API. Nothing sensitive is kept in browser storage.</p><div class="callcontrols" style="justify-content:flex-start"><button class="btn needs-supervisor" id="exportSettings">Export leads CSV</button><button class="btn needs-supervisor" id="resetQueue">Reset completed leads to Pending</button></div><p class="sub">Resets completed contacts so they can be dialed again. Do Not Call and suppressed contacts stay blocked and are never made dialable again.</p></div><div class="card"><div class="cardhead"><h3>Production checklist</h3></div><ul class="muted" style="padding-left:18px;display:grid;gap:9px"><li>Secure sign-in and role permissions: sign-in, sessions, and a central admin / supervisor / operator policy are in place; admins can create users, assign roles, and disable accounts; users cannot change their own role</li><li>Server-side database and audit trail: SQLite with audit log and audit API</li><li>Telephony provider integration and verified call events: adapters are built; live calling is not enabled</li><li>Consent, suppression lists, and allowed calling hours: enforced on the server before every call</li><li>Secure AI service integration with API keys held server-side: keys stay on the server</li><li>Backups, monitoring, and browser/device testing: backup and retention scripts, health route, admin-only request metrics, and e2e tests exist; no external monitoring service is connected</li></ul></div></div>
   <div class="card" style="margin-top:15px"><div class="cardhead"><h3>Server configuration</h3><span class="pill">READ-ONLY</span></div><p class="sub" style="margin:0 0 12px">These values come from the running server's configuration (environment variables). To change one, edit <code>.env</code> and restart the server — they cannot be changed from this page.</p><div id="sysConfig" class="sub">Loading…</div></div>
+ <div class="card needs-admin" style="margin-top:15px" id="telephonyCard"><div class="cardhead"><h3>Telephony (Twilio)</h3><span class="pill" id="intMode">DEMO</span></div><p class="sub">Create a Twilio account later, then paste credentials here. Tokens are stored encrypted on this server and are never shown again. Real calls require a purchased Twilio number and a public HTTPS URL (a tunnel such as ngrok, or a hosted deploy). Twilio cannot reach 127.0.0.1.</p><p class="sub" id="intMissing"></p><form id="integrationsForm"><div class="grid two"><div class="field"><label for="intSid">Twilio Account SID</label><input id="intSid" maxlength="40" autocomplete="off" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></div><div class="field"><label for="intToken">Twilio Auth Token</label><input id="intToken" type="password" maxlength="200" autocomplete="new-password" placeholder="Leave blank to keep the saved token"></div><div class="field"><label for="intFrom">Twilio caller ID (E.164)</label><input id="intFrom" maxlength="20" placeholder="+15551234567" inputmode="tel"></div><div class="field"><label for="intAgent">Your callback number (E.164)</label><input id="intAgent" maxlength="20" placeholder="+15559876543" inputmode="tel"></div><div class="field"><label for="intBase">Public HTTPS origin</label><input id="intBase" maxlength="200" placeholder="https://your-tunnel.example.com"></div><div class="field"><label for="intLive">Enable real outbound calls</label><select id="intLive"><option value="false">Off — simulate only</option><option value="true">On — Twilio click-to-call</option></select></div></div><div class="callcontrols" style="justify-content:flex-start;margin-top:12px"><button class="btn primary" type="submit">Save telephony settings</button><button class="btn" type="button" id="intTest">Test credentials</button></div></form><p class="sub" style="margin-top:10px">When live is on, Dial rings <b>your callback number</b> first, then connects the lead. Recording stays off. You still need consent, DNC, and calling-window checks to pass.</p></div>
  <div class="card" style="margin-top:15px" id="readinessCard" aria-labelledby="readinessTitle"><div class="cardhead"><h3 id="readinessTitle">Readiness</h3><span class="pill review" id="readinessLive">CHECKING</span></div><p class="sub" style="margin:0 0 10px">Demo mode and live-call readiness are separate. Readiness is a configuration check, not a verified call. Live calling cannot be turned on from this page.</p><div class="formrow" style="margin-bottom:10px"><span class="pill" id="readinessDemo">CHECKING</span></div><div id="readinessBox" role="status" aria-live="polite"><span class="muted">Loading readiness...</span></div></div><div class="card" style="margin-top:15px"><div class="cardhead"><h3>Operator account</h3><span class="pill" id="acctName">—</span></div><p class="sub" style="margin:0 0 12px">Change your sign-in password. This signs out every other active session.</p><form id="changePassForm" class="formrow" style="gap:10px"><input id="changeCurrent" type="password" autocomplete="current-password" placeholder="Current password" required><input id="changeNew" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="New password" required><input id="changeNew2" type="password" autocomplete="new-password" minlength="12" maxlength="72" placeholder="Confirm new password" required><button class="btn primary" type="submit">Change password</button></form></div>
+ <div class="card needs-admin" style="margin-top:15px" id="userAdmin" hidden><div class="cardhead"><h3>Team</h3><span class="pill">ADMIN</span></div><p class="sub" style="margin:0 0 12px">Create operators, assign roles, and disable accounts. You cannot change your own role or disable yourself. At least one enabled admin must remain.</p><form id="createUserForm" class="formrow" style="gap:10px;flex-wrap:wrap"><input id="newUserName" maxlength="40" placeholder="Username" required autocomplete="off"><input id="newUserPass" type="password" minlength="12" maxlength="72" placeholder="Password (12+)" required autocomplete="new-password"><select id="newUserRole" aria-label="Role"><option value="operator">operator</option><option value="supervisor">supervisor</option><option value="admin">admin</option></select><button class="btn primary" type="submit">Create user</button></form><div id="userTable" class="sub" style="margin-top:12px">No users loaded.</div></div>
  </section>
  <section class="page" id="page-campaigns">
-  <div class="sectionhead"><div><h2>Campaigns</h2><div class="sub">Design calling campaigns, enroll eligible leads, and simulate IVR / AI outcomes.</div></div><button class="btn danger" id="cpEmergency">■ Emergency stop all</button></div>
+  <div class="sectionhead"><div><h2>Campaigns</h2><div class="sub">Design calling campaigns, enroll eligible leads, and simulate IVR / AI outcomes.</div></div><button class="btn danger needs-supervisor" id="cpEmergency">■ Emergency stop all</button></div>
   <div class="notice">Simulated outbound engine. The background runner is off by default — nothing dials on its own. Each dial is claimed by an explicit <b>Tick</b> and resolved through the IVR / AI simulator; no carrier is contacted and no audio is processed.</div>
-  <div class="card"><div class="cardhead"><h3>New campaign</h3></div><div class="formrow"><input id="cpName" placeholder="Campaign name" maxlength="120"><input id="cpMax" type="number" min="1" max="20" placeholder="Max attempts" style="max-width:160px"><button class="btn primary" id="cpCreate">＋ Create campaign</button></div></div>
+  <div class="card needs-supervisor"><div class="cardhead"><h3>New campaign</h3></div><div class="formrow"><input id="cpName" placeholder="Campaign name" maxlength="120"><input id="cpMax" type="number" min="1" max="20" placeholder="Max attempts" style="max-width:160px"><button class="btn primary" id="cpCreate">＋ Create campaign</button></div></div>
   <div class="card" style="margin-top:15px"><div class="cardhead"><h3>Campaigns</h3><span class="muted" id="cpStatus"></span></div><div id="cpList" class="sub">Loading…</div></div>
   <div class="card" style="margin-top:15px" id="cpLeadCard" hidden><div class="cardhead"><h3>Simulate engagement</h3><span class="pill" id="cpLeadPill">IDLE</span></div><div id="cpLead" class="sub">Run a Tick to claim a lead, then choose a simulated IVR digit or type what the contact says to the AI.</div><div class="callcontrols" style="justify-content:flex-start;margin-top:10px"><button class="btn" data-cp-ivr="1">IVR 1 · Interested</button><button class="btn" data-cp-ivr="2">IVR 2 · Callback</button><button class="btn" data-cp-ivr="3">IVR 3 · Representative</button><button class="btn danger" data-cp-ivr="9">IVR 9 · Opt out</button></div><div class="formrow" style="margin-top:10px"><input id="cpAiText" placeholder="What the contact says (AI simulator)"><button class="btn" id="cpAiSend">Send to AI</button></div></div>
  </section>
 </main><nav class="mobile-nav" aria-label="Mobile navigation">
 <button class="active" data-page="overview"><span class="ico">◫</span><span>Home</span></button>
-<button data-page="leads"><span class="ico">♙</span><span>Leads</span></button>
+<button data-page="leads"><span class="ico">♙</span><span>Contacts</span></button>
  <button data-page="dialer"><span class="ico">☎</span><span>Dialer</span></button>
  <button data-page="campaigns"><span class="ico">▤</span><span>Campaigns</span></button>
+ <button data-page="reports"><span class="ico">▣</span><span>Reports</span></button>
  <button data-page="activity"><span class="ico">☷</span><span>Activity</span></button>
 <button data-page="settings"><span class="ico">⚙</span><span>Settings</span></button>
 </nav></div></div>
@@ -148,8 +210,12 @@ const $ = id => document.getElementById(id);
 const STATUS_LABEL = {pending:'Pending',completed:'Completed',dnc:'Do not call',blocked:'Blocked'};
 const STATUS_OPTION = {pending:'Pending',completed:'Completed',dnc:'DNC',blocked:'Blocked'};
 const STATUS_FROM_OPTION = {Pending:'pending',Completed:'completed',DNC:'dnc',Blocked:'blocked'};
-const titles = {overview:'Call center overview',leads:'Lead queue',dialer:'Dialer workspace',campaigns:'Campaigns',activity:'Activity log','settings':'Settings & data'};
-const state = {leads:[],logs:[],operator:null,signedIn:false,setupRequired:false,activeLeadId:null,callStart:null,callTicker:null,callSeconds:0,compliance:null,watchdog:null,startupDone:false,startupErr:false,campaigns:[],cpCurrent:null,pd:{session:false,call:null,preview:null,excluded:[]}};
+const titles = {overview:'Command center',leads:'Contacts',dialer:'Power dialer',campaigns:'Campaigns',reports:'Reports',activity:'Activity','settings':'Settings'};
+const PAGE_SIZE=50;
+const state = {leads:[],logs:[],operator:null,signedIn:false,setupRequired:false,operatorHint:'',localRecovery:false,signupEnabled:true,authMode:'login',activeLeadId:null,callStart:null,callTicker:null,callSeconds:0,compliance:null,watchdog:null,startupDone:false,startupErr:false,campaigns:[],cpCurrent:null,report:null,leadOffset:0,leadTotal:0,integrations:null,pd:{session:false,call:null,preview:null,excluded:[]}};
+function currentRole(){return state.operator&&state.operator.role?state.operator.role:'';}
+function canSupervise(){return currentRole()==='admin'||currentRole()==='supervisor';}
+function canAdmin(){return currentRole()==='admin';}
 const inflight=new Set();
 async function guard(key,fn){if(inflight.has(key))return;inflight.add(key);try{return await fn();}finally{inflight.delete(key);}}
 
@@ -176,7 +242,11 @@ async function api(method, path, body, {csv=false}={}){
 function handleSessionExpired(){if(state.signedIn){state.signedIn=false;clearInterval(state.callTicker);state.callTicker=null;state.activeLeadId=null;if(state.pd){state.pd.call=null;state.pd.session=false;state.pd.preview=null;}showLogin('Your session expired. Please sign in again.');}}
 function handleErr(err,fallback='Request failed'){
   if(err.status===401)return;
-  if(err.status===403){toast('Request blocked by the server (cross-origin guard).','error');return;}
+  if(err.status===403){
+    if(err.error==='cross_origin_forbidden'){toast('Request blocked by the server (cross-origin guard).','error');return;}
+    toast('You do not have permission for that action.','error');
+    return;
+  }
   if(err.status===429){toast('Rate limit reached. Please wait a moment and try again.','error');return;}
   const first=Array.isArray(err.details)?err.details.slice(0,3).map(d=>d.message||d.errors?.map(i=>i.message).join('; ')).filter(Boolean).join('; '):null;
   toast(`${fallback} ${first||err.error||err.message||''}`.trim(),'error');
@@ -186,12 +256,35 @@ function authErrText(err){
   if(err.status===409)return 'An operator account already exists. Sign in instead.';
   if(err.status===400&&Array.isArray(err.details))return err.details.map(d=>d.message).join('; ');
   if(err.error==='invalid_credentials')return 'Invalid username or password.';
+  if(err.error==='username_taken')return 'That username is taken. Sign in, or choose another.';
+  if(err.error==='signup_disabled')return 'New account creation is turned off on this server.';
   return err.error||err.message||'Request failed.';
 }
 
 function showAuthError(msg){const el=$('authError');el.textContent=msg;el.classList.add('show');}
 function clearAuthError(){const el=$('authError');el.classList.remove('show');el.textContent='';}
-function showLogin(msg){clearAuthError();state.signedIn=false;$('setupForm').hidden=!state.setupRequired;$('loginForm').hidden=!!state.setupRequired;$('loadingView').hidden=true;$('loginView').hidden=false;if(msg)showAuthError(msg);}
+function showAuthMode(mode){
+  state.authMode=mode;
+  const signup=mode==='signup',login=mode==='login',recovery=mode==='recovery';
+  if($('authTabLogin'))$('authTabLogin').classList.toggle('active',login);
+  if($('authTabSignup'))$('authTabSignup').classList.toggle('active',signup);
+  if($('authTabs'))$('authTabs').hidden=recovery;
+  $('setupForm').hidden=!signup;
+  $('loginForm').hidden=!login;
+  $('recoveryForm').hidden=!recovery;
+  if($('showRecovery'))$('showRecovery').hidden=!state.localRecovery;
+  if($('authTabSignup'))$('authTabSignup').hidden=!state.signupEnabled;
+}
+function showLogin(msg){
+  clearAuthError();
+  state.signedIn=false;
+  $('loadingView').hidden=true;
+  $('loginView').hidden=false;
+  showAuthMode(state.setupRequired&&state.signupEnabled?'signup':'login');
+  if(state.operatorHint&&$('loginUsername')&&!$('loginUsername').value)$('loginUsername').value=state.operatorHint;
+  if($('loginHint'))$('loginHint').textContent=state.operatorHint?`Workspace account on this server: ${state.operatorHint}. Sign in, or open Create account for a guest login.`:'Sign in, or create a guest account.';
+  if(msg)showAuthError(msg);
+}
 function showStartupError(msg){state.startupErr=true;clearTimeout(state.watchdog);clearAuthError();state.signedIn=false;$('startupErrorMsg').textContent=msg;$('loginView').hidden=true;$('loadingView').hidden=true;document.querySelector('.app').hidden=true;$('startupError').hidden=false;}
 function showApp(){$('loginView').hidden=true;$('loadingView').hidden=true;document.querySelector('.app').hidden=false;}
 function activeLead(){return state.leads.find(x=>x.id===state.activeLeadId)||null;}
@@ -199,15 +292,45 @@ function nextEligible(){return state.leads.slice().reverse().find(l=>l.status===
 function replaceLead(l){const i=state.leads.findIndex(x=>x.id===l.id);if(i>=0)state.leads[i]=l;}
 
 function badge(status,suppressed){const label=STATUS_LABEL[status]||String(status);const cls=status==='dnc'||status==='blocked'?'dnc':status==='completed'?'completed':'pending';return `<span class="badge ${cls}">${esc(label)}${suppressed?' ⊘':''}</span>`;}
-function leadRows(list,compact=false){if(!list.length)return '<div class="empty">No leads match. Add a contact or change your filters.</div>';return `<table><thead><tr><th>Contact</th><th>Company</th><th>Status</th>${compact?'':'<th>Last outcome</th><th>Actions</th>'}</tr></thead><tbody>${list.map(l=>{const callable=(l.status==='pending')&&!l.suppressed;return `<tr><td><div class="name">${esc(l.name)}</div><div class="muted">${esc(l.phone)}</div></td><td>${esc(l.company||'—')}</td><td>${badge(l.status,l.suppressed)}</td>${compact?'':`<td>${esc(l.disposition||'—')}</td><td><div class="formrow"><button class="btn small" data-action="call" data-id="${l.id}" ${callable&&!state.activeLeadId?'':'disabled'}>Call</button><button class="btn small" data-action="compliance" data-id="${l.id}" title="Compliance check">◎</button><button class="btn small" data-action="edit" data-id="${l.id}">Edit</button><button class="btn small danger" data-action="delete" data-id="${l.id}" ${l.id===state.activeLeadId?'disabled':''}>×</button></div></td>`}</tr>`;}).join('')}</tbody></table>`;}
+function leadRows(list,compact=false){if(!list.length)return '<div class="empty">No leads match. Add a contact or change your filters.</div>';return `<table><thead><tr><th>Contact</th><th>Company</th><th>Status</th>${compact?'':'<th>Last outcome</th><th>Actions</th>'}</tr></thead><tbody>${list.map(l=>{const callable=(l.status==='pending')&&!l.suppressed;const del=canSupervise()&&l.id!==state.activeLeadId;return `<tr><td><div class="name">${esc(l.name)}</div><div class="muted">${esc(l.phone)}</div></td><td>${esc(l.company||'—')}</td><td>${badge(l.status,l.suppressed)}</td>${compact?'':`<td>${esc(l.disposition||'—')}</td><td><div class="formrow"><button class="btn small" data-action="call" data-id="${l.id}" ${callable&&!state.activeLeadId?'':'disabled'}>Call</button><button class="btn small" data-action="compliance" data-id="${l.id}" title="Compliance check">◎</button><button class="btn small" data-action="edit" data-id="${l.id}">Edit</button>${canSupervise()?`<button class="btn small danger" data-action="delete" data-id="${l.id}" ${del?'':'disabled'}>×</button>`:''}</div></td>`}</tr>`;}).join('')}</tbody></table>`;}
 
+function applyRoleUi(){
+  document.querySelectorAll('.needs-supervisor').forEach(el=>{el.hidden=!canSupervise();});
+  document.querySelectorAll('.needs-admin').forEach(el=>{el.hidden=!canAdmin();});
+}
+function pctLabel(n){return n==null?'—':Math.round(Number(n)*100)+'%';}
+function renderOverviewFromReport(r){
+  if(!r)return;
+  const leads=r.leads||{},calls=r.calls||{},camps=r.campaigns||{};
+  $('statTotal').textContent=leads.total??0;
+  $('statPending').textContent=leads.pending??0;
+  $('statCompleted').textContent=leads.completed??0;
+  $('statDnc').textContent=(leads.dnc||0)+(leads.suppressed||0);
+  $('statAttempts').textContent=calls.attempted??0;
+  $('statOpen').textContent=calls.open??0;
+  $('statCampaigns').textContent=camps.running??0;
+  $('statCampaignsNote').textContent=`${camps.total||0} total · ${camps.paused||0} paused`;
+  $('statDuration').textContent=calls.averageDurationSeconds==null?'n/a':String(calls.averageDurationSeconds)+'s';
+  const denom=(leads.completed||0)+(leads.pending||0);
+  const q=r.queueCompletionRate;
+  $('completionText').textContent=q==null?'n/a':pctLabel(q);
+  $('completionBar').style.width=q==null?'0%':pctLabel(q);
+  const alerts=r.alerts||[];
+  const box=$('overviewAlerts');
+  if(box){if(!alerts.length){box.hidden=true;box.textContent='';}else{box.hidden=false;box.textContent=alerts.map(a=>a.message).join(' ');}}
+}
 function renderWorkspace(){
-  const pending=state.leads.filter(l=>l.status==='pending'&&!l.suppressed),done=state.leads.filter(l=>l.status==='completed'),dnc=state.leads.filter(l=>l.status==='dnc'||l.suppressed);
-  $('statTotal').textContent=state.leads.length;$('statPending').textContent=pending.length;$('statCompleted').textContent=done.length;$('statDnc').textContent=dnc.length;
+  applyRoleUi();
+  if(state.report)renderOverviewFromReport(state.report);
+  else{
+    const pending=state.leads.filter(l=>l.status==='pending'&&!l.suppressed),done=state.leads.filter(l=>l.status==='completed'),dnc=state.leads.filter(l=>l.status==='dnc'||l.suppressed);
+    $('statTotal').textContent=state.leads.length;$('statPending').textContent=pending.length;$('statCompleted').textContent=done.length;$('statDnc').textContent=dnc.length;
+    const eligible=state.leads.filter(l=>l.status!=='dnc'&&l.status!=='blocked'&&!l.suppressed);
+    const pct=eligible.length?Math.round(done.length/eligible.length*100):0;
+    $('completionText').textContent=pct+'%';$('completionBar').style.width=pct+'%';
+  }
   $('overviewLeads').innerHTML=leadRows(state.leads.filter(l=>l.status==='pending'&&!l.suppressed).slice(0,5),true);
-  const eligible=state.leads.filter(l=>l.status!=='dnc'&&l.status!=='blocked'&&!l.suppressed);
-  const pct=eligible.length?Math.round(done.length/eligible.length*100):0;
-  $('completionText').textContent=pct+'%';$('completionBar').style.width=pct+'%';
+  applyLiveUi();
   syncCallUI();renderLogs();renderRecent();
 }
 let tableToken=0;
@@ -216,23 +339,70 @@ async function loadTable(){
   const q=$('leadSearch').value.trim().toLowerCase()||'',st=$('statusFilter').value;
   if(q)params.set('q',$('leadSearch').value.trim());
   if(st!=='all')params.set('status',String(st).toLowerCase());
+  params.set('limit',String(PAGE_SIZE));
+  params.set('offset',String(state.leadOffset));
   let list=[];
-  try{const res=await api('GET','/api/leads?'+params.toString());if(t===tableToken){list=res.data||[];$('leadTable').innerHTML=leadRows(list);$('leadCount').textContent=`${list.length} of ${state.leads.length} leads`;}}
+  try{const res=await api('GET','/api/leads?'+params.toString());if(t===tableToken){list=res.data||[];state.leadTotal=res.total??list.length;$('leadTable').innerHTML=leadRows(list);$('leadCount').textContent=`${list.length} of ${state.leadTotal} matching`;$('leadPrev').disabled=state.leadOffset<=0;$('leadNext').disabled=state.leadOffset+list.length>=state.leadTotal;}}
   catch(err){handleErr(err,'Could not load leads.');}
 }
 let tableTimer=null;
 function scheduleTable(){clearTimeout(tableTimer);tableTimer=setTimeout(loadTable,180);}
 function render(){renderWorkspace();loadTable();}
+async function loadReport(days){
+  try{
+    const res=await api('GET','/api/reports/overview?days='+(days||30));
+    state.report=res.data||null;
+  }catch(err){state.report=null;if(err.status!==403)handleErr(err,'Could not load reports.');}
+}
+function renderReportsPage(){
+  const r=state.report,box=$('reportStats'),disp=$('reportDispositions'),form=$('reportFormulas'),alerts=$('reportAlerts');
+  if(!box)return;
+  if(!r){box.innerHTML='<div class="empty">Reports are unavailable.</div>';return;}
+  const leads=r.leads||{},calls=r.calls||{},camps=r.campaigns||{};
+  box.innerHTML=[
+    ['Leads',leads.total??0,'All contacts'],
+    ['Pending',leads.pending??0,'Ready queue'],
+    ['Attempts',calls.attempted??0,`${r.windowDays||30}-day window`],
+    ['Completed calls',calls.completed??0,r.formulas&&r.formulas.completionRate?pctLabel(calls.completionRate):'—'],
+    ['Failed/aborted',calls.failed??0,''],
+    ['Campaigns',camps.total??0,`${camps.running||0} running`],
+    ['Answer rate','Unavailable','No carrier answer events in demo mode'],
+    ['Abandonment','Unavailable','No live pacing telemetry'],
+  ].map(([k,v,n])=>`<div class="card"><div class="statlabel">${esc(k)}</div><div class="statvalue">${esc(v)}</div><div class="statnote">${esc(n)}</div></div>`).join('');
+  const rows=calls.dispositions||[];
+  disp.innerHTML=rows.length?rows.map(d=>`<div class="formrow" style="justify-content:space-between"><span>${esc(d.name)}</span><b>${esc(d.count)}</b></div>`).join(''):'<div class="empty">No dispositions in this window.</div>';
+  const f=r.formulas||{};
+  form.innerHTML=Object.keys(f).map(k=>`<div><b>${esc(k)}</b> — ${esc(f[k])}</div>`).join('')+((r.unavailable||[]).length?`<p class="sub">Unavailable: ${esc(r.unavailable.join(', '))}</p>`:'');
+  const a=r.alerts||[];
+  if(alerts){if(!a.length){alerts.hidden=true;alerts.textContent='';}else{alerts.hidden=false;alerts.textContent=a.map(x=>x.message).join(' ');}}
+}
+async function loadAudit(){
+  const box=$('auditLogs'),meta=$('auditMeta');
+  if(!box)return;
+  if(!canSupervise()){box.innerHTML='<div class="empty">The durable audit trail is available to supervisors and admins. Your session log is below.</div>';if(meta)meta.textContent='restricted';return;}
+  box.innerHTML='Loading…';
+  try{
+    const res=await api('GET','/api/audit?limit=50');
+    const rows=res.data||[];
+    if(meta)meta.textContent=`${res.total||rows.length} event(s)`;
+    box.innerHTML=rows.length?rows.map(x=>`<div class="logitem"><span class="logtime">${esc(x.createdAt||'')}</span><span class="logmsg">${esc(x.actor)} · ${esc(x.action)}${x.entityType?' · '+esc(x.entityType):''}${x.entityId?' #'+esc(x.entityId):''}</span></div>`).join(''):'<div class="empty">No audit events yet.</div>';
+  }catch(err){
+    box.innerHTML='<div class="empty">Could not load the server audit trail.</div>';
+    if(err.status!==403)handleErr(err,'Could not load audit log.');
+  }
+}
 async function refreshAll(){
-  try{const res=await api('GET','/api/leads');state.leads=res.data||[];}
+  try{const res=await api('GET','/api/leads?limit=500');state.leads=res.data||[];state.leadTotal=res.total??state.leads.length;}
   catch(err){handleErr(err,'Could not load leads.');return;}
+  await loadReport(30);
+  await loadIntegrations();
   render();
   await refreshCompliance();
   pdRender();
 }
 function renderLogs(){const make=()=>state.logs.length?state.logs.map(x=>`<div class="logitem"><span class="logtime">${esc(x.time)}</span><span class="logmsg">${esc(x.msg)}</span></div>`).join(''):'<div class="empty">No activity this session.</div>';$('allLogs').innerHTML=make();}
 function renderRecent(){$('recentLogs').innerHTML=state.logs.slice(0,4).map(x=>`<div class="logitem"><span class="logtime">${esc(x.time)}</span><span class="logmsg">${esc(x.msg)}</span></div>`).join('')||'<div class="empty">Your activity will appear here.</div>';}
-function showPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+name));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$('pageTitle').textContent=titles[name]||titles.overview;$('crumb').textContent=name.toUpperCase();if(name==='leads')loadTable();if(name==='settings')renderSettings();if(name==='campaigns')renderCampaigns();}
+function showPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+name));document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));$('pageTitle').textContent=titles[name]||titles.overview;$('crumb').textContent=name.toUpperCase();if(name==='leads')loadTable();if(name==='settings'){renderSettings();if(canAdmin())loadUsers();}if(name==='campaigns')renderCampaigns();if(name==='reports'){const days=$('reportDays')?$('reportDays').value:30;loadReport(days).then(renderReportsPage);}if(name==='activity')loadAudit();}
 
 function openModal(lead=null){
   $('leadForm').reset();$('editId').value=lead?lead.id:'';
@@ -536,7 +706,64 @@ async function renderReadiness(){
   notes.style.margin='10px 0 0';
   notes.textContent='Legal and compliance approval is not established by this page. Credential values are never shown.';
   box.append(notes);
-}async function renderSettings(){
+}
+function applyLiveUi(){
+  const live=!!(state.integrations&&state.integrations.ready);
+  const pd=$('pdMode');if(pd){pd.textContent=live?'LIVE TWILIO':'DEMO MODE';pd.className='pill '+(live?'allowed':'warn');}
+  const badge=$('callModeBadge');if(badge){badge.textContent=live?'LIVE CALLING':'DEMO MODE';badge.className='pill '+(live?'allowed':'warn');}
+  const intMode=$('intMode');if(intMode){intMode.textContent=live?'LIVE':'NOT LIVE';intMode.className='pill '+(live?'allowed':'warn');}
+}
+async function loadIntegrations(){
+  try{
+    const res=await api('GET','/api/settings/integrations');
+    state.integrations=res.data||null;
+  }catch(err){if(err.status!==403)state.integrations=state.integrations||null;}
+  applyLiveUi();
+}
+function fillIntegrationsForm(i){
+  if(!i||!$('intSid'))return;
+  $('intSid').placeholder=i.twilioAccountSidMasked||'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+  $('intFrom').value=i.twilioFromNumber||'';
+  $('intAgent').value=i.agentPhone||'';
+  $('intBase').value=i.publicBaseUrl||'';
+  $('intLive').value=i.liveOutboundEnabled?'true':'false';
+  const miss=$('intMissing');
+  if(miss){
+    if(i.ready)miss.textContent='Ready for click-to-call. Dial will use Twilio.';
+    else if(i.missing&&i.missing.length)miss.textContent='Still needed: '+i.missing.join(', ')+'. You can save partial values now and enable live later.';
+    else miss.textContent='Credentials can be saved now. Turn live on only when Twilio can reach your public HTTPS origin.';
+  }
+}
+async function saveIntegrations(e){
+  e.preventDefault();
+  const body={
+    twilioAccountSid:$('intSid').value.trim(),
+    twilioFromNumber:$('intFrom').value.trim(),
+    agentPhone:$('intAgent').value.trim(),
+    publicBaseUrl:$('intBase').value.trim(),
+    liveOutboundEnabled:$('intLive').value==='true'
+  };
+  const token=$('intToken').value;
+  if(token)body.twilioAuthToken=token;
+  if(!body.twilioAccountSid)delete body.twilioAccountSid;
+  try{
+    const res=await api('PUT','/api/settings/integrations',body);
+    state.integrations=res.data;
+    $('intToken').value='';
+    fillIntegrationsForm(res.data);
+    applyLiveUi();
+    toast(res.data.ready?'Live click-to-call is on.':'Telephony settings saved.');
+    log('Telephony workspace settings updated.');
+  }catch(err){handleErr(err,'Could not save telephony settings.');}
+}
+async function testIntegrations(){
+  try{
+    const res=await api('POST','/api/settings/integrations/test',{});
+    toast(res.data&&res.data.message?res.data.message:(res.data&&res.data.ok?'Twilio accepted the credentials.':'Twilio rejected the credentials.'),res.data&&res.data.ok?'ok':'error');
+  }catch(err){handleErr(err,'Could not test Twilio credentials.');}
+}
+async function renderSettings(){
+  applyRoleUi();
   renderReadiness();
   const box=$('sysConfig');if(!box)return;
   box.innerHTML='Loading…';
@@ -554,6 +781,7 @@ async function renderReadiness(){
     ['Stale attempt limit',`${calls.maxAttemptMinutes??'—'} min`],
   ];
   box.innerHTML=rows.map(([k,v])=>`<div class="formrow" style="justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line)"><span class="muted">${esc(k)}</span><b>${esc(String(v))}</b></div>`).join('');
+  if(s.integrations){state.integrations=s.integrations;fillIntegrationsForm(s.integrations);applyLiveUi();}
 }
 function cpStatusCls(s){return s==='running'?'allowed':s==='paused'?'review':s==='completed'?'completed':'pending';}
 async function renderCampaigns(){
@@ -564,9 +792,10 @@ async function renderCampaigns(){
   catch(err){box.innerHTML='<span class="muted">Campaigns are unavailable.</span>';return;}
   state.campaigns=list;
   $('cpStatus').textContent=`${list.length} campaign(s)`;
-  if(!list.length){box.innerHTML='<div class="empty">No campaigns yet. Create one above.</div>';return;}
+  if(!list.length){box.innerHTML='<div class="empty">No campaigns yet.'+(canSupervise()?' Create one above.':'')+'</div>';return;}
   box.innerHTML=list.map(cp=>{const s=cp.stats||{};const startable=['draft','paused','stopped'].includes(cp.status),pausable=cp.status==='running',resumable=cp.status==='paused',stoppable=cp.status!=='stopped'&&cp.status!=='completed';
-    return `<div style="border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px"><div class="formrow" style="justify-content:space-between;align-items:flex-start"><div><b>${esc(cp.name)}</b> <span class="badge ${cpStatusCls(cp.status)}">${esc(String(cp.status).toUpperCase())}</span>${cp.aiEnabled?' <span class="pill">AI</span>':''}</div><div class="muted">${s.queued||0} queued · ${s.dialing||0} dialing · ${s.completed||0} completed · ${s.opted_out||0} opted out · ${s.failed||0} failed</div></div><div class="callcontrols" style="justify-content:flex-start;margin-top:8px"><button class="btn small" data-cp-action="start" data-id="${cp.id}" ${startable?'':'disabled'}>▶ Start</button><button class="btn small" data-cp-action="pause" data-id="${cp.id}" ${pausable?'':'disabled'}>⏸ Pause</button><button class="btn small" data-cp-action="resume" data-id="${cp.id}" ${resumable?'':'disabled'}>⏵ Resume</button><button class="btn small danger" data-cp-action="stop" data-id="${cp.id}" ${stoppable?'':'disabled'}>■ Stop</button><button class="btn small" data-cp-action="queue" data-id="${cp.id}">＋ Queue eligible</button><button class="btn small primary" data-cp-action="tick" data-id="${cp.id}">☎ Tick</button></div></div>`;}).join('');
+    const controls=canSupervise()?`<div class="callcontrols" style="justify-content:flex-start;margin-top:8px"><button class="btn small" data-cp-action="start" data-id="${cp.id}" ${startable?'':'disabled'}>▶ Start</button><button class="btn small" data-cp-action="pause" data-id="${cp.id}" ${pausable?'':'disabled'}>⏸ Pause</button><button class="btn small" data-cp-action="resume" data-id="${cp.id}" ${resumable?'':'disabled'}>⏵ Resume</button><button class="btn small danger" data-cp-action="stop" data-id="${cp.id}" ${stoppable?'':'disabled'}>■ Stop</button><button class="btn small" data-cp-action="queue" data-id="${cp.id}">＋ Queue eligible</button><button class="btn small primary" data-cp-action="tick" data-id="${cp.id}">☎ Tick</button></div>`:'<p class="sub" style="margin:8px 0 0">Campaign controls require a supervisor or admin.</p>';
+    return `<div style="border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px"><div class="formrow" style="justify-content:space-between;align-items:flex-start"><div><b>${esc(cp.name)}</b> <span class="badge ${cpStatusCls(cp.status)}">${esc(String(cp.status).toUpperCase())}</span>${cp.aiEnabled?' <span class="pill">AI</span>':''}</div><div class="muted">${s.queued||0} queued · ${s.dialing||0} dialing · ${s.completed||0} completed · ${s.opted_out||0} opted out · ${s.failed||0} failed</div></div>${controls}</div>`;}).join('');
 }
 function showCpLead(msg){const card=$('cpLeadCard');if(!card)return;const cur=state.cpCurrent;if(!cur){card.hidden=true;return;}card.hidden=false;$('cpLeadPill').textContent='DIALING';$('cpLead').innerHTML=`<b>${esc(cur.name||('Lead #'+cur.leadId))}</b> · ${esc(cur.phone||'')} <span class="muted">(campaign #${esc(String(cur.campaignId))})</span>${msg?'<br>'+esc(msg):''}`;}
 function clearCpLead(){$('cpLeadCard').hidden=true;$('cpLeadPill').textContent='IDLE';state.cpCurrent=null;}
@@ -612,14 +841,24 @@ async function cpAiSend(){
   catch(err){handleErr(err,'AI action failed.');}
   await renderCampaigns();
 }
+async function downloadCsv(path, filename){
+  const res=await fetch(path,{credentials:'same-origin'});
+  if(res.status===401){handleSessionExpired();return;}
+  if(res.status===403){toast('You do not have permission to export.','error');return;}
+  if(!res.ok){toast('Export failed (server returned an error).','error');return;}
+  const blob=await res.blob();
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
 async function exportCsv(){
   try{
-    const res=await fetch('/api/leads/export',{credentials:'same-origin'});
-    if(res.status===401){handleSessionExpired();return;}
-    if(!res.ok){toast('Export failed (server returned an error).','error');return;}
-    const blob=await res.blob();
-    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='apexdialer-leads.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+    await downloadCsv('/api/leads/export','apexdialer-leads.csv');
     log('Lead CSV exported.');
+  }catch{toast('Export failed.','error');}
+}
+async function exportCallsCsv(){
+  try{
+    await downloadCsv('/api/reports/calls.csv','apexdialer-calls.csv');
+    log('Call CSV exported.');
   }catch{toast('Export failed.','error');}
 }
 async function importCsvFile(e){
@@ -627,6 +866,10 @@ async function importCsvFile(e){
   e.target.value='';
   let text;try{text=await file.text();}catch{toast('Could not read that CSV file.','error');return;}
   try{
+    const preview=await api('POST','/api/leads/import/preview',text,{csv:true});
+    const p=preview.data||{};
+    const ok=confirm(`Preview (no rows saved yet): ${p.imported||0} would import, ${p.rejected||0} rejected, ${p.skipped||0} skipped of ${p.total||0} rows. Continue with import?`);
+    if(!ok)return;
     const res=await api('POST','/api/leads/import',text,{csv:true});
     const s=res.data||{};
     log(`CSV import finished: ${s.imported||0} added, ${s.rejected||0} rejected, ${s.skipped||0} skipped.`);
@@ -636,7 +879,30 @@ async function importCsvFile(e){
   }catch(err){handleErr(err,'CSV import failed');}
 }
 
-function renderOperator(){const op=state.operator;const ini=op?String(op.displayName||op.username||'OP').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase()||'OP':'OP';$('logoutTop').textContent=ini;$('logoutTop').title=op?`${op.username} — Log out`:'Log out';$('acctName').textContent=op?esc(op.username):'—';}
+function renderOperator(){const op=state.operator;const ini=op?String(op.displayName||op.username||'OP').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase()||'OP':'OP';$('logoutTop').textContent=ini;$('logoutTop').title=op?`${op.username} (${op.role||'operator'}) — Log out`:'Log out';$('acctName').textContent=op?`${esc(op.username)} · ${esc(op.role||'')}`:'—';applyRoleUi();}
+async function loadUsers(){
+  const box=$('userTable');if(!box||!canAdmin())return;
+  try{
+    const res=await api('GET','/api/users');
+    const rows=res.data||[];
+    box.innerHTML=rows.length?`<table><thead><tr><th>User</th><th>Role</th><th>Status</th><th></th></tr></thead><tbody>${rows.map(u=>`<tr><td><div class="name">${esc(u.username)}</div><div class="muted">${esc(u.displayName||'')}</div></td><td>${esc(u.role)}</td><td>${u.disabled?'disabled':'active'}</td><td><div class="formrow"><button class="btn small" data-user-action="role" data-id="${u.id}" data-role="${u.role==='operator'?'supervisor':u.role==='supervisor'?'admin':'operator'}">Role: ${esc(u.role)}</button><button class="btn small ${u.disabled?'':'danger'}" data-user-action="${u.disabled?'enable':'disable'}" data-id="${u.id}">${u.disabled?'Enable':'Disable'}</button></div></td></tr>`).join('')}</tbody></table>`:'<div class="empty">No users.</div>';
+  }catch(err){box.innerHTML='<div class="empty">Could not load users.</div>';handleErr(err,'Could not load users.');}
+}
+async function createUser(e){
+  e.preventDefault();
+  const username=$('newUserName').value.trim(),password=$('newUserPass').value,role=$('newUserRole').value;
+  try{
+    await api('POST','/api/users',{username,password,role});
+    $('createUserForm').reset();
+    toast('User created.');
+    log(`User created: ${username}`);
+    await loadUsers();
+  }catch(err){handleErr(err,'Could not create user.');}
+}
+async function patchUser(id,body){
+  try{await api('PATCH',`/api/users/${id}`,body);await loadUsers();}
+  catch(err){handleErr(err,'Could not update user.');}
+}
 async function enterWorkspace(){
   const me=await api('GET','/api/auth/me');
   state.operator=me.data.operator;state.signedIn=true;state.setupRequired=false;
@@ -659,15 +925,14 @@ async function submitSetup(e){
   if(password!==confirm){showAuthError('Passwords do not match.');return;}
   clearAuthError();
   try{
-    await api('POST','/api/auth/setup',{username,password,displayName});
-    await api('POST','/api/auth/login',{username,password});
+    await api('POST','/api/auth/register',{username,password,displayName});
     state.setupRequired=false;
     await enterWorkspace();
     $('setupPass').value='';$('setupPass2').value='';
-    log('Operator account created and signed in.');
+    log('Account created and signed in.');
   }catch(err){$('setupPass').value='';$('setupPass2').value='';showAuthError(authErrText(err));}
 }
-function resetWorkspace(){state.leads=[];state.logs=[];state.operator=null;state.signedIn=false;state.compliance=null;state.activeLeadId=null;state.callStart=null;state.callSeconds=0;clearInterval(state.callTicker);state.callTicker=null;if(state.pd){state.pd.call=null;state.pd.session=false;state.pd.preview=null;state.pd.excluded=[];}showPage('overview');}
+function resetWorkspace(){state.leads=[];state.logs=[];state.operator=null;state.signedIn=false;state.compliance=null;state.activeLeadId=null;state.callStart=null;state.callSeconds=0;state.report=null;state.leadOffset=0;clearInterval(state.callTicker);state.callTicker=null;if(state.pd){state.pd.call=null;state.pd.session=false;state.pd.preview=null;state.pd.excluded=[];}showPage('overview');}
 async function logout(){
   try{await api('POST','/api/auth/logout');}catch{}
   resetWorkspace();renderLogs();renderRecent();showLogin('Signed out. Sign in to continue.');
@@ -690,7 +955,10 @@ async function boot(){
   try{cfg=await api('GET','/api/auth/config');}
   catch(err){showStartupError('Could not reach the ApexDialer server. Make sure npm start is running, then retry.');return;}
   state.setupRequired=cfg.setupRequired;
-  if(cfg.setupRequired){showLogin('Create the operator account to begin. This is the only way to sign in.');clearTimeout(state.watchdog);state.startupDone=true;return;}
+  state.operatorHint=cfg.operatorHint||'';
+  state.localRecovery=!!cfg.localRecovery;
+  state.signupEnabled=cfg.signupEnabled!==false;
+  if(cfg.setupRequired){showLogin('Create the first admin account to open this workspace.');clearTimeout(state.watchdog);state.startupDone=true;return;}
   try{
     const me=await api('GET','/api/auth/me');
     state.operator=me.data.operator;state.signedIn=true;
@@ -712,14 +980,26 @@ $('addTop').onclick=$('addLeadBtn').onclick=()=>openModal();
 $('closeModal').onclick=$('cancelModal').onclick=closeModal;
 $('leadForm').addEventListener('submit',e=>guard('saveLead',()=>saveLead(e)));
 $('leadModal').addEventListener('click',e=>{if(e.target===$('leadModal'))closeModal();});
-$('leadSearch').addEventListener('input',scheduleTable);
-$('statusFilter').addEventListener('change',scheduleTable);
+$('leadSearch').addEventListener('input',()=>{state.leadOffset=0;scheduleTable();});
+$('statusFilter').addEventListener('change',()=>{state.leadOffset=0;scheduleTable();});
+$('leadPrev').onclick=()=>{if(state.leadOffset<=0)return;state.leadOffset=Math.max(0,state.leadOffset-PAGE_SIZE);loadTable();};
+$('leadNext').onclick=()=>{state.leadOffset+=PAGE_SIZE;loadTable();};
+$('reportDays').addEventListener('change',()=>loadReport($('reportDays').value).then(renderReportsPage));
+$('exportCalls').onclick=()=>guard('exportCalls',exportCallsCsv);
+$('createUserForm').addEventListener('submit',e=>guard('createUser',()=>createUser(e)));
+$('userTable').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-user-action]');if(!b)return;
+  const id=b.dataset.id;
+  if(b.dataset.userAction==='disable'){if(!confirm('Disable this user and end their sessions?'))return;patchUser(id,{disabled:true});}
+  else if(b.dataset.userAction==='enable')patchUser(id,{disabled:false});
+  else if(b.dataset.userAction==='role')patchUser(id,{role:b.dataset.role});
+});
 $('importBtn').onclick=()=>$('csvFile').click();
 $('csvFile').addEventListener('change',importCsvFile);
 $('exportTop').onclick=$('exportLeads').onclick=$('exportSettings').onclick=exportCsv;
 $('leadTable').addEventListener('click',async e=>{
   const b=e.target.closest('button[data-action]');if(!b)return;
-  const l=state.leads.find(x=>String(x.id)===String(b.dataset.id));if(!l)return;
+  const l=state.leads.find(x=>String(x.id)===String(b.dataset.id))||{id:Number(b.dataset.id),name:'lead',phone:'',status:'pending',suppressed:false};
   if(b.dataset.action==='call'){if(state.activeLeadId){toast('End the active call first.','error');return;}gatedStart(l);}
   else if(b.dataset.action==='compliance'){let dec;try{dec=await checkCompliance(l);}catch(err){handleErr(err,'Compliance check failed.');return;}state.compliance=dec;renderComplianceCard(dec);openCompModal(dec,l);}
   else if(b.dataset.action==='edit')openModal(l);
@@ -757,7 +1037,25 @@ $('clearLogs').onclick=()=>{if(confirm('Clear activity history for this session?
 $('logoutBtn').onclick=$('logoutTop').onclick=logout;
 $('loginForm').addEventListener('submit',e=>guard('login',()=>submitLogin(e)));
 $('setupForm').addEventListener('submit',e=>guard('setup',()=>submitSetup(e)));
+$('authTabLogin').onclick=()=>{clearAuthError();showAuthMode('login');};
+$('authTabSignup').onclick=()=>{clearAuthError();showAuthMode('signup');};
+$('showRecovery').onclick=()=>{clearAuthError();showAuthMode('recovery');if(state.operatorHint)$('recoverUser').value=state.operatorHint;$('recoverPass').focus();};
+$('hideRecovery').onclick=()=>{clearAuthError();showAuthMode('login');};
+$('recoveryForm').addEventListener('submit',e=>guard('recover',async()=>{
+  e.preventDefault();
+  const username=$('recoverUser').value.trim(),newPassword=$('recoverPass').value,confirm=$('recoverPass2').value;
+  if(newPassword.length<12||newPassword.length>72){showAuthError('Password must be 12 to 72 characters.');return;}
+  if(newPassword!==confirm){showAuthError('Passwords do not match.');return;}
+  try{
+    await api('POST','/api/auth/local-recovery',{username,newPassword});
+    $('recoverPass').value='';$('recoverPass2').value='';
+    $('loginUsername').value=username;
+    showLogin('Password updated. Sign in with the new password.');
+  }catch(err){showAuthError(authErrText(err));}
+}));
 $('changePassForm').addEventListener('submit',e=>guard('changePass',()=>submitChangePass(e)));
+$('integrationsForm').addEventListener('submit',e=>guard('saveIntegrations',()=>saveIntegrations(e)));
+$('intTest').onclick=()=>guard('testIntegrations',testIntegrations);
 $('closeComp').onclick=$('compCloseBtn').onclick=closeCompModal;
 $('compModal').addEventListener('click',e=>{if(e.target===$('compModal'))closeCompModal();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeCompModal();}});

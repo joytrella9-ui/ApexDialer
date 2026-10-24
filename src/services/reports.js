@@ -86,11 +86,11 @@ export function overview(db, cfg, { days = 30 } = {}) {
       message: 'Demo mode is on. Call attempts are simulated; no carrier is connected.',
     });
   }
-  if (cfg.telephony?.liveEnabled || cfg.voice?.liveEnabled) {
+  if (cfg.workspace?.ready) {
     alerts.push({
       severity: 'warn',
-      code: 'live_flag',
-      message: 'A live-calling flag is present in config, but the process still forces liveEnabled off.',
+      code: 'live_calls',
+      message: 'Real outbound calling is ON. Dialing rings your callback number, then connects the lead via Twilio.',
     });
   }
   if (num(callCounts, 'open') > 0) {

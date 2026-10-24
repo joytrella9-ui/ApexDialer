@@ -24,8 +24,14 @@ const RULES = [
   { methods: ['PUT'], pattern: /^\/compliance\/campaigns\/\d+$/, roles: SUPERVISOR_UP },
   { methods: ['POST'], pattern: /^\/compliance\/retention\/execute$/, roles: ADMIN_ONLY },
   { methods: ['GET'], pattern: /^\/settings\/metrics$/, roles: ADMIN_ONLY },
+  { methods: ['PUT', 'POST'], pattern: /^\/settings\/integrations/, roles: ADMIN_ONLY },
   // User management: list, create, change role, disable/enable.
   { methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'], pattern: /^\/users(\/|$)/, roles: ADMIN_ONLY },
+  // Bulk contact export and the durable audit trail are supervisor+ (operators still
+  // see their own session activity in the UI, and can read the reports overview).
+  { methods: ['GET'], pattern: /^\/leads\/export$/, roles: SUPERVISOR_UP },
+  { methods: ['GET'], pattern: /^\/audit(\/|$)/, roles: SUPERVISOR_UP },
+  { methods: ['GET'], pattern: /^\/reports\/calls\.csv$/, roles: SUPERVISOR_UP },
   // Campaign creation, edits, and every run-control action (start/pause/tick/stop/...).
   { methods: ['POST', 'PUT', 'PATCH', 'DELETE'], pattern: /^\/campaigns(\/|$)/, roles: SUPERVISOR_UP },
 ];

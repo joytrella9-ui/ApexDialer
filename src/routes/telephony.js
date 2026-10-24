@@ -9,6 +9,7 @@ import {
 } from '../providers/twilio.js';
 import { acceptProviderEvent } from '../services/calls.js';
 import { webhookUrl } from '../lib/webhookUrl.js';
+import { clickToCallTwiml, toE164 } from '../services/clickToCall.js';
 
 const SAFE_FIELDS = ['To', 'From', 'FromCountry', 'ToCountry', 'Direction', 'CallType', 'CallerName'];
 
@@ -21,27 +22,52 @@ function pick(input, fields, extra = {}) {
   return out;
 }
 
+function requireTwilioSignature(cfg, req) {
+  if (!cfg.telephony.enabled && !cfg.telephony.liveEnabled) {
+    throw new HttpError(404, 'not_found');
+  }
+  const secret = cfg.telephony.webhookSecret || cfg.telephony.authToken || '';
+  if (!secret) throw new HttpError(403, 'provider_disabled');
+  const url = webhookUrl(cfg, req);
+  const valid = verifyTwilioSignature({
+    url,
+    params: req.body ?? {},
+    signature: req.headers['x-twilio-signature'],
+    authToken: secret,
+  });
+  if (!valid) throw new HttpError(401, 'invalid_signature');
+}
+
 export function telephonyRouter(db, cfg = config) {
   const router = Router();
 
-  router.post('/webhooks/twilio', (req, res) => {
-    if (!cfg.telephony.enabled) {
-      throw new HttpError(404, 'not_found');
+  router.post('/webhooks/twiml/:callId', (req, res) => {
+    requireTwilioSignature(cfg, req);
+    const callId = Number(req.params.callId);
+    if (!Number.isInteger(callId) || callId <= 0) throw new HttpError(400, 'invalid_id');
+    const row = db
+      .prepare(
+        `SELECT c.id, c.status, l.phone AS lead_phone
+           FROM calls c
+           LEFT JOIN leads l ON l.id = c.lead_id
+          WHERE c.id = ?`
+      )
+      .get(callId);
+    if (!row || !['in_progress', 'paused', 'queued', 'ringing'].includes(row.status)) {
+      res.type('text/xml').send('<?xml version="1.0" encoding="UTF-8"?><Response><Hangup/></Response>');
+      return;
     }
-    if (!cfg.telephony.webhookSecret) {
-      throw new HttpError(403, 'provider_disabled');
+    const leadPhone = toE164(row.lead_phone);
+    const from = toE164(cfg.telephony.fromNumber || cfg.voice.fromNumber);
+    if (!leadPhone || !from) {
+      res.type('text/xml').send('<?xml version="1.0" encoding="UTF-8"?><Response><Say>This call cannot be connected.</Say><Hangup/></Response>');
+      return;
     }
+    res.type('text/xml').send(clickToCallTwiml({ fromNumber: from, leadPhone }));
+  });
 
-    const url = webhookUrl(cfg, req);
-    const valid = verifyTwilioSignature({
-      url,
-      params: req.body ?? {},
-      signature: req.headers['x-twilio-signature'],
-      authToken: cfg.telephony.webhookSecret,
-    });
-    if (!valid) {
-      throw new HttpError(401, 'invalid_signature');
-    }
+  router.post('/webhooks/twilio', (req, res) => {
+    requireTwilioSignature(cfg, req);
 
     const body = req.body ?? {};
     const sid = String(body.CallSid ?? '').trim();

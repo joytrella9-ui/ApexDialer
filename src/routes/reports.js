@@ -12,7 +12,8 @@ export function reportsRouter(db, cfg) {
 
   router.get('/calls.csv', (req, res) => {
     const limit = req.query.limit !== undefined ? Number(req.query.limit) : 200;
-    const rows = calls.listCalls(db, req.auth.userId, { limit });
+    const supervisor = req.auth?.user?.role === 'admin' || req.auth?.user?.role === 'supervisor';
+    const rows = calls.listCalls(db, req.auth.userId, { limit, allUsers: supervisor });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename="apexdialer-calls.csv"');
     res.send(reports.callsToCsv(rows));

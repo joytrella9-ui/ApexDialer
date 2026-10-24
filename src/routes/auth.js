@@ -25,13 +25,33 @@ export function authRouter(db, cfg) {
     max: cfg.auth.loginFailureMax,
   });
 
+  function isLoopback(req) {
+    const ip = String(req.ip || '');
+    return ip === '127.0.0.1' || ip === '::1' || ip.endsWith('127.0.0.1');
+  }
+
   router.get('/config', (req, res) => {
+    const setupRequired = !auth.operatorExists(db);
     res.json({
-      setupRequired: !auth.operatorExists(db),
+      setupRequired,
+      operatorHint: setupRequired ? null : auth.firstOperatorUsername(db),
+      signupEnabled: cfg.auth.publicSignup !== false,
+      localRecovery: isLoopback(req),
       sessionTtlHours: cfg.auth.sessionTtlHours,
       cookieSecure: cfg.auth.cookieSecure,
     });
   });
+
+  function writeSessionCookie(res, token) {
+    const maxAgeMs = cfg.auth.sessionTtlHours * 3600 * 1000;
+    res.cookie(cfg.auth.cookieName, token, {
+      httpOnly: true,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: maxAgeMs,
+      secure: cfg.auth.cookieSecure,
+    });
+  }
 
   router.post('/setup', (req, res) => {
     const attempt = setupLimiter.check(`setup:${req.ip}`);
@@ -74,15 +94,38 @@ export function authRouter(db, cfg) {
     }
 
     loginFailures.reset(`login:user:${ip}:${result.operator.username}`);
-    const maxAgeMs = cfg.auth.sessionTtlHours * 3600 * 1000;
-    res.cookie(cfg.auth.cookieName, result.session.token, {
-      httpOnly: true,
-      sameSite: 'strict',
-      path: '/',
-      maxAge: maxAgeMs,
-      secure: cfg.auth.cookieSecure,
-    });
+    writeSessionCookie(res, result.session.token);
     res.json({ data: { operator: result.operator, expiresAt: result.session.expiresAt } });
+  });
+
+  router.post('/register', (req, res) => {
+    if (cfg.auth.publicSignup === false) throw new HttpError(403, 'signup_disabled');
+    const ip = req.ip;
+    const attempt = setupLimiter.check(`register:${ip}`);
+    if (!attempt.allowed) {
+      res.setHeader('Retry-After', String(attempt.retryAfterSeconds));
+      throw new HttpError(429, 'too_many_attempts');
+    }
+    const result = auth.registerAccount(db, req.body, {
+      bcryptRounds: cfg.auth.bcryptRounds,
+      sessionTtlHours: cfg.auth.sessionTtlHours,
+    });
+    setupLimiter.reset(`register:${ip}`);
+    writeSessionCookie(res, result.session.token);
+    res.status(201).json({ data: { operator: result.operator, expiresAt: result.session.expiresAt } });
+  });
+
+  router.post('/local-recovery', (req, res) => {
+    if (!isLoopback(req)) throw new HttpError(403, 'forbidden');
+    const ip = req.ip;
+    const attempt = passwordLimiter.check(`recovery:${ip}`);
+    if (!attempt.allowed) {
+      res.setHeader('Retry-After', String(attempt.retryAfterSeconds));
+      throw new HttpError(429, 'too_many_attempts');
+    }
+    const recovered = auth.localRecoverPassword(db, req.body, { bcryptRounds: cfg.auth.bcryptRounds });
+    passwordLimiter.reset(`recovery:${ip}`);
+    res.json({ data: { recovered: true, username: recovered.username } });
   });
 
   router.post('/logout', optionalAuth(db), (req, res) => {

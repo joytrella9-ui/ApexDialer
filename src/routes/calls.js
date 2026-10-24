@@ -31,6 +31,8 @@ export function callsRouter(db, cfg) {
       provider: cfg.voice.provider,
       liveEnabled: cfg.voice.liveEnabled === true || cfg.telephony.liveEnabled === true,
     },
+    cfg,
+    fetchImpl: cfg.telephony?.fetchImpl,
   });
 
   router.get('/', (req, res) => {
@@ -51,8 +53,8 @@ export function callsRouter(db, cfg) {
     res.json({ data });
   });
 
-  router.post('/attempt', (req, res) => {
-    const data = calls.startAttempt(db, req.auth.userId, req.auth.user.username, req.body, opts());
+  router.post('/attempt', async (req, res) => {
+    const data = await calls.startAttempt(db, req.auth.userId, req.auth.user.username, req.body, opts());
     res.status(201).json({ data });
   });
 
@@ -79,24 +81,26 @@ export function callsRouter(db, cfg) {
     res.json({ data });
   });
 
-  router.post('/:id/end', (req, res) => {
-    const data = calls.endAttempt(
+  router.post('/:id/end', async (req, res) => {
+    const data = await calls.endAttempt(
       db,
       req.auth.userId,
       req.auth.user.username,
       parseId(req.params.id),
-      req.body
+      req.body,
+      opts()
     );
     res.json({ data });
   });
 
-  router.post('/:id/abort', (req, res) => {
-    const data = calls.abortAttempt(
+  router.post('/:id/abort', async (req, res) => {
+    const data = await calls.abortAttempt(
       db,
       req.auth.userId,
       req.auth.user.username,
       parseId(req.params.id),
-      req.body
+      req.body,
+      opts()
     );
     res.json({ data });
   });

@@ -21,6 +21,7 @@ import { createMetrics } from './lib/metrics.js';
 import { usersRouter } from './routes/users.js';
 import { parseCookies, originGuard, securityHeaders, noStore } from './middleware/security.js';
 import { errorHandler } from './lib/errors.js';
+import { applyWorkspaceConfig } from './services/workspace.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const FRONTEND_HTML = path.resolve(HERE, '..', 'ApexDialer_App.html');
@@ -65,6 +66,7 @@ export function mergeConfig(overrides = {}) {
 
 export function createApp(db, overrides = {}, options = {}) {
   const cfg = mergeConfig(overrides);
+  applyWorkspaceConfig(db, cfg);
   const app = express();
   // Single-use Media Streams tokens, shared with the media endpoint via app.locals.
   const streamTokens = createStreamTokenStore();

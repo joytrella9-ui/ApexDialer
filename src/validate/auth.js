@@ -29,3 +29,8 @@ export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'current password is required'),
   newPassword: passwordSchema,
 });
+
+export const localRecoverySchema = z.object({
+  username: usernameSchema,
+  newPassword: passwordSchema,
+});

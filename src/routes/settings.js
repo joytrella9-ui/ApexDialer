@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { describeVoiceStack } from '../providers/voiceStack.js';
 import { buildReadinessReport } from '../services/readiness.js';
+import { applyWorkspaceConfig, publicWorkspace, saveIntegrations } from '../services/workspace.js';
+import { TwilioRestTransport } from '../providers/twilioRest.js';
+import { HttpError } from '../lib/errors.js';
 
 // Read-only view of the effective server configuration. These values are
 // controlled by environment variables / the running process, never by the
@@ -40,10 +43,58 @@ export function settingsRouter(db, cfg, metrics = null) {
         },
         auth: { sessionTtlHours: cfg.auth.sessionTtlHours },
         calls: { maxAttemptMinutes: cfg.calls.maxAttemptMinutes },
+        integrations: publicWorkspace(db),
         readOnly: true,
         source: 'server',
       },
     });
+  });
+
+  router.get('/integrations', (req, res) => {
+    res.json({ data: publicWorkspace(db) });
+  });
+
+  router.put('/integrations', (req, res) => {
+    const data = saveIntegrations(db, req.body, req.auth.user.username);
+    applyWorkspaceConfig(db, cfg);
+    res.json({ data });
+  });
+
+  router.post('/integrations/test', async (req, res) => {
+    applyWorkspaceConfig(db, cfg);
+    const sid = cfg.telephony.accountSid || '';
+    const token = cfg.telephony.authToken || '';
+    if (!sid || !token) throw new HttpError(400, 'provider_not_configured');
+    const transport = new TwilioRestTransport({
+      accountSid: sid,
+      authToken: token,
+      liveEnabled: false,
+    });
+    const url = `${transport.baseUrl}/2010-04-01/Accounts/${sid}.json`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString('base64')}`,
+          Accept: 'application/json',
+        },
+        signal: controller.signal,
+      });
+      res.json({
+        data: {
+          ok: response.ok,
+          status: response.status,
+          message: response.ok
+            ? 'Twilio accepted these credentials (account lookup succeeded). This does not place a call.'
+            : 'Twilio rejected these credentials. Check the Account SID and Auth Token.',
+        },
+      });
+    } catch {
+      throw new HttpError(502, 'provider_unavailable');
+    } finally {
+      clearTimeout(timer);
+    }
   });
 
   // Truthful readiness: what blocks live operation, and what is merely informational.

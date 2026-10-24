@@ -29,13 +29,14 @@ export function buildReadinessReport(cfg, env = process.env, { dbOk = true } = {
     cfg.demoMode ? 'Demo mode is ON: no live calls are placed by this application.' : 'Demo mode is OFF; live operation still requires the blockers below to be resolved.'
   );
 
-  const liveAuthorized = LIVE_AUTH_KEYS.every((k) => cfg[k]?.liveEnabled === true);
+  const clickReady = cfg.workspace?.ready === true;
+  const liveAuthorized = clickReady || LIVE_AUTH_KEYS.every((k) => cfg[k]?.liveEnabled === true);
   add(
     'live_calling',
-    liveAuthorized ? 'ok' : 'blocker',
-    liveAuthorized
-      ? 'Live calling is enabled in configuration.'
-      : 'Live calling is hard-disabled in this build (liveEnabled is forced false). It requires a deliberate code change and explicit authorization.'
+    clickReady ? 'ok' : 'blocker',
+    clickReady
+      ? 'Click-to-call is enabled from workspace Twilio settings. Twilio will ring your callback number, then the lead.'
+      : 'Save Twilio credentials in Settings → Telephony and turn on real outbound calling. Until then, dials are simulated and no carrier is contacted.'
   );
 
   add('recording', cfg.voice.recordingEnabled === true ? 'blocker' : 'ok', 'Call recording is disabled and cannot be enabled through configuration in this build.');

@@ -10,6 +10,7 @@ import {
   abortSchema,
   skipSchema,
 } from '../validate/call.js';
+import { hangupProviderCall, placeClickToCall } from './clickToCall.js';
 
 function toCall(row) {
   return {
@@ -24,6 +25,7 @@ function toCall(row) {
     endedAt: row.ended_at,
     durationSeconds: row.duration_seconds,
     notes: row.notes,
+    providerCallSid: row.provider_call_sid || '',
     createdAt: row.created_at,
   };
 }
@@ -94,8 +96,11 @@ export function getActiveContext(db, userId, opts = {}) {
   return { call: getCall(db, active.id), lead, compliance };
 }
 
-export function listCalls(db, userId, { limit = 50 } = {}) {
-  const lim = Math.min(Math.max(Number(limit) || 50, 1), 200);
+export function listCalls(db, userId, { limit = 50, allUsers = false } = {}) {
+  const lim = Math.min(Math.max(Number(limit) || 50, 1), 500);
+  if (allUsers) {
+    return db.prepare('SELECT * FROM calls ORDER BY id DESC LIMIT ?').all(lim).map(toCall);
+  }
   return db
     .prepare('SELECT * FROM calls WHERE user_id = ? ORDER BY id DESC LIMIT ?')
     .all(userId, lim)
@@ -131,9 +136,14 @@ export function assertSimulatedManualDialing(dialing) {
   return 'simulated';
 }
 
-export function startAttempt(db, userId, username, input, opts = {}) {
+function isLiveDialing(dialing) {
+  return dialing?.liveEnabled === true && String(dialing?.provider ?? '') === 'twilio';
+}
+
+export async function startAttempt(db, userId, username, input, opts = {}) {
   const parsed = attemptSchema.parse(input);
-  const dialingMode = assertSimulatedManualDialing(opts.dialing);
+  const live = isLiveDialing(opts.dialing);
+  const dialingMode = live ? 'live' : assertSimulatedManualDialing(opts.dialing);
 
   const existing = getActiveCall(db, userId, opts);
   if (existing) {
@@ -185,6 +195,23 @@ export function startAttempt(db, userId, username, input, opts = {}) {
   });
 
   const id = create();
+  if (live) {
+    try {
+      await placeClickToCall(db, {
+        callId: id,
+        leadPhone: lead.phone,
+        cfg: opts.cfg,
+        fetchImpl: opts.fetchImpl,
+      });
+      addEvent(db, id, 'provider_call_placed', { provider: 'twilio' });
+    } catch (err) {
+      db.prepare(
+        `UPDATE calls SET status = 'aborted', ended_at = datetime('now') WHERE id = ?`
+      ).run(id);
+      addEvent(db, id, 'attempt_aborted', { reason: err.message || 'provider_start_failed' });
+      throw err;
+    }
+  }
   return { call: getCall(db, id), lead: getLead(db, lead.id), compliance, dialingMode };
 }
 
@@ -208,7 +235,7 @@ function applyLeadOutcome(db, leadId, { disposition, notes, addToDnc }) {
   }
 }
 
-export function endAttempt(db, userId, username, callId, input, opts = {}) {
+export async function endAttempt(db, userId, username, callId, input, opts = {}) {
   const parsed = endAttemptSchema.parse(input);
   const row = db.prepare('SELECT * FROM calls WHERE id = ? AND user_id = ?').get(callId, userId);
   if (!row) throw new HttpError(404, 'call_not_found');
@@ -245,6 +272,7 @@ export function endAttempt(db, userId, username, callId, input, opts = {}) {
       JSON.stringify({ disposition, addToDnc })
     );
   });
+  await hangupProviderCall(opts.cfg, row.provider_call_sid, opts.fetchImpl);
   run();
 
   const lead = row.lead_id != null ? getLead(db, row.lead_id) : null;
@@ -269,13 +297,14 @@ export function resumeAttempt(db, userId, username, callId) {
   return transition(db, userId, username, callId, 'paused', 'in_progress', 'attempt_resumed', 'call_resumed');
 }
 
-export function abortAttempt(db, userId, username, callId, input = {}) {
+export async function abortAttempt(db, userId, username, callId, input = {}, opts = {}) {
   const parsed = abortSchema.parse(input);
   const row = db.prepare('SELECT * FROM calls WHERE id = ? AND user_id = ?').get(callId, userId);
   if (!row) throw new HttpError(404, 'call_not_found');
   if (!ACTIVE_STATUSES.includes(row.status)) {
     throw new HttpError(409, 'invalid_transition', { status: row.status });
   }
+  await hangupProviderCall(opts.cfg, row.provider_call_sid, opts.fetchImpl);
   db.prepare(
     `UPDATE calls SET status = 'aborted', ended_at = datetime('now'),
        duration_seconds = CAST(strftime('%s','now') - strftime('%s', started_at) AS INTEGER)

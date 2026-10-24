@@ -38,6 +38,10 @@ test('policy table: destructive and control actions require supervisor or admin'
   assert.deepEqual(requiredRolesFor('PUT', '/compliance/campaigns/3'), ['admin', 'supervisor']);
   assert.equal(requiredRolesFor('GET', '/campaigns'), null);
   assert.equal(requiredRolesFor('POST', '/calls/attempt'), null);
+  assert.deepEqual(requiredRolesFor('GET', '/leads/export'), ['admin', 'supervisor']);
+  assert.deepEqual(requiredRolesFor('GET', '/audit'), ['admin', 'supervisor']);
+  assert.deepEqual(requiredRolesFor('GET', '/reports/calls.csv'), ['admin', 'supervisor']);
+  assert.equal(requiredRolesFor('GET', '/reports/overview'), null);
   assert.ok(ROLES.includes('operator'));
 });
 
@@ -73,6 +77,18 @@ test('operator can work leads and calls but not delete, bulk-import, or run camp
 
     const campaignList = await api(base, 'GET', '/api/campaigns', undefined, { cookie: op });
     assert.equal(campaignList.status, 200);
+
+    const overview = await api(base, 'GET', '/api/reports/overview', undefined, { cookie: op });
+    assert.equal(overview.status, 200);
+
+    const exported = await api(base, 'GET', '/api/leads/export', undefined, { cookie: op });
+    assert.equal(exported.status, 403);
+
+    const audit = await api(base, 'GET', '/api/audit', undefined, { cookie: op });
+    assert.equal(audit.status, 403);
+
+    const callCsv = await api(base, 'GET', '/api/reports/calls.csv', undefined, { cookie: op });
+    assert.equal(callCsv.status, 403);
   });
 });
 
