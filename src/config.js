@@ -27,12 +27,14 @@ export function loadConfig(env = process.env) {
   const demoMode = truthy(env.APEX_DEMO_MODE, true);
   const sessionTtlHours = positiveNumber(env.APEX_SESSION_TTL_HOURS, 12);
   const voiceProvider = env.APEX_VOICE_PROVIDER || 'fake';
+  const hosted = Boolean(env.RENDER);
   return {
-    host: env.HOST || '127.0.0.1',
+    host: env.HOST || (hosted ? '0.0.0.0' : '127.0.0.1'),
     port: Number(env.PORT || 3210),
     demoMode,
+    trustProxy: hosted || truthy(env.APEX_TRUST_PROXY, false),
     // Origin (https) that providers call. Used to verify webhook signatures.
-    publicBaseUrl: normalizePublicBaseUrl(env.APEX_PUBLIC_BASE_URL),
+    publicBaseUrl: normalizePublicBaseUrl(env.APEX_PUBLIC_BASE_URL || env.RENDER_EXTERNAL_URL),
     dbPath: env.APEX_DB_PATH
       ? path.resolve(env.APEX_DB_PATH)
       : path.join(PROJECT_ROOT, 'data', 'apexdialer.db'),
@@ -118,7 +120,7 @@ export function loadConfig(env = process.env) {
       sessionTtlHours,
       bcryptRounds: positiveNumber(env.APEX_BCRYPT_ROUNDS, 10),
       cookieName: 'apexdialer_session',
-      cookieSecure: truthy(env.APEX_COOKIE_SECURE, false),
+      cookieSecure: truthy(env.APEX_COOKIE_SECURE, hosted),
       loginWindowMs: positiveNumber(env.APEX_LOGIN_WINDOW_MS, 15 * 60 * 1000),
       loginMaxPerIp: positiveNumber(env.APEX_LOGIN_MAX_PER_IP, 20),
       loginFailureMax: positiveNumber(env.APEX_LOGIN_FAILURE_MAX, 5),

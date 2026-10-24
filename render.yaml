@@ -1,0 +1,28 @@
+# Render Blueprint — import this repo at https://dashboard.render.com/blueprints
+# Persistent disk requires a paid web plan (Starter or higher). Free web services
+# lose SQLite data on every restart and cannot keep a disk.
+services:
+  - type: web
+    name: apexdialer
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    disk:
+      name: apexdialer-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: HOST
+        value: "0.0.0.0"
+      - key: APEX_DB_PATH
+        value: /data/apexdialer.db
+      - key: APEX_COOKIE_SECURE
+        value: "true"
+      - key: APEX_TRUST_PROXY
+        value: "true"
+      - key: APEX_DEMO_MODE
+        value: "true"
+      - key: APEX_PUBLIC_SIGNUP
+        value: "true"

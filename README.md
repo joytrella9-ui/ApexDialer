@@ -49,8 +49,8 @@ Then open <http://127.0.0.1:3210> in Chrome/Edge/Firefox (the server binds to
 guest operators, or **Sign in** if you already have a username. After signing in,
 the ApexDialer workspace loads from the backend.
 
-**Hosting:** push this repo to GitHub, then run it on an always-on Node host
-(see `docs/DEPLOYMENT.md`). This app cannot launch on Vercel.
+**Hosting:** deploy from GitHub to **Render** with `render.yaml` (Docker + persistent
+SQLite disk). See `docs/DEPLOYMENT.md`. This app cannot launch on Vercel.
 
 ### Frontend source of truth
 

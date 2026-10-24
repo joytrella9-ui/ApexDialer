@@ -5,3 +5,8 @@ data
 *.db
 *.db-wal
 *.db-shm
+coverage
+e2e
+*.md
+!README.md
+

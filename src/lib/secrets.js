@@ -3,7 +3,13 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { PROJECT_ROOT } from '../config.js';
 
-const KEY_FILE = path.join(PROJECT_ROOT, 'data', '.workspace-key');
+function keyFilePath() {
+  const dbPath = process.env.APEX_DB_PATH;
+  if (dbPath && dbPath !== ':memory:') {
+    return path.join(path.dirname(path.resolve(dbPath)), '.workspace-key');
+  }
+  return path.join(PROJECT_ROOT, 'data', '.workspace-key');
+}
 
 let cachedKey = null;
 
@@ -21,16 +27,17 @@ export function getSecretsKey() {
     return cachedKey;
   }
   try {
-    if (existsSync(KEY_FILE)) {
-      const fromFile = parseKey(readFileSync(KEY_FILE, 'utf8'));
+    const keyFile = keyFilePath();
+    if (existsSync(keyFile)) {
+      const fromFile = parseKey(readFileSync(keyFile, 'utf8'));
       if (fromFile) {
         cachedKey = fromFile;
         return cachedKey;
       }
     }
-    mkdirSync(path.dirname(KEY_FILE), { recursive: true });
+    mkdirSync(path.dirname(keyFile), { recursive: true });
     const generated = randomBytes(32);
-    writeFileSync(KEY_FILE, generated.toString('hex'), { encoding: 'utf8', mode: 0o600 });
+    writeFileSync(keyFile, generated.toString('hex'), { encoding: 'utf8', mode: 0o600 });
     cachedKey = generated;
     return cachedKey;
   } catch {

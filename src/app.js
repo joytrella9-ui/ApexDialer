@@ -68,6 +68,7 @@ export function createApp(db, overrides = {}, options = {}) {
   const cfg = mergeConfig(overrides);
   applyWorkspaceConfig(db, cfg);
   const app = express();
+  if (cfg.trustProxy) app.set('trust proxy', 1);
   // Single-use Media Streams tokens, shared with the media endpoint via app.locals.
   const streamTokens = createStreamTokenStore();
   app.locals.streamTokens = streamTokens;

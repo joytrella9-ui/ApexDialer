@@ -6,7 +6,23 @@ Do not expose this process to the public internet without TLS and an explicit de
 
 ApexDialer is a long-running **Node + Express + SQLite** process with session cookies, Twilio webhooks, and a native `better-sqlite3` module. Vercel’s serverless platform does not provide a writable persistent disk or a always-on Node process, so **do not deploy this repository to Vercel**. Connecting the GitHub repo to Vercel will not launch a working dialer.
 
-Use GitHub as the source of truth, then deploy the same repo to an always-on host (Render, Railway, Fly.io, or a VM) with the Dockerfile in the repo root.
+Use GitHub as the source of truth, then deploy the same repo to **Render** (recommended) or another always-on host with the Dockerfile in the repo root.
+
+## Render (supported hosted path)
+
+Repo: `https://github.com/joytrella9-ui/ApexDialer`. Blueprint: `render.yaml`.
+
+1. Open [Render Blueprints](https://dashboard.render.com/blueprints) and sign in.
+2. **New Blueprint Instance** → connect the `joytrella9-ui/ApexDialer` GitHub repo.
+3. Apply `render.yaml`. This creates a **Docker web service** plus a **1 GB disk** at `/data`.
+4. Use a **Starter** (or higher) plan. A free web service has no persistent disk, so SQLite and accounts vanish on restart.
+5. After the first deploy, set `APEX_PUBLIC_BASE_URL` to the service URL (`https://<name>.onrender.com`) if it is not already filled from `RENDER_EXTERNAL_URL`.
+6. Optional: generate a 64-character hex key and set `APEX_SECRETS_KEY` so encrypted Twilio tokens survive even if the key file is missing:
+   `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+7. Open the Render URL, use **Create account**, password 12+ characters. The first user is admin.
+8. Confirm `GET /api/health` returns `{ "ok": true }`.
+
+Do not connect this repo to Vercel. Render’s HTTPS origin, `$PORT`, and the disk at `/data` are what make signup and SQLite work.
 
 ## Local (supported)
 
